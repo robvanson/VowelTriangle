@@ -6,6 +6,7 @@
 #
 # Copyright: R.J.J.H. van Son, 2017
 # License: GNU GPL v2 or later
+# email: r.j.j.h.vanson@gmail.com
 # 
 # 
 uiLanguage$ = "NL"

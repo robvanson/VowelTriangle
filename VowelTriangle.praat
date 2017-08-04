@@ -463,6 +463,7 @@ procedure plot_vowels .plot .sp$ .sound
 	
 	# Calculate the formants
 	selectObject: .sound
+	.duration = Get total duration
 	.soundname$ = selected$("Sound")
 	.downSampled = Resample: 11000, 50
 	.formants = noprogress To Formant (sl): 0, 5, 5500, 0.025, 50
@@ -684,7 +685,7 @@ procedure plot_vowels .plot .sp$ .sound
 		Text special: 0.9, "right", 0.05, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "Area2"]
 		Text special: 0.9, "left", 0.05, "bottom", "Helvetica", 14, "0", ": '.area2perc:0'\% "
 		Text special: 0.9, "right", 0.00, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "AreaN"]
-		Text special: 0.9, "left", 0.00, "bottom", "Helvetica", 14, "0", ": '.numVowelIntervals'"
+		Text special: 0.9, "left", 0.00, "bottom", "Helvetica", 14, "0", ": '.numVowelIntervals' ('.duration:0's)"
 
 		# Relative distance to corners
 		Text special: 0, "left", 0.15, "bottom", "Helvetica", 16, "0", uiMessage$ [uiLanguage$, "DistanceTitle"]

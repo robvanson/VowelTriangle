@@ -14,7 +14,8 @@ uiLanguage$ = "NL"
 .defaultLanguage = 2
 .sp_default = 1
 output_table$ = ""
-input_file$ = "chunkslist.tsv"
+# Enter valid file path in input_file$ to run non-interactive
+#input_file$ = "chunkslist.tsv"
 input_file$ = ""
 input_table = -1
 .continue = 1
@@ -23,6 +24,7 @@ input_table = -1
 # An example would be a tab separated list:
 # F40L2VT2 F NL chunks/F40L/F40L2VT1.aifc ~/Desktop/results.tsv
 # All files are used AS IS, and nothing is drawn
+# Rows (i.e., Titles) starting with a # are skipped
 if input_file$ <> "" and fileReadable(input_file$) and index_regex(input_file$, "(?i\.(tsv|Table))")
 	input_table = Read Table from tab-separated file: input_file$
 endif
@@ -214,6 +216,10 @@ if input_table > 0
 	for .r to .numInputRows
 		selectObject: input_table
 		title$ = Get value: .r, "Title"
+		# Skip rows that are commented out
+		if startsWith(title$, "#")
+			goto NEXTROW
+		endif
 		.sp$ = Get value: .r, "Speaker"
 		file$ = Get value: .r, "File"
 		tmp$ = Get value: .r, "Language"
@@ -244,6 +250,8 @@ if input_table > 0
 		
 		selectObject: .sound
 		Remove
+		
+		label NEXTROW
 	endfor
 	selectObject: input_table
 	Remove
@@ -1079,7 +1087,12 @@ procedure select_vowel_target .sound .formants .textgrid
 			.f = Get value at time: 1, .tl, "Hertz", "Linear"
 			selectObject: .formantsBurg
 			.b = Get bandwidth at time: 1, .tl, "Hertz", "Linear"
-			.iframe = Get frame number from time: .tl
+			.iframe = Get frame number from time: .tl	
+			if .iframe > .totalNumFrames
+				.iframe = .totalNumFrames
+			elsif .iframe < 1
+				.iframe = 1
+			endif
 			.nf = Get number of formants: .iframe		
 		endwhile
 
@@ -1090,6 +1103,8 @@ procedure select_vowel_target .sound .formants .textgrid
 		.iframe = Get frame number from time: .th
 		if .iframe > .totalNumFrames
 			.iframe = .totalNumFrames
+		elsif .iframe < 1
+			.iframe = 1
 		endif
 		.nf = Get number of formants: .iframe
 		while (.f < .f1_Lowest or .f > .f1_Highest or .b > 0.7 * .f or .nf < 4) and .th - .dt > .tl
@@ -1162,6 +1177,11 @@ procedure select_vowel_target .sound .formants .textgrid
 			selectObject: .formantsBurg
 			.b = Get bandwidth at time: 1, .ttl, "Hertz", "Linear"
 			.iframe = Get frame number from time: .th
+			if .iframe > .totalNumFrames
+				.iframe = .totalNumFrames
+			elsif .iframe < 1
+				.iframe = 1
+			endif
 			.nf = Get number of formants: .iframe		
 			while (.f > 300 and .f < 1000 and .b < 0.9 * .f and .nf >= 4) and .ttl - .dt >= .tl
 				.ttl -= .dt
@@ -1170,6 +1190,11 @@ procedure select_vowel_target .sound .formants .textgrid
 				selectObject: .formantsBurg
 				.b = Get bandwidth at time: 1, .ttl, "Hertz", "Linear"
 				.iframe = Get frame number from time: .ttl
+				if .iframe > .totalNumFrames
+					.iframe = .totalNumFrames
+				elsif .iframe < 1
+					.iframe = 1
+				endif
 				.nf = Get number of formants: .iframe		
 			endwhile
 			# Make sure something has changed
@@ -1184,6 +1209,11 @@ procedure select_vowel_target .sound .formants .textgrid
 			selectObject: .formantsBurg
 			.b = Get bandwidth at time: 1, .tth, "Hertz", "Linear"
 			.iframe = Get frame number from time: .th
+			if .iframe > .totalNumFrames
+				.iframe = .totalNumFrames
+			elsif .iframe < 1
+				.iframe = 1
+			endif
 			.nf = Get number of formants: .iframe		
 			while (.f > 300 and .f < 1000 and .b < 0.9 * .f and .nf >= 4) and .tth + .dt <= .th
 				.tth += .dt
@@ -1192,6 +1222,11 @@ procedure select_vowel_target .sound .formants .textgrid
 				selectObject: .formantsBurg
 				.b = Get bandwidth at time: 1, .tth, "Hertz", "Linear"
 				.iframe = Get frame number from time: .tth
+				if .iframe > .totalNumFrames
+					.iframe = .totalNumFrames
+				elsif .iframe < 1
+					.iframe = 1
+				endif
 				.nf = Get number of formants: .iframe		
 			endwhile
 			# Make sure something has changed

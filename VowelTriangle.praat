@@ -215,10 +215,10 @@ while .continue
 		.recording = 1
 	endif
 	.sp$ = "M"
-	.sp_default = 1
+	.sp_default = 2
 	if speaker_is_a$ = "Female"
 		.sp$ = "F"
-		.sp_default = 2
+		.sp_default = 1
 	endif
 	uiLanguage$ = "EN"
 	.defaultLanguage = 1
@@ -298,7 +298,7 @@ procedure read_and_select_audio .type .message1$ .message2$
 		.filename$ = "Recorded continuous speech"
 	else
 		.filename$ = chooseReadFile$: .message1$
-		if .filename$ = "" or not fileReadable(.filename$) or not index_regex(.filename$, "(?i\.(wav|mp3))")
+		if .filename$ = "" or not fileReadable(.filename$) or not index_regex(.filename$, "(?i\.(wav|mp3|aif[fc]))")
 			@exitVowelTriangle: "No readable recording selected "+.filename$
 		endif
 		
@@ -867,6 +867,7 @@ procedure select_vowel_target .sound .formants .textgrid
 	selectObject: .sound
 	.intensity = Get intensity (dB)
 	.formantsBurg = noprogress To Formant (burg): 0, 5, 5500, 0.025, 50
+	.totalNumFrames = Get number of frames
 		
 	# Nothing found, but there is sound. Try to find at least 1 vowel
 	
@@ -957,6 +958,9 @@ procedure select_vowel_target .sound .formants .textgrid
 		selectObject: .formantsBurg
 		.b = Get bandwidth at time: 1, .tl, "Hertz", "Linear"
 		.iframe = Get frame number from time: .tl
+		if .iframe > .totalNumFrames
+			.iframe = .totalNumFrames
+		endif
 		.nf = Get number of formants: .iframe		
 		while (.f < .f1_Lowest or .f > .f1_Highest or .b > 0.7 * .f or .nf < 4) and .tl + .dt < .th
 			.tl += .dt
@@ -973,7 +977,10 @@ procedure select_vowel_target .sound .formants .textgrid
 		selectObject: .formantsBurg
 		.b = Get bandwidth at time: 1, .th, "Hertz", "Linear"
 		.iframe = Get frame number from time: .th
-		.nf = Get number of formants: .iframe		
+		if .iframe > .totalNumFrames
+			.iframe = .totalNumFrames
+		endif
+		.nf = Get number of formants: .iframe
 		while (.f < .f1_Lowest or .f > .f1_Highest or .b > 0.7 * .f or .nf < 4) and .th - .dt > .tl
 			.th -= .dt
 			selectObject: .formants
@@ -981,6 +988,9 @@ procedure select_vowel_target .sound .formants .textgrid
 			selectObject: .formantsBurg
 			.b = Get bandwidth at time: 1, .th, "Hertz", "Linear"
 			.iframe = Get frame number from time: .th
+			if .iframe > .totalNumFrames
+				.iframe = .totalNumFrames
+			endif
 			.nf = Get number of formants: .iframe		
 		endwhile
 		

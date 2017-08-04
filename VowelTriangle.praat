@@ -8,11 +8,23 @@
 # License: GNU GPL v2 or later
 # email: r.j.j.h.vanson@gmail.com
 # 
-# 
+#
+# Initialization
 uiLanguage$ = "NL"
 .defaultLanguage = 2
 .sp_default = 1
 output_table$ = ""
+input_file$ = "chunkslist.tsv"
+input_table = -1
+.continue = 1
+# The input table should have tab separated columns labeled: 
+# Title, Speaker, File, Language, Log
+# An example would be a tab separated list:
+# F40L2VT2 F NL chunks/F40L/F40L2VT1.aifc ~/Desktop/results.tsv
+# All files are used AS IS, and nothing is drawn
+if input_file$ <> "" and fileReadable(input_file$) and index_regex(input_file$, "(?i\.(tsv|Table))")
+	input_table = Read Table from tab-separated file: input_file$
+endif
 
 # When using a microphone:
 .input$ = "Microphone"
@@ -194,8 +206,51 @@ phonemes ["NL", "F", "Y", "F2"] = 1749.1
 phonemes ["NL", "F", "@", "F1"] = 500.5
 phonemes ["NL", "F", "@", "F2"] = 1706.6
 
+# Run as a non interactive program
+if input_table > 0
+	selectObject: input_table
+	.numInputRows = Get number of rows
+	for .r to .numInputRows
+		selectObject: input_table
+		title$ = Get value: .r, "Title"
+		.sp$ = Get value: .r, "Speaker"
+		file$ = Get value: .r, "File"
+		tmp$ = Get value: .r, "Language"
+		if index(tmp$, "[A-Z]{2}")
+			uiLanguage$ = tmp$
+		endif
+		if index_regex(tmp$, "[-\w]")
+			output_table$ = Get value: .r, "Log"
+			if not fileReadable(output_table$)
+				writeFileLine: output_table$, "Name", tab$, "Speaker", tab$, "N", tab$, "Area", tab$, "i.dist", tab$, "u.dist", tab$, "a.dist"
+			endif
+		endif
+		if file$ <> "" and fileReadable(file$) and index_regex(file$, "(?i\.(wav|mp3|aif[fc]))")
+			tmp = Read from file: file$
+			if tmp <= 0 or numberOfSelected("Sound") <= 0
+				exitScript: "Not a valid Sound file"
+			endif
+			name$ = selected$("Sound")
+			.sound = Convert to mono
+			Rename: name$
+			selectObject(tmp)
+			Remove
+		else
+			exitScript: "Not a valid file"
+		endif
+		@plot_vowels: 0, .sp$, .sound
+		@print_output_line: title$, .sp$, plot_vowels.numVowelIntervals, plot_vowels.area2perc, plot_vowels.relDist_i, plot_vowels.relDist_u, plot_vowels.relDist_a
+		
+		selectObject: .sound
+		Remove
+	endfor
+	selectObject: input_table
+	Remove
+	
+	exitScript: "Ready"
+endif
+
 # Run master loop
-.continue = 1
 while .continue
 	
 	.recording = 0
@@ -244,7 +299,8 @@ while .continue
 		if output_table$ = "-"
 			clearinfo
 			appendInfoLine: "Name", tab$, "Speaker", tab$, "N", tab$, "Area", tab$, "i.dist", tab$, "u.dist", tab$, "a.dist"
-		elsif index_regex(output_table$, "\w")
+		elsif index_regex(output_table$, "\w") and not fileReadable(output_table$)
+			writeFileLine: output_table$, "Name", tab$, "Speaker", tab$, "N", tab$, "Area", tab$, "i.dist", tab$, "u.dist", tab$, "a.dist"
 		endif
 	endif
 	
@@ -280,7 +336,7 @@ while .continue
 	selectObject: .sound
 	.intensity = Get intensity (dB)
 	if .intensity > 50
-		@plot_vowels: "Red", .sp$, .sound, 
+		@plot_vowels: 1, .sp$, .sound, 
 		@print_output_line: title$, .sp$, plot_vowels.numVowelIntervals, plot_vowels.area2perc, plot_vowels.relDist_i, plot_vowels.relDist_u, plot_vowels.relDist_a
 	endif
 	
@@ -388,7 +444,8 @@ procedure set_up_Canvas
 endproc
 
 # Plot the vowels in a sound
-procedure plot_vowels .color$ .sp$ .sound
+# .plot: Actually plot inside icture window or just calculate paramters
+procedure plot_vowels .plot .sp$ .sound
 	.startT = 0 
 	#call syllable_nuclei -25 4 0.3 1 .sound
 	#.syllableKernels = syllable_nuclei.textgridid
@@ -424,14 +481,16 @@ procedure plot_vowels .color$ .sp$ .sound
 	@get_closest_vowels: .sp$, .formants, .syllableKernels, .f1_c, .f2_c
 	.numVowelIntervals = get_closest_vowels.vowelNum
 	# Actually plot the vowels
-	for .i to get_closest_vowels.vowelNum
-		.f1 = get_closest_vowels.f1_list [.i]
-		.f2 = get_closest_vowels.f2_list [.i]
-		@vowel2point: .sp$, .f1, .f2
-		.x = vowel2point.x
-		.y = vowel2point.y
-		Paint circle: color$["@"], .x, .y, 0.01
-	endfor
+	if .plot
+		for .i to get_closest_vowels.vowelNum
+			.f1 = get_closest_vowels.f1_list [.i]
+			.f2 = get_closest_vowels.f2_list [.i]
+			@vowel2point: .sp$, .f1, .f2
+			.x = vowel2point.x
+			.y = vowel2point.y
+			Paint circle: color$["@"], .x, .y, 0.01
+		endfor
+	endif
 	
 	# Near /i/
 	.f1_i = phonemes [language$, .sp$, "i", "F1"]
@@ -439,15 +498,18 @@ procedure plot_vowels .color$ .sp$ .sound
 	@get_closest_vowels: .sp$, .formants, .syllableKernels, .f1_i, .f2_i
 	.meanDistToCenter ["i"] = get_closest_vowels.meanDistance
 	.stdevDistToCenter ["i"] = get_closest_vowels.stdevDistance
+	
 	# Actually plot the vowels
-	for .i to get_closest_vowels.vowelNum
-		.f1 = get_closest_vowels.f1_list [.i]
-		.f2 = get_closest_vowels.f2_list [.i]
-		@vowel2point: .sp$, .f1, .f2
-		.x = vowel2point.x
-		.y = vowel2point.y
-		Paint circle: color$["i"], .x, .y, 0.01
-	endfor
+	if .plot
+		for .i to get_closest_vowels.vowelNum
+			.f1 = get_closest_vowels.f1_list [.i]
+			.f2 = get_closest_vowels.f2_list [.i]
+			@vowel2point: .sp$, .f1, .f2
+			.x = vowel2point.x
+			.y = vowel2point.y
+			Paint circle: color$["i"], .x, .y, 0.01
+		endfor
+	endif
 	
 	# Near /u/
 	.f1_u = phonemes [language$, .sp$, "u", "F1"]
@@ -456,14 +518,16 @@ procedure plot_vowels .color$ .sp$ .sound
 	.meanDistToCenter ["u"] = get_closest_vowels.meanDistance
 	.stdevDistToCenter ["u"] = get_closest_vowels.stdevDistance
 	# Actually plot the vowels
-	for .i to get_closest_vowels.vowelNum
-		.f1 = get_closest_vowels.f1_list [.i]
-		.f2 = get_closest_vowels.f2_list [.i]
-		@vowel2point: .sp$, .f1, .f2
-		.x = vowel2point.x
-		.y = vowel2point.y
-		Paint circle: color$["u"], .x, .y, 0.01
-	endfor
+	if .plot
+		for .i to get_closest_vowels.vowelNum
+			.f1 = get_closest_vowels.f1_list [.i]
+			.f2 = get_closest_vowels.f2_list [.i]
+			@vowel2point: .sp$, .f1, .f2
+			.x = vowel2point.x
+			.y = vowel2point.y
+			Paint circle: color$["u"], .x, .y, 0.01
+		endfor
+	endif
 	
 	# Near /a/
 	.f1_a = phonemes [language$, .sp$, "a", "F1"]
@@ -472,48 +536,51 @@ procedure plot_vowels .color$ .sp$ .sound
 	.meanDistToCenter ["a"] = get_closest_vowels.meanDistance
 	.stdevDistToCenter ["a"] = get_closest_vowels.stdevDistance
 	# Actually plot the vowels
-	for .i to get_closest_vowels.vowelNum
-		.f1 = get_closest_vowels.f1_list [.i]
-		.f2 = get_closest_vowels.f2_list [.i]
-		@vowel2point: .sp$, .f1, .f2
-		.x = vowel2point.x
-		.y = vowel2point.y
-		Paint circle: color$["a"], .x, .y, 0.01
-	endfor
+	if .plot
+		for .i to get_closest_vowels.vowelNum
+			.f1 = get_closest_vowels.f1_list [.i]
+			.f2 = get_closest_vowels.f2_list [.i]
+			@vowel2point: .sp$, .f1, .f2
+			.x = vowel2point.x
+			.y = vowel2point.y
+			Paint circle: color$["a"], .x, .y, 0.01
+		endfor
+	endif
 	
 	# Print center and corner markers
 	# Center
-	.x = .st_c1
-	.y = .st_c2
-	Black
-	Solid line
-	Draw line: .x-0.007, .y+0.007, .x+0.007, .y-0.007
-	Draw line: .x-0.007, .y-0.007, .x+0.007, .y+0.007
-	# u
-	@vowel2point: .sp$, .f1_u, .f2_u	
-	.x = vowel2point.x
-	.y = vowel2point.y
-	Black
-	Solid line
-	Draw line: .x-0.007, .y+0.007, .x+0.007, .y-0.007
-	Draw line: .x-0.007, .y-0.007, .x+0.007, .y+0.007
-	# i
-	@vowel2point: .sp$, .f1_i, .f2_i	
-	.x = vowel2point.x
-	.y = vowel2point.y
-	Black
-	Solid line
-	Draw line: .x-0.007, .y+0.007, .x+0.007, .y-0.007
-	Draw line: .x-0.007, .y-0.007, .x+0.007, .y+0.007
-	# a
-	@vowel2point: .sp$, .f1_a, .f2_a	
-	.x = vowel2point.x
-	.y = vowel2point.y
-	Black
-	Solid line
-	Draw line: .x-0.007, .y+0.007, .x+0.007, .y-0.007
-	Draw line: .x-0.007, .y-0.007, .x+0.007, .y+0.007
-
+	if .plot
+		.x = .st_c1
+		.y = .st_c2
+		Black
+		Solid line
+		Draw line: .x-0.007, .y+0.007, .x+0.007, .y-0.007
+		Draw line: .x-0.007, .y-0.007, .x+0.007, .y+0.007
+		# u
+		@vowel2point: .sp$, .f1_u, .f2_u	
+		.x = vowel2point.x
+		.y = vowel2point.y
+		Black
+		Solid line
+		Draw line: .x-0.007, .y+0.007, .x+0.007, .y-0.007
+		Draw line: .x-0.007, .y-0.007, .x+0.007, .y+0.007
+		# i
+		@vowel2point: .sp$, .f1_i, .f2_i	
+		.x = vowel2point.x
+		.y = vowel2point.y
+		Black
+		Solid line
+		Draw line: .x-0.007, .y+0.007, .x+0.007, .y-0.007
+		Draw line: .x-0.007, .y-0.007, .x+0.007, .y+0.007
+		# a
+		@vowel2point: .sp$, .f1_a, .f2_a	
+		.x = vowel2point.x
+		.y = vowel2point.y
+		Black
+		Solid line
+		Draw line: .x-0.007, .y+0.007, .x+0.007, .y-0.007
+		Draw line: .x-0.007, .y-0.007, .x+0.007, .y+0.007
+	endif
 	
 	# Draw new triangle
 	@vowel2point: .sp$, .f1_i, .f2_i
@@ -549,11 +616,14 @@ procedure plot_vowels .color$ .sp$ .sound
 	.relDist = (.meanDistToCenter ["a"] + .stdevDistToCenter ["a"]) / .ac_dist
 	.x ["a"] = .st_c1 + .relDist * (.st_a1 - .st_c1)
 	.y ["a"] = .st_c2 + .relDist * (.st_a2 - .st_c2)
-	Black
-	Dotted line
-	Draw line: .x ["a"], .y ["a"], .x ["i"], .y ["i"]
-	Draw line: .x ["i"], .y ["i"], .x ["u"], .y ["u"]
-	Draw line: .x ["u"], .y ["u"], .x ["a"], .y ["a"]
+	
+	if .plot
+		Black
+		Dotted line
+		Draw line: .x ["a"], .y ["a"], .x ["i"], .y ["i"]
+		Draw line: .x ["i"], .y ["i"], .x ["u"], .y ["u"]
+		Draw line: .x ["u"], .y ["u"], .x ["a"], .y ["a"]
+	endif
 
 	# Vowel tirangle surface area (Heron's formula)
 	.auDist = sqrt((.x ["a"] - .x ["u"])^2 + (.y ["a"] - .y ["u"])^2)
@@ -561,6 +631,7 @@ procedure plot_vowels .color$ .sp$ .sound
 	.uiDist = sqrt((.x ["u"] - .x ["i"])^2 + (.y ["u"] - .y ["i"])^2)
 	.p = (.auDist + .aiDist + .uiDist)/2
 	.areaSD1 = sqrt(.p * (.p - .auDist) * (.p - .aiDist) * (.p - .uiDist))
+	.area1perc = 100*(.areaSD1 / .areaVT)
 
 	# 2 stdev
 	# c - i
@@ -575,11 +646,18 @@ procedure plot_vowels .color$ .sp$ .sound
 	.relDist_a = (.meanDistToCenter ["a"] + 2 * .stdevDistToCenter ["a"]) / .ac_dist
 	.x ["a"] = .st_c1 + .relDist_a * (.st_a1 - .st_c1)
 	.y ["a"] = .st_c2 + .relDist_a * (.st_a2 - .st_c2)
-	Black
-	Solid line
-	Draw line: .x ["a"], .y ["a"], .x ["i"], .y ["i"]
-	Draw line: .x ["i"], .y ["i"], .x ["u"], .y ["u"]
-	Draw line: .x ["u"], .y ["u"], .x ["a"], .y ["a"]
+	# Convert to percentages
+	.relDist_i *= 100
+	.relDist_u *= 100
+	.relDist_a *= 100
+	
+	if .plot
+		Black
+		Solid line
+		Draw line: .x ["a"], .y ["a"], .x ["i"], .y ["i"]
+		Draw line: .x ["i"], .y ["i"], .x ["u"], .y ["u"]
+		Draw line: .x ["u"], .y ["u"], .x ["a"], .y ["a"]
+	endif
 
 	# Vowel tirangle surface area (Heron's formula)
 	.auDist = sqrt((.x ["a"] - .x ["u"])^2 + (.y ["a"] - .y ["u"])^2)
@@ -587,36 +665,35 @@ procedure plot_vowels .color$ .sp$ .sound
 	.uiDist = sqrt((.x ["u"] - .x ["i"])^2 + (.y ["u"] - .y ["i"])^2)
 	.p = (.auDist + .aiDist + .uiDist)/2
 	.areaSD2 = sqrt(.p * (.p - .auDist) * (.p - .aiDist) * (.p - .uiDist))
+	.area2perc = 100*(.areaSD2 / .areaVT)
 
 	# Print areas as percentage
-	Text special: 1, "right", 0.15, "bottom", "Helvetica", 16, "0", uiMessage$ [uiLanguage$, "AreaTitle"]
-	.area1perc = 100*(.areaSD1 / .areaVT)
-	Text special: 0.9, "right", 0.1, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "Area1"]
-	Text special: 0.9, "left", 0.1, "bottom", "Helvetica", 14, "0", ": '.area1perc:0'\% "
-	.area2perc = 100*(.areaSD2 / .areaVT)
-	Text special: 0.9, "right", 0.05, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "Area2"]
-	Text special: 0.9, "left", 0.05, "bottom", "Helvetica", 14, "0", ": '.area2perc:0'\% "
-	Text special: 0.9, "right", 0.00, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "AreaN"]
-	Text special: 0.9, "left", 0.00, "bottom", "Helvetica", 14, "0", ": '.numVowelIntervals'"
+	if .plot
+		Text special: 1, "right", 0.15, "bottom", "Helvetica", 16, "0", uiMessage$ [uiLanguage$, "AreaTitle"]
+		Text special: 0.9, "right", 0.1, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "Area1"]
+		Text special: 0.9, "left", 0.1, "bottom", "Helvetica", 14, "0", ": '.area1perc:0'\% "
+		Text special: 0.9, "right", 0.05, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "Area2"]
+		Text special: 0.9, "left", 0.05, "bottom", "Helvetica", 14, "0", ": '.area2perc:0'\% "
+		Text special: 0.9, "right", 0.00, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "AreaN"]
+		Text special: 0.9, "left", 0.00, "bottom", "Helvetica", 14, "0", ": '.numVowelIntervals'"
 
-	# Relative distance to corners
-	.relDist_i *= 100
-	.relDist_u *= 100
-	.relDist_a *= 100
-	Text special: 0, "left", 0.15, "bottom", "Helvetica", 16, "0", uiMessage$ [uiLanguage$, "DistanceTitle"]
-	Text special: 0, "left", 0.10, "bottom", "Helvetica", 14, "0", "/i/: '.relDist_i:0'\% "
-	Text special: 0, "left", 0.05, "bottom", "Helvetica", 14, "0", "/u/: '.relDist_u:0'\% "
-	Text special: 0, "left", 0.00, "bottom", "Helvetica", 14, "0", "/a/: '.relDist_a:0'\% "
+		# Relative distance to corners
+		Text special: 0, "left", 0.15, "bottom", "Helvetica", 16, "0", uiMessage$ [uiLanguage$, "DistanceTitle"]
+		Text special: 0, "left", 0.10, "bottom", "Helvetica", 14, "0", "/i/: '.relDist_i:0'\% "
+		Text special: 0, "left", 0.05, "bottom", "Helvetica", 14, "0", "/u/: '.relDist_u:0'\% "
+		Text special: 0, "left", 0.00, "bottom", "Helvetica", 14, "0", "/a/: '.relDist_a:0'\% "
+	endif
 	
 	selectObject: .downSampled, .formants, .syllableKernels
 	Remove
 endproc
 
 procedure print_output_line .title$, .sp$, .numVowelIntervals, .area2perc, .relDist_i, .relDist_u, .relDist_a
-	if output_table$ = "-"
 	# Uses global variable
+	if output_table$ = "-"
 		appendInfoLine: title$, tab$, .sp$, tab$, .numVowelIntervals, tab$, fixed$(.area2perc, 0), tab$, fixed$(.relDist_i, 0), tab$, fixed$(.relDist_u, 0), tab$, fixed$(.relDist_a, 0)
 	elsif index_regex(output_table$, "\w")
+		appendFileLine: output_table$, title$, tab$, .sp$, tab$, .numVowelIntervals, tab$, fixed$(.area2perc, 0), tab$, fixed$(.relDist_i, 0), tab$, fixed$(.relDist_u, 0), tab$, fixed$(.relDist_a, 0)
 	endif	
 endproc
 

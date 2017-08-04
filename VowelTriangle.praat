@@ -15,6 +15,7 @@ uiLanguage$ = "NL"
 .sp_default = 1
 output_table$ = ""
 input_file$ = "chunkslist.tsv"
+input_file$ = ""
 input_table = -1
 .continue = 1
 # The input table should have tab separated columns labeled: 
@@ -1068,8 +1069,10 @@ procedure select_vowel_target .sound .formants .textgrid
 		.iframe = Get frame number from time: .tl
 		if .iframe > .totalNumFrames
 			.iframe = .totalNumFrames
+		elsif .iframe < 1
+			.iframe = 1
 		endif
-		.nf = Get number of formants: .iframe		
+		.nf = Get number of formants: .iframe
 		while (.f < .f1_Lowest or .f > .f1_Highest or .b > 0.7 * .f or .nf < 4) and .tl + .dt < .th
 			.tl += .dt
 			selectObject: .formants
@@ -1098,6 +1101,8 @@ procedure select_vowel_target .sound .formants .textgrid
 			.iframe = Get frame number from time: .th
 			if .iframe > .totalNumFrames
 				.iframe = .totalNumFrames
+			elsif .iframe < 1
+				.iframe = 1
 			endif
 			.nf = Get number of formants: .iframe		
 		endwhile

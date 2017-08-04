@@ -12,6 +12,7 @@
 uiLanguage$ = "NL"
 .defaultLanguage = 2
 .sp_default = 1
+output_table$ = ""
 
 # When using a microphone:
 .input$ = "Microphone"
@@ -56,6 +57,7 @@ uiMessage$ ["EN", "Area1"] = "1"
 uiMessage$ ["EN", "Area2"] = "2"
 uiMessage$ ["EN", "AreaN"] = "N"
 
+uiMessage$ ["EN", "LogFile"] = "Write log to table (""-"" write to the info window)"
 uiMessage$ ["EN", "CommentContinue"] = "Click on ""Continue"" if you want to analyze more speech samples"
 uiMessage$ ["EN", "CommentOpen"] = "Click on ""Open"" and select a recording"
 uiMessage$ ["EN", "CommentRecord"] = "Click on ""Record"" and start speaking"
@@ -90,6 +92,7 @@ uiMessage$ ["NL", "Area1"] = "1"
 uiMessage$ ["NL", "Area2"] = "2"
 uiMessage$ ["NL", "AreaN"] = "N"
 
+uiMessage$ ["NL", "LogFile"] = "Schrijf resultaten naar log bestand (""-"" schrijft naar info venster)"
 uiMessage$ ["NL", "CommentContinue"] = "Klik op ""Doorgaan"" als u meer spraakopnamen wilt analyseren"
 uiMessage$ ["NL", "CommentOpen"] = "Klik op ""Open"" en selecteer een opname"
 uiMessage$ ["NL", "CommentRecord"] = "Klik op ""Opnemen"" en start met spreken"
@@ -191,7 +194,6 @@ phonemes ["NL", "F", "Y", "F2"] = 1749.1
 phonemes ["NL", "F", "@", "F1"] = 500.5
 phonemes ["NL", "F", "@", "F2"] = 1706.6
 
-
 # Run master loop
 .continue = 1
 while .continue
@@ -207,6 +209,7 @@ while .continue
 		optionMenu: "Display language", .defaultLanguage
 			option: "English"
 			option: "Nederlands"
+		boolean: "Log", (output_table$ <> "")
 	.clicked = endPause: (uiMessage$ [uiLanguage$, "Stop"]), (uiMessage$ [uiLanguage$, "Record"]), (uiMessage$ [uiLanguage$, "Open"]), 3, 1
 	if .clicked = 1
 		.continue = 0
@@ -225,6 +228,24 @@ while .continue
 	if display_language$ = "Nederlands"
 		uiLanguage$ = "NL"
 		.defaultLanguage = 2
+	endif
+	if log and output_table$ = ""
+		Erase all
+		Select inner viewport: 0.5, 7.5, 0.5, 4.5
+		Axes: 0, 1, 0, 1
+		Blue
+		Text special: 0, "left", 0.65, "half", "Helvetica", 16, "0", uiMessage$ [uiLanguage$, "LogFile"]
+		
+		output_table$ = chooseWriteFile$: uiMessage$ [uiLanguage$, "LogFile"], replace_regex$(uiMessage$ [uiLanguage$, "LogFile"], "^[^\(]+", "", 0) + " -"
+		if endsWith(output_table$, "-")
+			output_table$ = "-"
+		endif
+		# Print output
+		if output_table$ = "-"
+			clearinfo
+			appendInfoLine: "Name", tab$, "Speaker", tab$, "N", tab$, "Area", tab$, "i.dist", tab$, "u.dist", tab$, "a.dist"
+		elsif index_regex(output_table$, "\w")
+		endif
 	endif
 	
 	# Write instruction
@@ -260,6 +281,7 @@ while .continue
 	.intensity = Get intensity (dB)
 	if .intensity > 50
 		@plot_vowels: "Red", .sp$, .sound, 
+		@print_output_line: title$, .sp$, plot_vowels.numVowelIntervals, plot_vowels.area2perc, plot_vowels.relDist_i, plot_vowels.relDist_u, plot_vowels.relDist_a
 	endif
 	
 	selectObject: .sound
@@ -295,7 +317,7 @@ procedure read_and_select_audio .type .message1$ .message2$
 			@exitVowelTriangle: (uiMessage$ [uiLanguage$, "ErrorSound"])
 		endif
 		.source = selected ("Sound")
-		.filename$ = "Recorded continuous speech"
+		.filename$ = "Recorded speech"
 	else
 		.filename$ = chooseReadFile$: .message1$
 		if .filename$ = "" or not fileReadable(.filename$) or not index_regex(.filename$, "(?i\.(wav|mp3|aif[fc]))")
@@ -303,6 +325,7 @@ procedure read_and_select_audio .type .message1$ .message2$
 		endif
 		
 		.source = Open long sound file: .filename$
+		.filename$ = selected$("LongSound")
 		.fullName$ = selected$()
 		.fileType$ = extractWord$ (.fullName$, "")
 		if .fileType$ <> "Sound" and .fileType$ <> "LongSound"
@@ -351,7 +374,7 @@ procedure read_and_select_audio .type .message1$ .message2$
 	Remove
 
 	selectObject: .sound
-	Rename: "ContinuousSpeech"
+	Rename: .filename$
 endproc
 
 # Set up Canvas
@@ -374,6 +397,7 @@ procedure plot_vowels .color$ .sp$ .sound
 	
 	# Calculate the formants
 	selectObject: .sound
+	.soundname$ = selected$("Sound")
 	.downSampled = Resample: 11000, 50
 	.formants = noprogress To Formant (sl): 0, 5, 5500, 0.025, 50
 
@@ -584,9 +608,16 @@ procedure plot_vowels .color$ .sp$ .sound
 	Text special: 0, "left", 0.05, "bottom", "Helvetica", 14, "0", "/u/: '.relDist_u:0'\% "
 	Text special: 0, "left", 0.00, "bottom", "Helvetica", 14, "0", "/a/: '.relDist_a:0'\% "
 	
-
 	selectObject: .downSampled, .formants, .syllableKernels
 	Remove
+endproc
+
+procedure print_output_line .title$, .sp$, .numVowelIntervals, .area2perc, .relDist_i, .relDist_u, .relDist_a
+	if output_table$ = "-"
+	# Uses global variable
+		appendInfoLine: title$, tab$, .sp$, tab$, .numVowelIntervals, tab$, fixed$(.area2perc, 0), tab$, fixed$(.relDist_i, 0), tab$, fixed$(.relDist_u, 0), tab$, fixed$(.relDist_a, 0)
+	elsif index_regex(output_table$, "\w")
+	endif	
 endproc
 
 # Plot the standard vowels

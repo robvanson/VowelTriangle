@@ -229,7 +229,7 @@ if input_table > 0
 		if index_regex(tmp$, "[-\w]")
 			output_table$ = Get value: .r, "Log"
 			if not fileReadable(output_table$)
-				writeFileLine: output_table$, "Name", tab$, "Speaker", tab$, "N", tab$, "Area", tab$, "i.dist", tab$, "u.dist", tab$, "a.dist"
+				writeFileLine: output_table$, "Name", tab$, "Speaker", tab$, "N", tab$, "Area", tab$, "i.dist", tab$, "u.dist", tab$, "a.dist", tab$, "Duration"
 			endif
 		endif
 		if file$ <> "" and fileReadable(file$) and index_regex(file$, "(?i\.(wav|mp3|aif[fc]))")
@@ -239,6 +239,7 @@ if input_table > 0
 			endif
 			name$ = selected$("Sound")
 			.sound = Convert to mono
+			.duration = Get total duration
 			Rename: name$
 			selectObject(tmp)
 			Remove
@@ -246,7 +247,7 @@ if input_table > 0
 			exitScript: "Not a valid file"
 		endif
 		@plot_vowels: 0, .sp$, .sound
-		@print_output_line: title$, .sp$, plot_vowels.numVowelIntervals, plot_vowels.area2perc, plot_vowels.relDist_i, plot_vowels.relDist_u, plot_vowels.relDist_a
+		@print_output_line: title$, .sp$, plot_vowels.numVowelIntervals, plot_vowels.area2perc, plot_vowels.relDist_i, plot_vowels.relDist_u, plot_vowels.relDist_a, .duration
 		
 		selectObject: .sound
 		Remove
@@ -307,9 +308,9 @@ while .continue
 		# Print output
 		if output_table$ = "-"
 			clearinfo
-			appendInfoLine: "Name", tab$, "Speaker", tab$, "N", tab$, "Area", tab$, "i.dist", tab$, "u.dist", tab$, "a.dist"
+			appendInfoLine: "Name", tab$, "Speaker", tab$, "N", tab$, "Area", tab$, "i.dist", tab$, "u.dist", tab$, "a.dist", tab$, "Duration"
 		elsif index_regex(output_table$, "\w") and not fileReadable(output_table$)
-			writeFileLine: output_table$, "Name", tab$, "Speaker", tab$, "N", tab$, "Area", tab$, "i.dist", tab$, "u.dist", tab$, "a.dist"
+			writeFileLine: output_table$, "Name", tab$, "Speaker", tab$, "N", tab$, "Area", tab$, "i.dist", tab$, "u.dist", tab$, "a.dist", tab$, "Duration"
 		endif
 	endif
 	
@@ -343,10 +344,11 @@ while .continue
 	Text special... 0.5 Centre 1.05 bottom Helvetica 18 0 %%'title$'%
 	
 	selectObject: .sound
+	.duration = Get total duration
 	.intensity = Get intensity (dB)
 	if .intensity > 50
 		@plot_vowels: 1, .sp$, .sound, 
-		@print_output_line: title$, .sp$, plot_vowels.numVowelIntervals, plot_vowels.area2perc, plot_vowels.relDist_i, plot_vowels.relDist_u, plot_vowels.relDist_a
+		@print_output_line: title$, .sp$, plot_vowels.numVowelIntervals, plot_vowels.area2perc, plot_vowels.relDist_i, plot_vowels.relDist_u, plot_vowels.relDist_a, .duration
 	endif
 	
 	selectObject: .sound
@@ -685,7 +687,7 @@ procedure plot_vowels .plot .sp$ .sound
 		Text special: 0.9, "right", 0.05, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "Area2"]
 		Text special: 0.9, "left", 0.05, "bottom", "Helvetica", 14, "0", ": '.area2perc:0'\% "
 		Text special: 0.9, "right", 0.00, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "AreaN"]
-		Text special: 0.9, "left", 0.00, "bottom", "Helvetica", 14, "0", ": '.numVowelIntervals' ('.duration:0's)"
+		Text special: 0.9, "left", 0.00, "bottom", "Helvetica", 14, "0", ": '.numVowelIntervals' ('.duration:0' s)"
 
 		# Relative distance to corners
 		Text special: 0, "left", 0.15, "bottom", "Helvetica", 16, "0", uiMessage$ [uiLanguage$, "DistanceTitle"]
@@ -698,12 +700,12 @@ procedure plot_vowels .plot .sp$ .sound
 	Remove
 endproc
 
-procedure print_output_line .title$, .sp$, .numVowelIntervals, .area2perc, .relDist_i, .relDist_u, .relDist_a
+procedure print_output_line .title$, .sp$, .numVowelIntervals, .area2perc, .relDist_i, .relDist_u, .relDist_a, .duration
 	# Uses global variable
 	if output_table$ = "-"
-		appendInfoLine: title$, tab$, .sp$, tab$, .numVowelIntervals, tab$, fixed$(.area2perc, 0), tab$, fixed$(.relDist_i, 0), tab$, fixed$(.relDist_u, 0), tab$, fixed$(.relDist_a, 0)
+		appendInfoLine: title$, tab$, .sp$, tab$, .numVowelIntervals, tab$, fixed$(.area2perc, 0), tab$, fixed$(.relDist_i, 0), tab$, fixed$(.relDist_u, 0), tab$, fixed$(.relDist_a, 0), tab$, fixed$(.duration,0)
 	elsif index_regex(output_table$, "\w")
-		appendFileLine: output_table$, title$, tab$, .sp$, tab$, .numVowelIntervals, tab$, fixed$(.area2perc, 0), tab$, fixed$(.relDist_i, 0), tab$, fixed$(.relDist_u, 0), tab$, fixed$(.relDist_a, 0)
+		appendFileLine: output_table$, title$, tab$, .sp$, tab$, .numVowelIntervals, tab$, fixed$(.area2perc, 0), tab$, fixed$(.relDist_i, 0), tab$, fixed$(.relDist_u, 0), tab$, fixed$(.relDist_a, 0), tab$, fixed$(.duration,0)
 	endif	
 endproc
 

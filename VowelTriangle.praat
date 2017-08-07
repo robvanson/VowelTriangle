@@ -15,8 +15,8 @@ uiLanguage$ = "NL"
 .sp_default = 1
 output_table$ = ""
 # Enter valid file path in input_file$ to run non-interactive
-#input_file$ = "chunkslist.tsv"
-input_file$ = ""
+input_file$ = "chunkslist.tsv"
+#input_file$ = ""
 input_table = -1
 .continue = 1
 # The input table should have tab separated columns labeled: 

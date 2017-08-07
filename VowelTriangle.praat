@@ -66,7 +66,7 @@ uiMessage$ ["EN", "Open2"] = "Select the speech you want to analyse"
 uiMessage$ ["EN", "Corneri"] = "h%%ea%t"
 uiMessage$ ["EN", "Corneru"] = "h%%oo%t"
 uiMessage$ ["EN", "Cornera"] = "h%%a%t"
-uiMessage$ ["EN", "DistanceTitle"] = "Rel. Distance"
+uiMessage$ ["EN", "DistanceTitle"] = "Rel. Distance (N)"
 uiMessage$ ["EN", "AreaTitle"] = "Rel. Area"
 uiMessage$ ["EN", "Area1"] = "1"
 uiMessage$ ["EN", "Area2"] = "2"
@@ -101,7 +101,7 @@ uiMessage$ ["NL", "Open2"] = "Selecteer de spraak die u wilt analyseren"
 uiMessage$ ["NL", "Corneri"] = "h%%ie%t"
 uiMessage$ ["NL", "Corneru"] = "h%%oe%d"
 uiMessage$ ["NL", "Cornera"] = "h%%aa%t"
-uiMessage$ ["NL", "DistanceTitle"] = "Rel. Afstand"
+uiMessage$ ["NL", "DistanceTitle"] = "Rel. Afstand (N)"
 uiMessage$ ["NL", "AreaTitle"] = "Rel. Oppervlak"
 uiMessage$ ["NL", "Area1"] = "1"
 uiMessage$ ["NL", "Area2"] = "2"
@@ -510,7 +510,7 @@ procedure plot_vowels .plot .sp$ .sound
 	@get_closest_vowels: .sp$, .formants, .syllableKernels, .f1_i, .f2_i
 	.meanDistToCenter ["i"] = get_closest_vowels.meanDistance
 	.stdevDistToCenter ["i"] = get_closest_vowels.stdevDistance
-	
+	.num_i_Intervals = get_closest_vowels.vowelNum
 	# Actually plot the vowels
 	if .plot
 		for .i to get_closest_vowels.vowelNum
@@ -529,6 +529,7 @@ procedure plot_vowels .plot .sp$ .sound
 	@get_closest_vowels: .sp$, .formants, .syllableKernels, .f1_u, .f2_u
 	.meanDistToCenter ["u"] = get_closest_vowels.meanDistance
 	.stdevDistToCenter ["u"] = get_closest_vowels.stdevDistance
+	.num_u_Intervals = get_closest_vowels.vowelNum
 	# Actually plot the vowels
 	if .plot
 		for .i to get_closest_vowels.vowelNum
@@ -547,6 +548,7 @@ procedure plot_vowels .plot .sp$ .sound
 	@get_closest_vowels: .sp$, .formants, .syllableKernels, .f1_a, .f2_a
 	.meanDistToCenter ["a"] = get_closest_vowels.meanDistance
 	.stdevDistToCenter ["a"] = get_closest_vowels.stdevDistance
+	.num_a_Intervals = get_closest_vowels.vowelNum
 	# Actually plot the vowels
 	if .plot
 		for .i to get_closest_vowels.vowelNum
@@ -691,9 +693,9 @@ procedure plot_vowels .plot .sp$ .sound
 
 		# Relative distance to corners
 		Text special: 0, "left", 0.15, "bottom", "Helvetica", 16, "0", uiMessage$ [uiLanguage$, "DistanceTitle"]
-		Text special: 0, "left", 0.10, "bottom", "Helvetica", 14, "0", "/i/: '.relDist_i:0'\% "
-		Text special: 0, "left", 0.05, "bottom", "Helvetica", 14, "0", "/u/: '.relDist_u:0'\% "
-		Text special: 0, "left", 0.00, "bottom", "Helvetica", 14, "0", "/a/: '.relDist_a:0'\% "
+		Text special: 0, "left", 0.10, "bottom", "Helvetica", 14, "0", "/i/: '.relDist_i:0'\%  (.num_i_intervals)"
+		Text special: 0, "left", 0.05, "bottom", "Helvetica", 14, "0", "/u/: '.relDist_u:0'\%  (.num_u_intervals)"
+		Text special: 0, "left", 0.00, "bottom", "Helvetica", 14, "0", "/a/: '.relDist_a:0'\%  (.num_a_intervals)"
 	endif
 	
 	selectObject: .downSampled, .formants, .syllableKernels

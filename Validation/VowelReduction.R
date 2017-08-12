@@ -16,7 +16,7 @@ SdevVowels <- aggregate(cbind(Area1, Area2, N, i.dist, u.dist, a.dist, Duration,
 #analysisVowel<-lm(Area ~ Speaker+Style, data=VowelTable, subset=VowelTable$Text=="V")
 
 print("V + F")
-analysisVowelVF<-lm(Area2 ~ Speaker+Style+Text, data=VowelTable)
+analysisVowelVF<-lm(Area2 ~ Speaker+Style+Text+Speaker*Style+Style*Text+Speaker*Text+Speaker*Style*Text, data=VowelTable)
 print(anova(analysisVowelVF))
 print(summary.lm(analysisVowelVF))
 

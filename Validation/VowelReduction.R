@@ -21,12 +21,12 @@ print(anova(analysisVowelVF))
 print(summary.lm(analysisVowelVF))
 
 print("V")
-analysisVowelV<-lm(Area2 ~ Speaker+Style, data=VowelTable, subset=VowelTable$Text=="V")
+analysisVowelV<-lm(Area2 ~ Speaker+Style+Speaker*Style, data=VowelTable, subset=VowelTable$Text=="V")
 print(anova(analysisVowelV))
 print(summary.lm(analysisVowelV))
 
 print("F")
-analysisVowelF<-lm(Area2 ~ Speaker+Style, data=VowelTable, subset=VowelTable$Text=="F")
+analysisVowelF<-lm(Area2 ~ Speaker+Style+Speaker*Style, data=VowelTable, subset=VowelTable$Text=="F")
 print(anova(analysisVowelF))
 print(summary.lm(analysisVowelF))
 

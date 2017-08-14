@@ -247,7 +247,7 @@ if input_table > 0
 		if index_regex(tmp$, "[-\w]")
 			output_table$ = Get value: .r, "Log"
 			if not fileReadable(output_table$)
-				writeFileLine: output_table$, "Name", tab$, "Speaker", tab$, "N", tab$, "Area2", tab$, "Area1", tab$, "i.dist", tab$, "u.dist", tab$, "a.dist", tab$, "Duration"
+				writeFileLine: output_table$, "Name", tab$, "Speaker", tab$, "N", tab$, "Area2", tab$, "Area1", tab$, "i.dist", tab$, "u.dist", tab$, "a.dist", tab$, "Duration", tab$, "Intensity"
 			endif
 		endif
 		if file$ <> "" and fileReadable(file$) and index_regex(file$, "(?i\.(wav|mp3|aif[fc]))")
@@ -258,6 +258,7 @@ if input_table > 0
 			name$ = selected$("Sound")
 			.sound = Convert to mono
 			.duration = Get total duration
+			.intensity = Get intensity (dB)
 			Rename: name$
 			selectObject(tmp)
 			Remove
@@ -265,7 +266,7 @@ if input_table > 0
 			exitScript: "Not a valid file"
 		endif
 		@plot_vowels: 0, .sp$, .sound
-		@print_output_line: title$, .sp$, plot_vowels.numVowelIntervals, plot_vowels.area2perc, plot_vowels.area1perc, plot_vowels.relDist_i, plot_vowels.relDist_u, plot_vowels.relDist_a, .duration
+		@print_output_line: title$, .sp$, plot_vowels.numVowelIntervals, plot_vowels.area2perc, plot_vowels.area1perc, plot_vowels.relDist_i, plot_vowels.relDist_u, plot_vowels.relDist_a, .duration, .intensity
 		
 		selectObject: .sound
 		Remove
@@ -326,9 +327,9 @@ while .continue
 		# Print output
 		if output_table$ = "-"
 			clearinfo
-			appendInfoLine: "Name", tab$, "Speaker", tab$, "N", tab$, "Area2", tab$, "Area1", tab$, "i.dist", tab$, "u.dist", tab$, "a.dist", tab$, "Duration"
+			appendInfoLine: "Name", tab$, "Speaker", tab$, "N", tab$, "Area2", tab$, "Area1", tab$, "i.dist", tab$, "u.dist", tab$, "a.dist", tab$, "Duration", tab$, "Intensity"
 		elsif index_regex(output_table$, "\w") and not fileReadable(output_table$)
-			writeFileLine: output_table$, "Name", tab$, "Speaker", tab$, "N", tab$, "Area2", tab$, "Area1", tab$, "i.dist", tab$, "u.dist", tab$, "a.dist", tab$, "Duration"
+			writeFileLine: output_table$, "Name", tab$, "Speaker", tab$, "N", tab$, "Area2", tab$, "Area1", tab$, "i.dist", tab$, "u.dist", tab$, "a.dist", tab$, "Duration", tab$, "Intensity"
 		endif
 	endif
 	
@@ -366,7 +367,7 @@ while .continue
 	.intensity = Get intensity (dB)
 	if .intensity > 50
 		@plot_vowels: 1, .sp$, .sound, 
-		@print_output_line: title$, .sp$, plot_vowels.numVowelIntervals, plot_vowels.area2perc, plot_vowels.area1perc, plot_vowels.relDist_i, plot_vowels.relDist_u, plot_vowels.relDist_a, .duration
+		@print_output_line: title$, .sp$, plot_vowels.numVowelIntervals, plot_vowels.area2perc, plot_vowels.area1perc, plot_vowels.relDist_i, plot_vowels.relDist_u, plot_vowels.relDist_a, .duration, .intensity
 	endif
 	
 	selectObject: .sound
@@ -473,7 +474,7 @@ procedure set_up_Canvas
 endproc
 
 # Plot the vowels in a sound
-# .plot: Actually plot inside icture window or just calculate paramters
+# .plot: Actually plot inside picture window or just calculate paramters
 procedure plot_vowels .plot .sp$ .sound
 	.startT = 0 
 	#call syllable_nuclei -25 4 0.3 1 .sound
@@ -485,8 +486,13 @@ procedure plot_vowels .plot .sp$ .sound
 	selectObject: .sound
 	.duration = Get total duration
 	.soundname$ = selected$("Sound")
-	.downSampled = Resample: 11000, 50
-	.formants = noprogress To Formant (sl): 0, 5, 5500, 0.025, 50
+	if .sp$ = "M"
+		.downSampled = Resample: 10000, 50
+		.formants = noprogress To Formant (sl): 0, 5, 5000, 0.025, 50
+	else
+		.downSampled = Resample: 11000, 50
+		.formants = noprogress To Formant (sl): 0, 5, 5500, 0.025, 50
+	endif
 
 	call select_vowel_target .sound .formants .syllableKernels
 	.vowelTier = select_vowel_target.vowelTier
@@ -508,7 +514,7 @@ procedure plot_vowels .plot .sp$ .sound
 	# Near /@/
 	.f1_c = phonemes [language$, .sp$, "@_center", "F1"]
 	.f2_c = phonemes [language$, .sp$, "@_center", "F2"]
-	@get_closest_vowels: .sp$, .formants, .syllableKernels, .f1_c, .f2_c
+	@get_closest_vowels: 0, .sp$, .formants, .syllableKernels, .f1_c, .f2_c
 	.numVowelIntervals = get_closest_vowels.vowelNum
 	# Actually plot the vowels
 	if .plot
@@ -525,9 +531,7 @@ procedure plot_vowels .plot .sp$ .sound
 	# Near /i/
 	.f1_i = phonemes [language$, .sp$, "i", "F1"]
 	.f2_i = phonemes [language$, .sp$, "i", "F2"]
-	@get_closest_vowels: .sp$, .formants, .syllableKernels, .f1_i, .f2_i
-	.meanDistToCenterAll ["i"] = get_closest_vowels.meanDistanceAll
-	.stdevDistToCenterAll ["i"] = get_closest_vowels.stdevDistanceAll
+	@get_closest_vowels: 0, .sp$, .formants, .syllableKernels, .f1_i, .f2_i
 	.meanDistToCenter ["i"] = get_closest_vowels.meanDistance
 	.stdevDistToCenter ["i"] = get_closest_vowels.stdevDistance
 	.num_i_Intervals = get_closest_vowels.vowelNum
@@ -546,9 +550,7 @@ procedure plot_vowels .plot .sp$ .sound
 	# Near /u/
 	.f1_u = phonemes [language$, .sp$, "u", "F1"]
 	.f2_u = phonemes [language$, .sp$, "u", "F2"]
-	@get_closest_vowels: .sp$, .formants, .syllableKernels, .f1_u, .f2_u
-	.meanDistToCenterAll ["u"] = get_closest_vowels.meanDistanceAll
-	.stdevDistToCenterAll ["u"] = get_closest_vowels.stdevDistanceAll
+	@get_closest_vowels: 0, .sp$, .formants, .syllableKernels, .f1_u, .f2_u
 	.meanDistToCenter ["u"] = get_closest_vowels.meanDistance
 	.stdevDistToCenter ["u"] = get_closest_vowels.stdevDistance
 	.num_u_Intervals = get_closest_vowels.vowelNum
@@ -567,9 +569,7 @@ procedure plot_vowels .plot .sp$ .sound
 	# Near /a/
 	.f1_a = phonemes [language$, .sp$, "a", "F1"]
 	.f2_a = phonemes [language$, .sp$, "a", "F2"]
-	@get_closest_vowels: .sp$, .formants, .syllableKernels, .f1_a, .f2_a
-	.meanDistToCenterAll ["a"] = get_closest_vowels.meanDistanceAll
-	.stdevDistToCenterAll ["a"] = get_closest_vowels.stdevDistanceAll
+	@get_closest_vowels: 0, .sp$, .formants, .syllableKernels, .f1_a, .f2_a
 	.meanDistToCenter ["a"] = get_closest_vowels.meanDistance
 	.stdevDistToCenter ["a"] = get_closest_vowels.stdevDistance
 	.num_a_Intervals = get_closest_vowels.vowelNum
@@ -641,17 +641,17 @@ procedure plot_vowels .plot .sp$ .sound
 	.p = (.auDist + .aiDist + .uiDist)/2
 	.areaVT = sqrt(.p * (.p - .auDist) * (.p - .aiDist) * (.p - .uiDist))
 
-	# All 2 stdev
+	# 1 stdev
 	# c - i
-	.relDist = (.meanDistToCenterAll ["i"] + 2 * .stdevDistToCenterAll ["i"]) / .ic_dist
+	.relDist = (.meanDistToCenter ["i"] + 1 * .stdevDistToCenter ["i"]) / .ic_dist
 	.x ["i"] = .st_c1 + .relDist * (.st_i1 - .st_c1)
 	.y ["i"] = .st_c2 + .relDist * (.st_i2 - .st_c2)
 	# c - u
-	.relDist = (.meanDistToCenterAll ["u"] + 2 * .stdevDistToCenterAll ["u"]) / .uc_dist
+	.relDist = (.meanDistToCenter ["u"] + 1 * .stdevDistToCenter ["u"]) / .uc_dist
 	.x ["u"] = .st_c1 + .relDist * (.st_u1 - .st_c1)
 	.y ["u"] = .st_c2 + .relDist * (.st_u2 - .st_c2)
 	# c - a
-	.relDist = (.meanDistToCenterAll ["a"] + 2 * .stdevDistToCenterAll ["a"]) / .ac_dist
+	.relDist = (.meanDistToCenter ["a"] + 1 * .stdevDistToCenter ["a"]) / .ac_dist
 	.x ["a"] = .st_c1 + .relDist * (.st_a1 - .st_c1)
 	.y ["a"] = .st_c2 + .relDist * (.st_a2 - .st_c2)
 	
@@ -668,8 +668,8 @@ procedure plot_vowels .plot .sp$ .sound
 	.aiDist = sqrt((.x ["a"] - .x ["i"])^2 + (.y ["a"] - .y ["i"])^2)
 	.uiDist = sqrt((.x ["u"] - .x ["i"])^2 + (.y ["u"] - .y ["i"])^2)
 	.p = (.auDist + .aiDist + .uiDist)/2
-	.areaSDall = sqrt(.p * (.p - .auDist) * (.p - .aiDist) * (.p - .uiDist))
-	.area1perc = 100*(.areaSDall / .areaVT)
+	.areaSD1 = sqrt(.p * (.p - .auDist) * (.p - .aiDist) * (.p - .uiDist))
+	.area1perc = 100*(.areaSD1 / .areaVT)
 
 	# 2 stdev
 	# c - i
@@ -729,12 +729,12 @@ procedure plot_vowels .plot .sp$ .sound
 	Remove
 endproc
 
-procedure print_output_line .title$, .sp$, .numVowelIntervals, .area2perc, .area1perc, .relDist_i, .relDist_u, .relDist_a, .duration
+procedure print_output_line .title$, .sp$, .numVowelIntervals, .area2perc, .area1perc, .relDist_i, .relDist_u, .relDist_a, .duration, .intensity
 	# Uses global variable
 	if output_table$ = "-"
-		appendInfoLine: title$, tab$, .sp$, tab$, .numVowelIntervals, tab$, fixed$(.area2perc, 0), tab$, fixed$(.area1perc, 0), tab$, fixed$(.relDist_i, 0), tab$, fixed$(.relDist_u, 0), tab$, fixed$(.relDist_a, 0), tab$, fixed$(.duration,0)
+		appendInfoLine: title$, tab$, .sp$, tab$, .numVowelIntervals, tab$, fixed$(.area2perc, 0), tab$, fixed$(.area1perc, 0), tab$, fixed$(.relDist_i, 0), tab$, fixed$(.relDist_u, 0), tab$, fixed$(.relDist_a, 0), tab$, fixed$(.duration,0), tab$, fixed$(.intensity,1)
 	elsif index_regex(output_table$, "\w")
-		appendFileLine: output_table$, title$, tab$, .sp$, tab$, .numVowelIntervals, tab$, fixed$(.area2perc, 0), tab$, fixed$(.area1perc, 0), tab$, fixed$(.relDist_i, 0), tab$, fixed$(.relDist_u, 0), tab$, fixed$(.relDist_a, 0), tab$, fixed$(.duration,0)
+		appendFileLine: output_table$, title$, tab$, .sp$, tab$, .numVowelIntervals, tab$, fixed$(.area2perc, 0), tab$, fixed$(.area1perc, 0), tab$, fixed$(.relDist_i, 0), tab$, fixed$(.relDist_u, 0), tab$, fixed$(.relDist_a, 0), tab$, fixed$(.duration,0), tab$, fixed$(.intensity,1)
 	endif	
 endproc
 
@@ -850,7 +850,7 @@ endproc
 
 # Get a list of best targets with distances, one for each vowel segment found
 # Use DTW to get the best match
-procedure get_closest_vowels .sp$ .formants .textgrid .f1_o .f2_o
+procedure get_closest_vowels .cutoff .sp$ .formants .textgrid .f1_o .f2_o
 	.f1 = 0
 	.f2 = 0
 	
@@ -872,7 +872,6 @@ procedure get_closest_vowels .sp$ .formants .textgrid .f1_o .f2_o
 	selectObject: .textgrid
 	.numIntervals = Get number of intervals: .vowelTier
 	.tableDistances = -1
-	.allTableDistances = -1
 	for .i to .numIntervals
 		selectObject: .textgrid
 		.label$ = Get label of interval: .vowelTier, .i
@@ -915,18 +914,9 @@ procedure get_closest_vowels .sp$ .formants .textgrid .f1_o .f2_o
 			.vcDist_sqr = (.st_c1 - .st1)^2 + (.st_c2 - .st2)^2
 			.vtDist_sqr = (.st_o1 - .st1)^2 + (.st_o2 - .st2)^2
 			.cvDist = (.tcDist_sqr + .vcDist_sqr - .vtDist_sqr)/(2*sqrt(.tcDist_sqr))
-			# Catalogue ALL distances
-			if .allTableDistances <= 0
-				.allTableDistances = Create TableOfReal: "AllDistances", 1, 1
-			else
-				selectObject: .allTableDistances
-				Insert row (index): 1
-			endif
-			selectObject: .allTableDistances
-			Set value: 1, 1, .cvDist
 			
 			# Only use positive distances for plotting
-			if .cvDist = undefined or .cvDist >= 0
+			if .cvDist = undefined or .cvDist >= .cutoff
 				.vowelNum += 1
 				.distance_list [.vowelNum] = sqrt(.numDistance)
 				.f1_list [.vowelNum] = .numF1
@@ -950,14 +940,6 @@ procedure get_closest_vowels .sp$ .formants .textgrid .f1_o .f2_o
 		selectObject: .tableDistances
 		.meanDistance = Get column mean (index): 1
 		.stdevDistance = Get column stdev (index): 1
-		Remove
-	endif
-	.meanDistanceAll = -1
-	.stdevDistanceAll = -1
-	if .tableDistances > 0
-		selectObject: .allTableDistances
-		.meanDistanceAll = Get column mean (index): 1
-		.stdevDistanceAll = Get column stdev (index): 1
 		Remove
 	endif
 endproc
@@ -1033,8 +1015,13 @@ procedure select_vowel_target .sound .formants .textgrid
 	.vuvTier = 6
 
 	selectObject: .sound
+	.samplingFrequency = Get sampling frequency
 	.intensity = Get intensity (dB)
-	.formantsBurg = noprogress To Formant (burg): 0, 5, 5500, 0.025, 50
+	if .samplingFrequency = 10000
+		.formantsBurg = noprogress To Formant (burg): 0, 5, 5000, 0.025, 50
+	else
+		.formantsBurg = noprogress To Formant (burg): 0, 5, 5500, 0.025, 50
+	endif
 	.totalNumFrames = Get number of frames
 		
 	# Nothing found, but there is sound. Try to find at least 1 vowel

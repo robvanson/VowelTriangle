@@ -145,84 +145,97 @@ uiMessage$ ["NL", "Open"] = "Open"
 uiMessage$ ["NL", "Record"] = "Opnemen"
 
 # Male
-phonemes ["NL", "M", "i_corner", "F1"] = 280
-phonemes ["NL", "M", "i_corner", "F2"] = 2400
+phonemes ["NL", "M", "i_corner", "F1"] = 250
+phonemes ["NL", "M", "i_corner", "F2"] = 2100
 phonemes ["NL", "M", "a_corner", "F1"] = 850
-phonemes ["NL", "M", "a_corner", "F2"] = 1350
-phonemes ["NL", "M", "u_corner", "F1"] = 280
+phonemes ["NL", "M", "a_corner", "F2"] = 1300
+phonemes ["NL", "M", "u_corner", "F1"] = 260
 phonemes ["NL", "M", "u_corner", "F2"] = 600
 # @_center is not fixed but derived from current corners
 phonemes ["NL", "M", "@_center", "F1"] =(phonemes ["NL", "M", "i_corner", "F1"]*phonemes ["NL", "M", "u_corner", "F1"]*phonemes ["NL", "M", "a_corner", "F1"])^(1/3)
 phonemes ["NL", "M", "@_center", "F2"] = (phonemes ["NL", "M", "i_corner", "F2"]*phonemes ["NL", "M", "u_corner", "F2"]*phonemes ["NL", "M", "a_corner", "F2"])^(1/3)
 
 # Formant values according to 
-# Weenink, D. J. M. "Formant analysis of Dutch vowels from 10 children." 
-# Proc. Institute of Phonetic Sciences University of Amsterdam. 
-# Vol. 9. 1985.
-# Values taken from: Praat
-phonemes ["NL", "M", "i", "F1"] = 285.9
-phonemes ["NL", "M", "i", "F2"] = 2219.2
-phonemes ["NL", "M", "I", "F1"] = 384.2
-phonemes ["NL", "M", "I", "F2"] = 2121.0
-phonemes ["NL", "M", "e", "F1"] = 442.3
-phonemes ["NL", "M", "e", "F2"] = 2035.2
-phonemes ["NL", "M", "E", "F1"] = 581.6
-phonemes ["NL", "M", "E", "F2"] = 1872.5
-phonemes ["NL", "M", "a", "F1"] = 797.7
-phonemes ["NL", "M", "a", "F2"] = 1339.9
-phonemes ["NL", "M", "A", "F1"] = 682.4
-phonemes ["NL", "M", "A", "F2"] = 1069.1
-phonemes ["NL", "M", "O", "F1"] = 475.5
-phonemes ["NL", "M", "O", "F2"] = 734.5
-phonemes ["NL", "M", "o", "F1"] = 483.5
-phonemes ["NL", "M", "o", "F2"] = 857.5
-phonemes ["NL", "M", "u", "F1"] = 317.6
-phonemes ["NL", "M", "u", "F2"] = 670.7
-phonemes ["NL", "M", "y", "F1"] = 301.5
-phonemes ["NL", "M", "y", "F2"] = 1671.7
-phonemes ["NL", "M", "Y", "F1"] = 431.9
-phonemes ["NL", "M", "Y", "F2"] = 1512.1
+# IFA corpus averages from FPA isolated vowels
+# Using Split-Levinson algorithm
+phonemes ["NL", "M", "A", "F1"] = 695.6000
+phonemes ["NL", "M", "A", "F2"] = 1065.500
+phonemes ["NL", "M", "E", "F1"] = 552.5000
+phonemes ["NL", "M", "E", "F2"] = 1659.200
+phonemes ["NL", "M", "I", "F1"] = 378.0909
+phonemes ["NL", "M", "I", "F2"] = 1868.545
+phonemes ["NL", "M", "O", "F1"] = 482.9000
+phonemes ["NL", "M", "O", "F2"] = 725.800
+phonemes ["NL", "M", "Y", "F1"] = 417.7000
+phonemes ["NL", "M", "Y", "F2"] = 1455.100
+phonemes ["NL", "M", "Y:", "F1"] = 386.3000
+phonemes ["NL", "M", "Y:", "F2"] = 1492.400
+phonemes ["NL", "M", "a", "F1"] = 788.6000
+phonemes ["NL", "M", "a", "F2"] = 1290.600
+phonemes ["NL", "M", "au", "F1"] = 583.8000
+phonemes ["NL", "M", "au", "F2"] = 959.300
+phonemes ["NL", "M", "e", "F1"] = 372.3000
+phonemes ["NL", "M", "e", "F2"] = 1959.700
+phonemes ["NL", "M", "ei", "F1"] = 499.5000
+phonemes ["NL", "M", "ei", "F2"] = 1733.000
+phonemes ["NL", "M", "i", "F1"] = 259.5556
+phonemes ["NL", "M", "i", "F2"] = 1971.889
+phonemes ["NL", "M", "o", "F1"] = 426.7000
+phonemes ["NL", "M", "o", "F2"] = 743.600
+phonemes ["NL", "M", "u", "F1"] = 287.5000
+phonemes ["NL", "M", "u", "F2"] = 666.500
+phonemes ["NL", "M", "ui", "F1"] = 495.3000
+phonemes ["NL", "M", "ui", "F2"] = 1468.600
+phonemes ["NL", "M", "y", "F1"] = 268.4000
+phonemes ["NL", "M", "y", "F2"] = 1581.400
 # Guessed
-phonemes ["NL", "M", "@", "F1"] = 458.5
-phonemes ["NL", "M", "@", "F2"] = 1513.8
+phonemes ["NL", "M", "@", "F1"] = 417.7000
+phonemes ["NL", "M", "@", "F2"] = 1455.100
 
 # Female
-phonemes ["NL", "F", "i_corner", "F1"] = 290
-phonemes ["NL", "F", "i_corner", "F2"] = 2800
-phonemes ["NL", "F", "a_corner", "F1"] = 1000
-phonemes ["NL", "F", "a_corner", "F2"] = 1530
-phonemes ["NL", "F", "u_corner", "F1"] = 290
-phonemes ["NL", "F", "u_corner", "F2"] = 630
+phonemes ["NL", "F", "i_corner", "F1"] = 280
+phonemes ["NL", "F", "i_corner", "F2"] = 2200
+phonemes ["NL", "F", "a_corner", "F1"] = 900
+phonemes ["NL", "F", "a_corner", "F2"] = 1410
+phonemes ["NL", "F", "u_corner", "F1"] = 280
+phonemes ["NL", "F", "u_corner", "F2"] = 610
 # @_center is not fixed but derived from current corners
 phonemes ["NL", "F", "@_center", "F1"] =(phonemes ["NL", "F", "i_corner", "F1"]*phonemes ["NL", "F", "u_corner", "F1"]*phonemes ["NL", "F", "a_corner", "F1"])^(1/3)
 phonemes ["NL", "F", "@_center", "F2"] = (phonemes ["NL", "F", "i_corner", "F2"]*phonemes ["NL", "F", "u_corner", "F2"]*phonemes ["NL", "F", "a_corner", "F2"])^(1/3)
 
-# Weenink, D. J. M. "Formant analysis of Dutch vowels from 10 children." 
-# Proc. Institute of Phonetic Sciences University of Amsterdam. 
-# Vol. 9. 1985.
-# Values taken from: Praat
-phonemes ["NL", "F", "i", "F1"] = 295.5
-phonemes ["NL", "F", "i", "F2"] = 2519.5
-phonemes ["NL", "F", "I", "F1"] = 459.2
-phonemes ["NL", "F", "I", "F2"] = 2373.3
-phonemes ["NL", "F", "e", "F1"] = 487.8
-phonemes ["NL", "F", "e", "F2"] = 2304.1
-phonemes ["NL", "F", "E", "F1"] = 650.7
-phonemes ["NL", "F", "E", "F2"] = 2121.2
-phonemes ["NL", "F", "a", "F1"] = 914.1
-phonemes ["NL", "F", "a", "F2"] = 1534.5
-phonemes ["NL", "F", "A", "F1"] = 816.5
-phonemes ["NL", "F", "A", "F2"] = 1219.5
-phonemes ["NL", "F", "O", "F1"] = 580.2
-phonemes ["NL", "F", "O", "F2"] = 876.9
-phonemes ["NL", "F", "o", "F1"] = 556.2
-phonemes ["NL", "F", "o", "F2"] = 976.4
-phonemes ["NL", "F", "u", "F1"] = 331.4
-phonemes ["NL", "F", "u", "F2"] = 705.8
-phonemes ["NL", "F", "y", "F1"] = 308.0
-phonemes ["NL", "F", "y", "F2"] = 1828.1
-phonemes ["NL", "F", "Y", "F1"] = 477.9
-phonemes ["NL", "F", "Y", "F2"] = 1749.1
+# Formant values according to 
+# IFA corpus average from FPA isolated vowels
+# Using Split-Levinson algorithm
+phonemes ["NL", "F", "A", "F1"] = 817.7000
+phonemes ["NL", "F", "A", "F2"] = 1197.300
+phonemes ["NL", "F", "E", "F1"] = 667.9000
+phonemes ["NL", "F", "E", "F2"] = 1748.500
+phonemes ["NL", "F", "I", "F1"] = 429.2222
+phonemes ["NL", "F", "I", "F2"] = 1937.333
+phonemes ["NL", "F", "O", "F1"] = 570.8000
+phonemes ["NL", "F", "O", "F2"] = 882.100
+phonemes ["NL", "F", "Y", "F1"] = 495.7000
+phonemes ["NL", "F", "Y", "F2"] = 1635.600
+phonemes ["NL", "F", "Y:", "F1"] = 431.1000
+phonemes ["NL", "F", "Y:", "F2"] = 1695.100
+phonemes ["NL", "F", "a", "F1"] = 853.6000
+phonemes ["NL", "F", "a", "F2"] = 1435.800
+phonemes ["NL", "F", "au", "F1"] = 647.6000
+phonemes ["NL", "F", "au", "F2"] = 1056.700
+phonemes ["NL", "F", "e", "F1"] = 429.9000
+phonemes ["NL", "F", "e", "F2"] = 1861.700
+phonemes ["NL", "F", "ei", "F1"] = 619.9000
+phonemes ["NL", "F", "ei", "F2"] = 1718.500
+phonemes ["NL", "F", "i", "F1"] = 294.3000
+phonemes ["NL", "F", "i", "F2"] = 1855.000
+phonemes ["NL", "F", "o", "F1"] = 527.5000
+phonemes ["NL", "F", "o", "F2"] = 894.100
+phonemes ["NL", "F", "u", "F1"] = 376.0000
+phonemes ["NL", "F", "u", "F2"] = 735.200
+phonemes ["NL", "F", "ui", "F1"] = 612.8000
+phonemes ["NL", "F", "ui", "F2"] = 1559.200
+phonemes ["NL", "F", "y", "F1"] = 321.2000
+phonemes ["NL", "F", "y", "F2"] = 1741.700
 # Guessed
 phonemes ["NL", "F", "@", "F1"] = 500.5
 phonemes ["NL", "F", "@", "F2"] = 1706.6
@@ -354,6 +367,7 @@ while .continue
 	if title$ = "untitled"
 		title$ = replace_regex$(read_and_select_audio.filename$, "\.[^\.]+$", "", 0)
 		title$ = replace_regex$(title$, "^.*/([^/]+)$", "\1", 0)
+		title$ = replace_regex$(title$, "_", " ", 0)
 	endif
 		
 	# Draw vowel triangle
@@ -707,22 +721,22 @@ procedure plot_vowels .plot .sp$ .sound
 
 	# Print areas as percentage
 	if .plot
-		Text special: 1, "right", 0.15, "bottom", "Helvetica", 16, "0", uiMessage$ [uiLanguage$, "AreaTitle"]
-		Text special: 0.9, "right", 0.1, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "Area1"]
-		Text special: 0.9, "left", 0.1, "bottom", "Helvetica", 14, "0", ": '.area1perc:0'\% "
-		Text special: 0.9, "right", 0.05, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "Area2"]
-		Text special: 0.9, "left", 0.05, "bottom", "Helvetica", 14, "0", ": '.area2perc:0'\% "
-		Text special: 0.9, "right", 0.00, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "AreaN"]
-		Text special: 0.9, "left", 0.00, "bottom", "Helvetica", 14, "0", ": '.numVowelIntervals' ('.duration:0' s)"
+		Text special: 1, "right", 0.07, "bottom", "Helvetica", 16, "0", uiMessage$ [uiLanguage$, "AreaTitle"]
+		Text special: 0.9, "right", 0.02, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "Area1"]
+		Text special: 0.9, "left", 0.02, "bottom", "Helvetica", 14, "0", ": '.area1perc:0'\% "
+		Text special: 0.9, "right", -0.03, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "Area2"]
+		Text special: 0.9, "left", -0.03, "bottom", "Helvetica", 14, "0", ": '.area2perc:0'\% "
+		Text special: 0.9, "right", -0.08, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "AreaN"]
+		Text special: 0.9, "left", -0.08, "bottom", "Helvetica", 14, "0", ": '.numVowelIntervals' ('.duration:0' s)"
 
 		# Relative distance to corners
-		Text special: 0, "left", 0.15, "bottom", "Helvetica", 16, "0", uiMessage$ [uiLanguage$, "DistanceTitle"]
-		Text special: 0.1, "right", 0.10, "bottom", "Helvetica", 14, "0", "/i/:"
-		Text special: 0.25, "right", 0.10, "bottom", "Helvetica", 14, "0", " '.relDist_i:0'\%  ('.num_i_Intervals')"
-		Text special: 0.1, "right", 0.05, "bottom", "Helvetica", 14, "0", "/u/:"
-		Text special: 0.25, "right", 0.05, "bottom", "Helvetica", 14, "0", " '.relDist_u:0'\%  ('.num_u_Intervals')"
-		Text special: 0.1, "right", 0.00, "bottom", "Helvetica", 14, "0", "/a/:"
-		Text special: 0.25, "right", 0.00, "bottom", "Helvetica", 14, "0", " '.relDist_a:0'\%  ('.num_a_Intervals')"
+		Text special: -0.1, "left", 0.07, "bottom", "Helvetica", 16, "0", uiMessage$ [uiLanguage$, "DistanceTitle"]
+		Text special: 0.0, "right", 0.02, "bottom", "Helvetica", 14, "0", "/i/:"
+		Text special: 0.16, "right", 0.02, "bottom", "Helvetica", 14, "0", " '.relDist_i:0'\%  ('.num_i_Intervals')"
+		Text special: 0.0, "right", -0.03, "bottom", "Helvetica", 14, "0", "/u/:"
+		Text special: 0.16, "right", -0.03, "bottom", "Helvetica", 14, "0", " '.relDist_u:0'\%  ('.num_u_Intervals')"
+		Text special: 0.0, "right", -0.08, "bottom", "Helvetica", 14, "0", "/a/:"
+		Text special: 0.16, "right", -0.08, "bottom", "Helvetica", 14, "0", " '.relDist_a:0'\%  ('.num_a_Intervals')"
 	endif
 	
 	selectObject: .downSampled, .formants, .syllableKernels
@@ -998,7 +1012,7 @@ procedure get_most_distant_vowels .sp$ .formants .textgrid .f1_o .f2_o
 endproc
 
 procedure select_vowel_target .sound .formants .textgrid
-	.f1_Lowest = 270
+	.f1_Lowest = 250
 	.f1_Highest = 1050
 	selectObject: .textgrid
 	.duration = Get total duration

@@ -26,7 +26,7 @@ print(anova(analysisVowelV))
 print(summary.lm(analysisVowelV))
 
 print("F")
-analysisVowelF<-lm(Area2 ~ Speaker+Style+Speaker*Style, data=VowelTable, subset=VowelTable$Text=="F")
+analysisVowelF<-lm(Area2 ~ Speaker+Style + Speaker*Style, data=VowelTable, subset=VowelTable$Text=="F")
 print(anova(analysisVowelF))
 print(summary.lm(analysisVowelF))
 
@@ -39,3 +39,41 @@ plot(AverageVowels[AverageVowels$Text=="V",]$Style, AverageVowels[AverageVowels$
 plot(AverageVowels[AverageVowels$Text=="F",]$Style, AverageVowels[AverageVowels$Text=="F",]$Area2)
 
 plot(VowelTable$Style, VowelTable$Area2)
+
+if(0){
+# Explained variance:
+print("Area2 ~ Speaker")
+analysisVowelVFSpeaker<-lm(Area2 ~ Speaker, data=VowelTable)
+print(anova(analysisVowelVFSpeaker))
+print(summary.lm(analysisVowelVFSpeaker))
+print(c("D","E", "G", "H", "I", "K", "L", "N", "O", "R"))
+predict(analysisVowelVFSpeaker, data.frame( Speaker=c("D","E", "G", "H", "I", "K", "L", "N", "O", "R")))
+
+print("Area2 ~ Style")
+analysisVowelVFStyle<-lm(Area2 ~ Style, data=VowelTable)
+print(anova(analysisVowelVFStyle))
+print(summary.lm(analysisVowelVFStyle))
+print(c("I","R", "T", "S", "W", "Y"))
+predict(analysisVowelVFStyle, data.frame( Style=factor(c("I","R", "T", "S", "W", "Y"), levels=c("I", "R", "T", "S", "W", "Y"))))
+
+print("Area2 ~ Text")
+analysisVowelText<-lm(Area2 ~ Text, data=VowelTable)
+print(anova(analysisVowelText))
+print(summary.lm(analysisVowelText))
+print(c("F","V"))
+predict(analysisVowelText, data.frame( Text=c("F", "V")))
+
+print("Area2 ~ Sex")
+analysisVowelSex<-lm(Area2 ~ Sex, data=VowelTable)
+print(anova(analysisVowelSex))
+print(summary.lm(analysisVowelSex))
+print(c("F","V"))
+predict(analysisVowelSex, data.frame(Sex=c("F", "M")))
+
+print("Area2 ~ Sex + Text + Sex*Text")
+analysisVowelSexText<-lm(Area2 ~ Sex + Text + Sex*Text, data=VowelTable)
+print(anova(analysisVowelSexText))
+print(summary.lm(analysisVowelSexText))
+print(c("F","V"))
+predict(analysisVowelSexText, data.frame(Sex=c("F", "M"), Text=c("F", "V")))
+}

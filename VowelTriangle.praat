@@ -148,9 +148,9 @@ uiMessage$ ["NL", "Record"] = "Opnemen"
 phonemes ["NL", "M", "i_corner", "F1"] = 250
 phonemes ["NL", "M", "i_corner", "F2"] = 2100
 phonemes ["NL", "M", "a_corner", "F1"] = 850
-phonemes ["NL", "M", "a_corner", "F2"] = 1300
-phonemes ["NL", "M", "u_corner", "F1"] = 260
-phonemes ["NL", "M", "u_corner", "F2"] = 600
+phonemes ["NL", "M", "a_corner", "F2"] = 1290
+phonemes ["NL", "M", "u_corner", "F1"] = 285
+phonemes ["NL", "M", "u_corner", "F2"] = 650
 # @_center is not fixed but derived from current corners
 phonemes ["NL", "M", "@_center", "F1"] =(phonemes ["NL", "M", "i_corner", "F1"]*phonemes ["NL", "M", "u_corner", "F1"]*phonemes ["NL", "M", "a_corner", "F1"])^(1/3)
 phonemes ["NL", "M", "@_center", "F2"] = (phonemes ["NL", "M", "i_corner", "F2"]*phonemes ["NL", "M", "u_corner", "F2"]*phonemes ["NL", "M", "a_corner", "F2"])^(1/3)
@@ -196,9 +196,9 @@ phonemes ["NL", "M", "@", "F2"] = 1455.100
 phonemes ["NL", "F", "i_corner", "F1"] = 280
 phonemes ["NL", "F", "i_corner", "F2"] = 2200
 phonemes ["NL", "F", "a_corner", "F1"] = 900
-phonemes ["NL", "F", "a_corner", "F2"] = 1410
-phonemes ["NL", "F", "u_corner", "F1"] = 280
-phonemes ["NL", "F", "u_corner", "F2"] = 610
+phonemes ["NL", "F", "a_corner", "F2"] = 1435
+phonemes ["NL", "F", "u_corner", "F1"] = 370
+phonemes ["NL", "F", "u_corner", "F2"] = 700
 # @_center is not fixed but derived from current corners
 phonemes ["NL", "F", "@_center", "F1"] =(phonemes ["NL", "F", "i_corner", "F1"]*phonemes ["NL", "F", "u_corner", "F1"]*phonemes ["NL", "F", "a_corner", "F1"])^(1/3)
 phonemes ["NL", "F", "@_center", "F2"] = (phonemes ["NL", "F", "i_corner", "F2"]*phonemes ["NL", "F", "u_corner", "F2"]*phonemes ["NL", "F", "a_corner", "F2"])^(1/3)
@@ -847,10 +847,21 @@ procedure vowel2point .sp$ .f1 .f2
 
 	.u_St1 = 12*log2(phonemes [language$, .sp$, "u_corner", "F1"])
 	.u_St2 = 12*log2(phonemes [language$, .sp$, "u_corner", "F2"])
-
-	.x = ((.i_St2 - .spt2)/(.i_St2 - .u_St2))
-	.y = (1 - (.spt1 - min(.u_St1, .i_St1))/(.a_St1 - min(.u_St1, .i_St1)))
 	
+	.dist_iu = sqrt((.i_St1 - .u_St1)^2 + (.i_St2 - .u_St2)^2)
+	.theta = arcsin((.u_St1 - .i_St1)/.dist_iu)
+
+	# First, with i_corner as (0, 0)
+	.xp = ((.i_St2 - .spt2)/(.i_St2 - .u_St2))
+	.yp = (.spt1 - min(.u_St1, .i_St1))/(.a_St1 - min(.u_St1, .i_St1))
+	
+	# Rotate around i_corner
+	.x = .xp * cos(.theta) + .yp * sin(.theta)
+	.y = -1 * .xp * sin(.theta) + .yp * cos(.theta)
+	
+	# Reflect y-axis and make i_corner as (0, 1)
+	.y = 1 - .y
+	.yp = 1 - .yp
 endproc
 
 # Stop the progam

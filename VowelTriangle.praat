@@ -855,7 +855,7 @@ procedure vowel2point .sp$ .f1 .f2
 	.xp = ((.i_St2 - .spt2)/(.i_St2 - .u_St2))
 	.yp = (.spt1 - min(.u_St1, .i_St1))/(.a_St1 - min(.u_St1, .i_St1))
 	
-	# Rotate around i_corner
+	# Rotate around i_corner to make i-u axis horizontal
 	.x = .xp * cos(.theta) + .yp * sin(.theta)
 	.y = -1 * .xp * sin(.theta) + .yp * cos(.theta)
 	
@@ -1312,7 +1312,19 @@ procedure select_vowel_target .sound .formants .textgrid
 				Insert boundary: .vowelTier, .tth
 			endif
 			.index = Get interval at time: .vowelTier, .tt
-			Set interval text: .vowelTier, .index, "Vowel"
+			.start = Get start time of interval: .vowelTier, .index
+			.end = Get end time of interval: .vowelTier, .index
+			# Last sanity checks on duration and intensity
+			# A vowel is at least 20 ms long
+			if .end - .start > 0.020
+				selectObject: .sound
+				.sd = Get standard deviation: 1, .start, .end
+				# Is there enough sound to warrant a vowel? >-15dB
+				if 20*log10(.sd/(2*10^-5)) - .intensity > -15
+					selectObject: .textgrid
+					Set interval text: .vowelTier, .index, "Vowel"
+				endif
+			endif
 			
 		endif
 	endfor

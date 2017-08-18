@@ -1314,16 +1314,13 @@ procedure select_vowel_target .sound .formants .textgrid
 			.index = Get interval at time: .vowelTier, .tt
 			.start = Get start time of interval: .vowelTier, .index
 			.end = Get end time of interval: .vowelTier, .index
-			# Last sanity checks on duration and intensity
-			# A vowel is at least 20 ms long
-			if .end - .start > 0.020
-				selectObject: .sound
-				.sd = Get standard deviation: 1, .start, .end
-				# Is there enough sound to warrant a vowel? >-15dB
-				if 20*log10(.sd/(2*10^-5)) - .intensity > -15
-					selectObject: .textgrid
-					Set interval text: .vowelTier, .index, "Vowel"
-				endif
+			# Last sanity checks on intensity
+			selectObject: .sound
+			.sd = Get standard deviation: 1, .start, .end
+			# Is there enough sound to warrant a vowel? >-15dB
+			if 20*log10(.sd/(2*10^-5)) - .intensity > -15
+				selectObject: .textgrid
+				Set interval text: .vowelTier, .index, "Vowel"
 			endif
 			
 		endif

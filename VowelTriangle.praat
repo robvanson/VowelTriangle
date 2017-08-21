@@ -1054,7 +1054,7 @@ procedure select_vowel_target .sound .formants .textgrid
 	selectObject: .textgrid
 	.numPeaks = Get number of points: .peakTier	
 	if .numPeaks <= 0 and .intensity >= 45
-		selectObject: .downSampled
+		selectObject: .sound
 		.t_max = Get time of maximum: 0, 0, "Sinc70"
 		.pp = noprogress To PointProcess (periodic, cc): 75, 600
 		.textGrid = noprogress To TextGrid (vuv): 0.02, 0.01
@@ -1070,6 +1070,8 @@ procedure select_vowel_target .sound .formants .textgrid
 		endif
 	endif
 	
+	selectObject: .sound
+	.voicePP = noprogress To PointProcess (periodic, cc): 75, 600
 	selectObject: .textgrid
 	.numPeaks = Get number of points: .peakTier
 	.numValleys = Get number of points: .valleyTier
@@ -1245,8 +1247,14 @@ procedure select_vowel_target .sound .formants .textgrid
 			elsif .iframe < 1
 				.iframe = 1
 			endif
-			.nf = Get number of formants: .iframe		
-			while (.f > 300 and .f < 1000 and .b < 0.9 * .f and .nf >= 4) and .ttl - .dt >= .tl
+			.nf = Get number of formants: .iframe	
+			
+			# Voicing: Is there a voiced point below within 0.02 s?
+			selectObject: .voicePP
+			.i_near = Get nearest index: .ttl - .dt
+			.pp_near = Get time from index: .i_near
+			
+			while (.f > 300 and .f < 1000 and .b < 0.9 * .f and .nf >= 4) and .ttl - .dt >= .tl and abs((.ttl - .dt) - .pp_near) <= 0.02
 				.ttl -= .dt
 				selectObject: .formants
 				.f = Get value at time: 1, .ttl, "Hertz", "Linear"
@@ -1258,7 +1266,11 @@ procedure select_vowel_target .sound .formants .textgrid
 				elsif .iframe < 1
 					.iframe = 1
 				endif
-				.nf = Get number of formants: .iframe		
+				.nf = Get number of formants: .iframe
+				# Voicing: Is there a voiced point below within 0.02 s?
+				selectObject: .voicePP
+				.i_near = Get nearest index: .ttl - .dt
+				.pp_near = Get time from index: .i_near
 			endwhile
 			# Make sure something has changed
 			if .ttl > .tt - 0.01
@@ -1278,7 +1290,13 @@ procedure select_vowel_target .sound .formants .textgrid
 				.iframe = 1
 			endif
 			.nf = Get number of formants: .iframe		
-			while (.f > 300 and .f < 1000 and .b < 0.9 * .f and .nf >= 4) and .tth + .dt <= .th
+			
+			# Voicing: Is there a voiced point above within 0.02 s?
+			selectObject: .voicePP
+			.i_near = Get nearest index: .ttl + .dt
+			.pp_near = Get time from index: .i_near
+			
+			while (.f > 300 and .f < 1000 and .b < 0.9 * .f and .nf >= 4) and .tth + .dt <= .th and abs((.ttl + .dt) - .pp_near) <= 0.02
 				.tth += .dt
 				selectObject: .formants
 				.f = Get value at time: 1, .tth, "Hertz", "Linear"
@@ -1291,6 +1309,10 @@ procedure select_vowel_target .sound .formants .textgrid
 					.iframe = 1
 				endif
 				.nf = Get number of formants: .iframe		
+				# Voicing: Is there a voiced point above within 0.02 s?
+				selectObject: .voicePP
+				.i_near = Get nearest index: .ttl + .dt
+				.pp_near = Get time from index: .i_near
 			endwhile
 			# Make sure something has changed
 			if .tth < .tt + 0.01
@@ -1314,18 +1336,23 @@ procedure select_vowel_target .sound .formants .textgrid
 			.index = Get interval at time: .vowelTier, .tt
 			.start = Get start time of interval: .vowelTier, .index
 			.end = Get end time of interval: .vowelTier, .index
-			# Last sanity checks on intensity
-			selectObject: .sound
-			.sd = Get standard deviation: 1, .start, .end
-			# Is there enough sound to warrant a vowel? >-15dB
-			if 20*log10(.sd/(2*10^-5)) - .intensity > -15
-				selectObject: .textgrid
-				Set interval text: .vowelTier, .index, "Vowel"
+			# Last sanity checks on voicing and intensity
+			# A vowel is voiced
+			selectObject: .voicePP
+			.meanPeriod = Get mean period: .start, .end, 0.0001, 0.02, 1.3
+			if .meanPeriod <> undefined
+				selectObject: .sound
+				.sd = Get standard deviation: 1, .start, .end
+				# Is there enough sound to warrant a vowel? > -15dB
+				if 20*log10(.sd/(2*10^-5)) - .intensity > -15
+					selectObject: .textgrid
+					Set interval text: .vowelTier, .index, "Vowel"
+				endif
 			endif
-			
 		endif
 	endfor
-	selectObject: .formantsBurg
+	
+	selectObject: .formantsBurg, .voicePP
 	Remove
 	
 endproc
@@ -1575,4 +1602,31 @@ procedure calculateCOG .dt .sound
 	
 	selectObject: .spectrogram
 	Remove
+endproc
+
+# Initialize missing columns. Column names ending with a $ are text
+procedure initialize_table_collumns .table, .columns$, .initial_value$
+	.columns$ = replace_regex$(.columns$, "^\W+", "", 0)
+	selectObject: .table
+	.numRows = Get number of rows
+	while .columns$ <> ""
+		.label$ = replace_regex$(.columns$, "^\W*(\w+)\W.*$", "\1", 0)
+		.columns$ = replace_regex$(.columns$, "^\W*(\w+)", "", 0)
+		.textType = startsWith(.columns$, "$")
+		if not .textType and index_regex(.initial_value$, "[0-9]") <= 0
+			.textType = 1
+		endif
+		.columns$ = replace_regex$(.columns$, "^\W+", "", 0)
+		.col = Get column index: .label$
+		if .col <= 0
+			Append column: .label$
+			for .r to .numRows
+				if .textType
+					Set string value: .r, .label$, .initial_value$
+				else
+					Set value: .r, .label$, '.initial_value$'
+				endif
+			endfor
+		endif
+	endwhile
 endproc

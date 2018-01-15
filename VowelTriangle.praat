@@ -40,7 +40,7 @@ input_table = -1
 # The input table should have tab separated columns labeled: 
 # Title, Speaker, File, Language, Log
 # An example would be a tab separated list:
-# F40L2VT2 F NL chunks/F40L/F40L2VT1.aifc ~/Desktop/results.tsv
+# F40L2VT2 F chunks/F40L/F40L2VT1.aifc NL ~/Desktop/results.tsv
 # All files are used AS IS, and nothing is drawn
 # Rows (i.e., Titles) starting with a # are skipped
 if input_file$ <> "" and fileReadable(input_file$) and index_regex(input_file$, "(?i\.(tsv|Table))")

@@ -4,7 +4,7 @@
 #
 # Unless specified otherwise:
 #
-# Copyright: R.J.J.H. van Son, 2017
+# Copyright: R.J.J.H. van Son, 2017,2018
 # License: GNU GPL v2 or later
 # email: r.j.j.h.vanson@gmail.com
 # 
@@ -28,17 +28,21 @@
 # 
 #
 # Initialization
-uiLanguage$ = "NL"
-.defaultLanguage = 2
+uiLanguage$ = "EN"
+.defaultLanguage = 1
 .sp_default = 1
 output_table$ = ""
+#
 # Enter valid file path in input_file$ to run non-interactive
 #input_file$ = "chunkslist.tsv"
 input_file$ = ""
 input_table = -1
 .continue = 1
-# The input table should have tab separated columns labeled: 
+#
+# The input table for non-interactive use should have tab separated 
+# columns labeled: 
 # Title, Speaker, File, Language, Log
+#
 # An example would be a tab separated list:
 # F40L2VT2 F chunks/F40L/F40L2VT1.aifc NL ~/Desktop/results.tsv
 # All files are used AS IS, and nothing is drawn

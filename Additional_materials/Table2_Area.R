@@ -178,3 +178,65 @@ p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
 print(paste("T2 ~ Speaker + Task R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT2),  ", p=", sprintf("%.3g",p), ")", sep=""), quote=FALSE)
 
 
+# Leave one out tests
+print("", quote=FALSE)
+print("Leave-One-Out predictions of linear models", quote=FALSE)
+speakerList <- unique(WordsTimeTable$Speaker)
+
+diff0 <- c()
+diff1 <- c()
+diff2 <- c()
+for(subject in speakerList){
+	trainTable <- subset(WordsTimeTable, subset=!(Speaker == subject))
+	testTable <- subset(WordsTimeTable, subset=Speaker == subject)
+	
+	diff0 <- c(diff0, (testTable$Area2.T1 - mean(trainTable$Area2.T1, na.rm = TRUE)))
+	
+	model <- lm(Area2.T1 ~ Area2.T0 + Area2.T2 + Speaker, trainTable)
+	predArea2T1 <- predict(model, testTable)
+	diff1 <- c(diff1, (testTable$Area2.T1 - predArea2T1))
+}
+
+print("", quote=FALSE)
+rmse_mean <- sqrt(mean(diff0**2, na.rm = TRUE))
+mae_mean <- mean(abs(diff0), na.rm = TRUE)
+print(paste("RelAR.T1 ~ Mean", sep=""), quote=FALSE)
+print(paste("RMSE: ", sprintf("%.3g", rmse_mean), sep=""), quote=FALSE)
+print(paste("MAE: ", sprintf("%.3g", mae_mean), sep=""), quote=FALSE)
+
+print("", quote=FALSE)
+print(paste("Area2.T1 ~ Area2.T0 + Area2.T2 + Speaker", sep=""), quote=FALSE)
+print(paste("RMSE: ", sprintf("%.3g", sqrt(mean(diff1**2, na.rm = TRUE))), " (", sprintf("%.3g", sqrt(mean(diff1**2, na.rm = TRUE))/rmse_mean), ")", sep=""), quote=FALSE)
+print(paste("MAE: ", sprintf("%.3g", mean(abs(diff1), na.rm = TRUE)), " (", sprintf("%.3g", mean(abs(diff1), na.rm = TRUE)/mae_mean), ")", sep=""), quote=FALSE)
+
+
+# Leave one out tests
+print("", quote=FALSE)
+print("Leave-One-Out predictions of linear models", quote=FALSE)
+speakerList <- unique(WordsTimeTable$Speaker)
+
+diff0 <- c()
+diff1 <- c()
+diff2 <- c()
+for(subject in speakerList){
+	trainTable <- subset(WordsTimeTable, subset=!(Speaker == subject))
+	testTable <- subset(WordsTimeTable, subset=Speaker == subject)
+	
+	diff0 <- c(diff0, (testTable$Area2.T2 - mean(trainTable$Area2.T2, na.rm = TRUE)))
+	
+	model <- lm(Area2.T2 ~ Area2.T0 + Speaker, trainTable)
+	predArea2T2 <- predict(model, testTable)
+	diff1 <- c(diff1, (testTable$Area2.T2 - predArea2T2))
+}
+
+print("", quote=FALSE)
+rmse_mean <- sqrt(mean(diff0**2, na.rm = TRUE))
+mae_mean <- mean(abs(diff0), na.rm = TRUE)
+print(paste("RelAR.T2 ~ Mean", sep=""), quote=FALSE)
+print(paste("RMSE: ", sprintf("%.3g", rmse_mean), sep=""), quote=FALSE)
+print(paste("MAE: ", sprintf("%.3g", mae_mean), sep=""), quote=FALSE)
+
+print("", quote=FALSE)
+print(paste("Area2.T2 ~ Area2.T0 + Speaker", sep=""), quote=FALSE)
+print(paste("RMSE: ", sprintf("%.3g", sqrt(mean(diff1**2, na.rm = TRUE))), " (", sprintf("%.3g", sqrt(mean(diff1**2, na.rm = TRUE))/rmse_mean), ")", sep=""), quote=FALSE)
+print(paste("MAE: ", sprintf("%.3g", mean(abs(diff1), na.rm = TRUE)), " (", sprintf("%.3g", mean(abs(diff1), na.rm = TRUE)/mae_mean), ")", sep=""), quote=FALSE)

@@ -167,3 +167,127 @@ aicmodelT2 <- AIC(modelT2)
 x <- summary(modelT2)
 p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
 print(paste("RelArt.T2 ~ a.dist.T0*i.dist.T0*u.dist.T0*Area.T0 + i.dist.T2 + NormScore.T2 + NormScore.T0  R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT2), ", p=", sprintf("%.3g", p), ")", sep=""), quote=FALSE)
+
+
+# Art rate
+print("", quote=FALSE)
+modelT2 <- lm(art.rate.T2 ~ art.rate.T0, DapreTimeTable)
+aicmodelT2 <- AIC(modelT2)
+x <- summary(modelT2)
+p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
+print(paste("art.rate.T2 ~ art.rate.T0  R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT2), ", p=", sprintf("%.3g", p), ")", sep=""), quote=FALSE)
+
+modelT2 <- lm(art.rate.T2 ~ art.rate.T0 + a.dist.T2*i.dist.T2*u.dist.T2*Area2.T2, DapreTimeTable)
+aicmodelT2 <- AIC(modelT2)
+x <- summary(modelT2)
+p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
+print(paste("art.rate.T2 ~ art.rate.T0 + a.dist.T2*i.dist.T2*u.dist.T2*Area.T2  R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT2), ", p=", sprintf("%.3g", p), ")", sep=""), quote=FALSE)
+
+modelT2 <- lm(art.rate.T2 ~ art.rate.T0 + a.dist.T1*i.dist.T1*u.dist.T1*Area2.T1, DapreTimeTable)
+aicmodelT2 <- AIC(modelT2)
+x <- summary(modelT2)
+p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
+print(paste("art.rate.T2 ~ art.rate.T0 + a.dist.T1*i.dist.T1*u.dist.T1*Area.T1  R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT2), ", p=", sprintf("%.3g", p), ")", sep=""), quote=FALSE)
+
+modelT2 <- lm(art.rate.T2 ~ art.rate.T0 + a.dist.T0*i.dist.T0*u.dist.T0*Area2.T0, DapreTimeTable)
+aicmodelT2 <- AIC(modelT2)
+x <- summary(modelT2)
+p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
+print(paste("art.rate.T2 ~ art.rate.T0 + a.dist.T0*i.dist.T0*u.dist.T0*Area.T0  R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT2), ", p=", sprintf("%.3g", p), ")", sep=""), quote=FALSE)
+
+
+# Leave one out tests
+print("", quote=FALSE)
+print("Leave-One-Out predictions of linear models: T1", quote=FALSE)
+speakerList <- unique(DapreTimeTable$Speaker)
+
+diff0 <- c()
+diff1 <- c()
+diff2 <- c()
+for(subject in speakerList){
+	trainTable <- subset(DapreTimeTable, subset=!(Speaker == subject))
+	testTable <- subset(DapreTimeTable, subset=Speaker == subject)
+	
+	diff0 <- c(diff0, (testTable$RelAR.T1 - mean(trainTable$RelAR.T1, na.rm = TRUE)))
+	
+	model <- lm(RelAR.T1 ~ a.dist.T0*i.dist.T0*u.dist.T0*Area2.T0, trainTable)
+	predART1 <- predict(model, testTable)
+	diff1 <- c(diff1, (testTable$RelAR.T1 - predART1))
+}
+
+print("", quote=FALSE)
+rmse_mean <- sqrt(mean(diff0**2, na.rm = TRUE))
+mae_mean <- mean(abs(diff0), na.rm = TRUE)
+print(paste("RelAR.T1 ~ Mean", sep=""), quote=FALSE)
+print(paste("RMSE: ", sprintf("%.3g", rmse_mean), sep=""), quote=FALSE)
+print(paste("MAE: ", sprintf("%.3g", mae_mean), sep=""), quote=FALSE)
+
+print("", quote=FALSE)
+print(paste("RelAR.T1 ~ a.dist.T0*i.dist.T0*u.dist.T0*Area2.T0", sep=""), quote=FALSE)
+print(paste("RMSE: ", sprintf("%.3g", sqrt(mean(diff1**2, na.rm = TRUE))), " (", sprintf("%.3g", sqrt(mean(diff1**2, na.rm = TRUE))/rmse_mean), ")", sep=""), quote=FALSE)
+print(paste("MAE: ", sprintf("%.3g", mean(abs(diff1), na.rm = TRUE)), " (", sprintf("%.3g", mean(abs(diff1), na.rm = TRUE)/mae_mean), ")", sep=""), quote=FALSE)
+
+
+# Leave one out tests
+print("", quote=FALSE)
+print("Leave-One-Out predictions of linear models: T2", quote=FALSE)
+speakerList <- unique(DapreTimeTable$Speaker)
+
+diff0 <- c()
+diff1 <- c()
+diff2 <- c()
+for(subject in speakerList){
+	trainTable <- subset(DapreTimeTable, subset=!(Speaker == subject))
+	testTable <- subset(DapreTimeTable, subset=Speaker == subject)
+	
+	diff0 <- c(diff0, (testTable$RelAR.T2 - mean(trainTable$RelAR.T2, na.rm = TRUE)))
+	
+	model <- lm(RelAR.T2 ~ a.dist.T0*i.dist.T0*u.dist.T0*Area2.T0, trainTable)
+	predART2 <- predict(model, testTable)
+	diff1 <- c(diff1, (testTable$RelAR.T2 - predART2))
+}
+
+print("", quote=FALSE)
+rmse_mean <- sqrt(mean(diff0**2, na.rm = TRUE))
+mae_mean <- mean(abs(diff0), na.rm = TRUE)
+print(paste("RelAR.T2 ~ Mean", sep=""), quote=FALSE)
+print(paste("RMSE: ", sprintf("%.3g", rmse_mean), sep=""), quote=FALSE)
+print(paste("MAE: ", sprintf("%.3g", mae_mean), sep=""), quote=FALSE)
+
+print("", quote=FALSE)
+print(paste("RelAR.T2 ~ a.dist.T0*i.dist.T0*u.dist.T0*Area2.T0", sep=""), quote=FALSE)
+print(paste("RMSE: ", sprintf("%.3g", sqrt(mean(diff1**2, na.rm = TRUE))), " (", sprintf("%.3g", sqrt(mean(diff1**2, na.rm = TRUE))/rmse_mean), ")", sep=""), quote=FALSE)
+print(paste("MAE: ", sprintf("%.3g", mean(abs(diff1), na.rm = TRUE)), " (", sprintf("%.3g", mean(abs(diff1), na.rm = TRUE)/mae_mean), ")", sep=""), quote=FALSE)
+
+
+# Leave one out tests
+print("", quote=FALSE)
+print("Leave-One-Out predictions of linear models: T2", quote=FALSE)
+speakerList <- unique(DapreTimeTable$Speaker)
+
+diff0 <- c()
+diff1 <- c()
+diff2 <- c()
+for(subject in speakerList){
+	trainTable <- subset(DapreTimeTable, subset=!(Speaker == subject))
+	testTable <- subset(DapreTimeTable, subset=Speaker == subject)
+	
+	diff0 <- c(diff0, (testTable$art.rate.T2 - mean(trainTable$art.rate.T2, na.rm = TRUE)))
+	
+	model <- lm(art.rate.T2 ~ art.rate.T0, trainTable)
+	predART2 <- predict(model, testTable)
+	diff1 <- c(diff1, (testTable$art.rate.T2 - predART2))
+}
+
+print("", quote=FALSE)
+rmse_mean <- sqrt(mean(diff0**2, na.rm = TRUE))
+mae_mean <- mean(abs(diff0), na.rm = TRUE)
+print(paste("art.rate.T2 ~ Mean", sep=""), quote=FALSE)
+print(paste("RMSE: ", sprintf("%.3g", rmse_mean), sep=""), quote=FALSE)
+print(paste("MAE: ", sprintf("%.3g", mae_mean), sep=""), quote=FALSE)
+
+print("", quote=FALSE)
+print(paste("art.rate.T2 ~ art.rate.T0 + a.dist.T0*i.dist.T0*u.dist.T0*Area2.T0", sep=""), quote=FALSE)
+print(paste("RMSE: ", sprintf("%.3g", sqrt(mean(diff1**2, na.rm = TRUE))), " (", sprintf("%.3g", sqrt(mean(diff1**2, na.rm = TRUE))/rmse_mean), ")", sep=""), quote=FALSE)
+print(paste("MAE: ", sprintf("%.3g", mean(abs(diff1), na.rm = TRUE)), " (", sprintf("%.3g", mean(abs(diff1), na.rm = TRUE)/mae_mean), ")", sep=""), quote=FALSE)
+

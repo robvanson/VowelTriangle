@@ -4,9 +4,9 @@
 #
 # Unless specified otherwise:
 #
-# Copyright: R.J.J.H. van Son, 2017,2018
+# Copyright: 2017-2018, R.J.J.H. van Son and the Netherlands Cancer Institute
 # License: GNU GPL v2 or later
-# email: r.j.j.h.vanson@gmail.com
+# email: r.j.j.h.vanson@gmail.com, r.v.son@nki.nl
 # 
 #     VowelTriangle.praat: Praat script to practice vowel pronunciation 
 #     
@@ -28,27 +28,45 @@
 # 
 #
 # Initialization
-uiLanguage$ = "EN"
+uiLanguage$ = "NL"
 .defaultLanguage = 1
 .sp_default = 1
 output_table$ = ""
-#
+# 
+#######################################################################
+# 
 # Enter valid file path in input_file$ to run non-interactive
-#input_file$ = "chunkslist.tsv"
+#
+#input_file$ = "Concatlist.tsv"
+#input_file$ = "Chunkslist.tsv"
 input_file$ = ""
+
 input_table = -1
 .continue = 1
 #
-# The input table for non-interactive use should have tab separated 
-# columns labeled: 
-# Title, Speaker, File, Language, Log
-#
+# The input table should have tab separated columns labeled: 
+# Title, Speaker, File, Language, Log, Plotfile
 # An example would be a tab separated list:
-# F40L2VT2 F chunks/F40L/F40L2VT1.aifc NL ~/Desktop/results.tsv
-# All files are used AS IS, and nothing is drawn
-# Rows (i.e., Titles) starting with a # are skipped
+# F40L2VT2 F IFAcorpus/chunks/F40L/F40L2VT1.aifc NL target/results.tsv target/F40L2VT2.png
+# All files are used AS IS, and nothing is drawn unless a "Plotfile" is entered
+#
 if input_file$ <> "" and fileReadable(input_file$) and index_regex(input_file$, "(?i\.(tsv|Table))")
 	input_table = Read Table from tab-separated file: input_file$
+	.numRows = Get number of rows
+	.i = Get column index: "Log"
+	if .i <= 0
+		Append column: "Log"
+		for .r to .numRows
+			Set string value: .r, "-"
+		endfor
+	endif 
+	.i = Get column index: "Plotfile"
+	if .i <= 0
+		Append column: "Plotfile"
+		for .r to .numRows
+			Set string value: .r, "-"
+		endfor
+	endif 
 endif
 
 # When using a microphone:
@@ -261,13 +279,64 @@ if input_table > 0
 		if index(tmp$, "[A-Z]{2}")
 			uiLanguage$ = tmp$
 		endif
-		if index_regex(tmp$, "[-\w]")
-			output_table$ = Get value: .r, "Log"
+		.log$ = Get value: .r, "Log"
+		if index_regex(.log$, "[\w]")
+			log = 1
+			output_table$ = .log$
 			if not fileReadable(output_table$)
 				writeFileLine: output_table$, "Name", tab$, "Speaker", tab$, "N", tab$, "Area2", tab$, "Area1", tab$, "i.dist", tab$, "u.dist", tab$, "a.dist", tab$, "Duration", tab$, "Intensity"
 			endif
+		else
+			log = 0
+			output_table$ = "-"
 		endif
-		if file$ <> "" and fileReadable(file$) and index_regex(file$, "(?i\.(wav|mp3|aif[fc]))")
+		
+		.plotFile$ = Get value: .r, "Plotfile"
+		.plotVowels = 0
+		if index_regex(.plotFile$, "\w") <= 0
+			.plotFile$ = ""
+		else
+			.plotVowels = 1
+		endif
+
+		# Handle cases where there is a wildcard
+		if file$ <> "" and index_regex(file$, "[*]{1}") and index_regex(file$, "(?i\.(wav|mp3|aif[fc]))")
+			.preFix$ = ""
+			if index(file$, "/") > 0
+				.preFix$ = replace_regex$(file$, "/[^/]+$", "/", 0)
+			endif
+			.fileList = Create Strings as file list: "FileList", file$
+			.numFiles = Get number of strings
+			.sound = -1
+			for .f to .numFiles
+				selectObject: .fileList
+				.fileName$ = Get string: .f
+
+				.tmp = Read from file: .preFix$ + .fileName$
+				if .tmp <= 0 or numberOfSelected("Sound") <= 0
+					exitScript: "Not a valid Sound file"
+				endif
+				name$ = selected$("Sound")
+				.soundPart = Convert to mono
+				selectObject: .tmp
+				Remove
+				
+				if .sound > 0
+					selectObject: .sound, .soundPart
+					.tmp = Concatenate
+					.duration = Get total duration
+					.intensity = Get intensity (dB)
+					selectObject: .sound, .soundPart
+					Remove
+					.sound = .tmp
+					.tmp = -1
+				else
+					.sound = .soundPart
+				endif
+			endfor
+			selectObject: .fileList
+			Remove
+		elsif file$ <> "" and fileReadable(file$) and index_regex(file$, "(?i\.(wav|mp3|aif[fc]))")
 			tmp = Read from file: file$
 			if tmp <= 0 or numberOfSelected("Sound") <= 0
 				exitScript: "Not a valid Sound file"
@@ -282,8 +351,19 @@ if input_table > 0
 		else
 			exitScript: "Not a valid file"
 		endif
-		@plot_vowels: 0, .sp$, .sound
+		
+		if .plotVowels
+			Erase all
+			call set_up_Canvas
+			call plot_vowel_triangle '.sp$'
+			Text special... 0.5 Centre 1.05 bottom Helvetica 18 0 %%'title$'%
+		endif
+		@plot_vowels: .plotVowels, .sp$, .sound
 		@print_output_line: title$, .sp$, plot_vowels.numVowelIntervals, plot_vowels.area2perc, plot_vowels.area1perc, plot_vowels.relDist_i, plot_vowels.relDist_u, plot_vowels.relDist_a, .duration, .intensity
+
+		if index_regex(.plotFile$, "\w")
+			Save as 300-dpi PNG file: .plotFile$
+		endif
 		
 		selectObject: .sound
 		Remove
@@ -1381,8 +1461,14 @@ endproc
 #    along with this program.  If not, see http://www.gnu.org/licenses/   #
 #                                                                         #
 ###########################################################################
-#
+#                                                                         #
 # Simplified summary of the script by Nivja de Jong and Ton Wempe         #
+#                                                                         #
+# Praat script to detect syllable nuclei and measure speech rate          # 
+# automatically                                                           #
+# de Jong, N.H. & Wempe, T. Behavior Research Methods (2009) 41: 385.     #
+# https://doi.org/10.3758/BRM.41.2.385                                    #
+# 
 procedure segment_syllables .silence_threshold .minimum_dip_between_peaks .minimum_pause_duration .keep_Soundfiles_and_Textgrids .soundid
 	# Get intensity
 	selectObject: .soundid

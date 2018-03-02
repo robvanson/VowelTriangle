@@ -1,4 +1,9 @@
 # R
+#
+# Copyright: 2017-2018, R.J.J.H. van Son and the Netherlands Cancer Institute
+# License: GNU GPL v2 or later
+# email: r.v.son@nki.nl
+#
 
 se <- function(x) sqrt(var(x)/length(x))
 ci <- function(x) {t <- t.test(x); (t$conf.int[[2]]- t$conf.int[[1]])/2}

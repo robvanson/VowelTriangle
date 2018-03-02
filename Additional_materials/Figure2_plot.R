@@ -1,4 +1,9 @@
 # R
+#
+# Copyright: 2017-2018, R.J.J.H. van Son and the Netherlands Cancer Institute
+# License: GNU GPL v2 or later
+# email: r.v.son@nki.nl
+#
 library(ggplot2)
 # A4 size in Inches
 OutputWidth <-  11.692;

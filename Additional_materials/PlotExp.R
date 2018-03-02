@@ -1,8 +1,14 @@
 # R
 #
+# Copyright: 2017-2018, R.J.J.H. van Son and the Netherlands Cancer Institute
+# License: GNU GPL v2 or later
+# email: r.v.son@nki.nl
+#
+#
 ScoreTableIndividual <- read.table("PlotScores.tsv", header = TRUE, sep = "\t", na.strings = "-");
 ScoreTableIndividual$VowelDensity <- ScoreTableIndividual$N/ScoreTableIndividual$Duration
-ScoreTableIndividual$T <- as.factor(ScoreTableIndividual$T)
+ScoreTableIndividual$T <- factor(ScoreTableIndividual$T, ordered=TRUE)
+ScoreTableIndividual$Speaker <- factor(ScoreTableIndividual$Speaker, ordered=FALSE)
 
 # Normalize scores
 ScoreTableIndividual$NormScore <- ScoreTableIndividual$Score
@@ -10,6 +16,7 @@ for(eval in unique(ScoreTableIndividual$Evaluator)){
 	ScoreTableIndividual[ScoreTableIndividual$Evaluator==eval,]$NormScore <- as.vector(scale(ScoreTableIndividual[ScoreTableIndividual$Evaluator==eval,]$Score))
 }
 
+# Convert T moments to columns
 T0TableIndividual <- subset(ScoreTableIndividual, subset = T == 0, select = c("Speaker", "T", "Task", "Sex", "N", "Area2", "i.dist", "u.dist", "a.dist", "Score", "NormScore"))
 T1TableIndividual <- subset(ScoreTableIndividual, subset = T == 1, select = c("Speaker", "T", "Task", "Sex", "N", "Area2", "i.dist", "u.dist", "a.dist", "Score", "NormScore"))
 T2TableIndividual <- subset(ScoreTableIndividual, subset = T == 2, select = c("Speaker", "T", "Task", "Sex", "N", "Area2", "i.dist", "u.dist", "a.dist", "Score", "NormScore"))
@@ -21,9 +28,7 @@ TimeTableIndividual <- merge(T0TableIndividual, T1TableIndividual, by = c("Speak
 TimeTableIndividual <- merge(TimeTableIndividual, T2TableIndividual, by = c("Speaker", "Task"), sort = TRUE, all = TRUE)
 
 
-ScoreTable <- aggregate(cbind(Score, NormScore)~Name+Speaker+T+Task+Sex+N+Area2+Area1+i.dist+u.dist+a.dist+Duration+Intensity, data=ScoreTableIndividual, mean);
-
-# All
+# All Individual score
 print("", quote=FALSE)
 print("All Individual Scores", quote=FALSE)
 modelNormScore <- lm(NormScore ~ a.dist*u.dist*Area2*i.dist, ScoreTableIndividual)
@@ -32,10 +37,31 @@ x <- summary(modelNormScore)
 p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
 print(paste("NormScore ~ a.dist*u.dist*Area2*i.dist R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelNormScore), ", p=", sprintf("%.3g", p), ")", sep=""), quote=FALSE)
 
+# Average over evaluators
+ScoreTable <- aggregate(cbind(Score, NormScore)~Name+Speaker+T+Task+Sex+N+Area2+Area1+i.dist+u.dist+a.dist+Duration+Intensity, data=ScoreTableIndividual, mean);
 
-T0Table <- subset(ScoreTable, subset = T == 0, select = c("Speaker", "T", "Task", "Sex", "N", "Area2", "i.dist", "u.dist", "a.dist", "Score", "NormScore"))
-T1Table <- subset(ScoreTable, subset = T == 1, select = c("Speaker", "T", "Task", "Sex", "N", "Area2", "i.dist", "u.dist", "a.dist", "Score", "NormScore"))
-T2Table <- subset(ScoreTable, subset = T == 2, select = c("Speaker", "T", "Task", "Sex", "N", "Area2", "i.dist", "u.dist", "a.dist", "Score", "NormScore"))
+
+# Adding Listening Experiment
+LexpTableIndividual <- read.table("ListeningExp.tsv", header = TRUE, sep = "\t", na.strings = "-");
+LexpTableIndividual$T <- factor(LexpTableIndividual$T, ordered=TRUE)
+LexpTableIndividual$Speaker <- factor(LexpTableIndividual$Speaker, ordered=FALSE)
+
+# Normalize scores
+LexpTableIndividual$NormRating <- LexpTableIndividual$Rating
+for(eval in unique(LexpTableIndividual$Evaluator)){
+	LexpTableIndividual[LexpTableIndividual$Evaluator==eval,]$NormRating <- as.vector(scale(LexpTableIndividual[LexpTableIndividual$Evaluator==eval,]$Rating))
+}
+
+# Average over evaluators
+LexpTable <- aggregate(cbind(Rating, NormRating)~Speaker+T+Sex, data=LexpTableIndividual, mean);
+
+# Combine Plot and Listening experiments
+ScoreTable <- merge(ScoreTable, LexpTable, by = c("Speaker", "Sex", "T"), suffixes = c(".PE", ".LE"), sort = TRUE, all = TRUE)
+
+# Convert T moments to columns
+T0Table <- subset(ScoreTable, subset = T == 0, select = c("Speaker", "T", "Task", "Sex", "N", "Area2", "i.dist", "u.dist", "a.dist", "Score", "NormScore", "Rating", "NormRating"))
+T1Table <- subset(ScoreTable, subset = T == 1, select = c("Speaker", "T", "Task", "Sex", "N", "Area2", "i.dist", "u.dist", "a.dist", "Score", "NormScore", "Rating", "NormRating"))
+T2Table <- subset(ScoreTable, subset = T == 2, select = c("Speaker", "T", "Task", "Sex", "N", "Area2", "i.dist", "u.dist", "a.dist", "Score", "NormScore", "Rating", "NormRating"))
 names(T2Table) <- paste(names(T2Table),".T2", sep="")
 names(T2Table)[1] <- "Speaker"
 names(T2Table)[3] <- "Task"
@@ -156,3 +182,86 @@ aicmodelNormScore <- AIC(modelNormScore)
 x <- summary(modelNormScore)
 p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
 print(paste("NormScore.T2 ~ a.dist.T2*u.dist.T2*Area2.T2*i.dist.T2 R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelNormScore), ", p=", sprintf("%.3g", p), ")", sep=""), quote=FALSE)
+
+# Model Plot and Listening Experiments
+
+print("", quote=FALSE)
+print("Listening Experiment, all time", quote=FALSE)
+print("No relation between results of plot and listening experiments", quote=FALSE)
+
+print(cor.test(ScoreTable$NormRating, ScoreTable$NormScore))
+print(cor.test(TimeTable$NormRating.T0, TimeTable$NormScore.T0))
+print(cor.test(TimeTable$NormRating.T1, TimeTable$NormScore.T1))
+print(cor.test(TimeTable$NormRating.T2, TimeTable$NormScore.T2))
+
+# 
+modelNormRating <- lm(NormRating ~ Speaker, ScoreTable)
+aicmodelNormRating <- AIC(modelNormRating)
+x <- summary(modelNormRating)
+p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
+print(paste("NormRating ~ Speaker R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelNormRating), ", p=", sprintf("%.3g", p), ")", sep=""), quote=FALSE)
+
+modelNormRating <- lm(NormRating ~ Speaker + T, ScoreTable)
+aicmodelNormRating <- AIC(modelNormRating)
+x <- summary(modelNormRating)
+p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
+print(paste("NormRating ~ Speaker + T R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelNormRating), ", p=", sprintf("%.3g", p), ")", sep=""), quote=FALSE)
+
+modelNormRating <- lm(NormRating ~ Speaker + T + NormScore, ScoreTable)
+aicmodelNormRating <- AIC(modelNormRating)
+x <- summary(modelNormRating)
+p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
+print(paste("NormRating ~ Speaker + T + NormScore R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelNormRating), ", p=", sprintf("%.3g", p), ")", sep=""), quote=FALSE)
+
+
+print("", quote=FALSE)
+print("Listening Experiment, T", quote=FALSE)
+
+
+# T0
+modelNormRating <- lm(NormRating.T0 ~ NormScore.T0, TimeTable)
+aicmodelNormRating <- AIC(modelNormRating)
+x <- summary(modelNormRating)
+p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
+print(paste("NormRating.T0 ~ NormScore.T1 R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelNormRating), ", p=", sprintf("%.3g", p), ")", sep=""), quote=FALSE)
+
+print("", quote=FALSE)
+# T1
+modelNormRating <- lm(NormRating.T1 ~ NormRating.T0, TimeTable)
+aicmodelNormRating <- AIC(modelNormRating)
+x <- summary(modelNormRating)
+p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
+print(paste("NormRating.T1 ~ NormRating.T0 R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelNormRating), ", p=", sprintf("%.3g", p), ")", sep=""), quote=FALSE)
+
+modelNormRating <- lm(NormRating.T1 ~ NormRating.T0 + NormScore.T1, TimeTable)
+aicmodelNormRating <- AIC(modelNormRating)
+x <- summary(modelNormRating)
+p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
+print(paste("NormRating.T1 ~ NormRating.T0 + NormScore.T1 R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelNormRating), ", p=", sprintf("%.3g", p), ")", sep=""), quote=FALSE)
+
+modelNormRating <- lm(NormRating.T1 ~ NormRating.T0 + NormScore.T0, TimeTable)
+aicmodelNormRating <- AIC(modelNormRating)
+x <- summary(modelNormRating)
+p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
+print(paste("NormRating.T1 ~ NormRating.T0 + NormScore.T0 R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelNormRating), ", p=", sprintf("%.3g", p), ")", sep=""), quote=FALSE)
+
+print("", quote=FALSE)
+# T2
+modelNormRating <- lm(NormRating.T2 ~ NormRating.T1, TimeTable)
+aicmodelNormRating <- AIC(modelNormRating)
+x <- summary(modelNormRating)
+p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
+print(paste("NormRating.T2 ~ NormRating.T1 R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelNormRating), ", p=", sprintf("%.3g", p), ")", sep=""), quote=FALSE)
+
+modelNormRating <- lm(NormRating.T2 ~ NormRating.T1 + NormScore.T2, TimeTable)
+aicmodelNormRating <- AIC(modelNormRating)
+x <- summary(modelNormRating)
+p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
+print(paste("NormRating.T2 ~ NormRating.T1 + NormScore.T2 R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelNormRating), ", p=", sprintf("%.3g", p), ")", sep=""), quote=FALSE)
+
+modelNormRating <- lm(NormRating.T2 ~ NormRating.T1 + NormScore.T1, TimeTable)
+aicmodelNormRating <- AIC(modelNormRating)
+x <- summary(modelNormRating)
+p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
+print(paste("NormRating.T2 ~ NormRating.T1 + NormScore.T1 R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelNormRating), ", p=", sprintf("%.3g", p), ")", sep=""), quote=FALSE)
+

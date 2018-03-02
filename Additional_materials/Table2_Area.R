@@ -1,4 +1,9 @@
 # R
+#
+# Copyright: 2017-2018, R.J.J.H. van Son and the Netherlands Cancer Institute
+# License: GNU GPL v2 or later
+# email: r.v.son@nki.nl
+#
 library("lmtest")
 
 TaskTable <- read.table("Patient_data.tsv", header = TRUE, sep = "\t", na.strings = "-");
@@ -9,16 +14,18 @@ T1Table <- subset(TaskTable, subset = T == 1, select = c("Speaker", "T", "Task",
 T2Table <- subset(TaskTable, subset = T == 2, select = c("Speaker", "T", "Task", "Sex", "N", "Area2", "i.dist", "u.dist", "a.dist"))
 names(T2Table) <- paste(names(T2Table),".T2", sep="")
 names(T2Table)[1] <- "Speaker"
+names(T2Table)[2] <- "T"
 names(T2Table)[3] <- "Task"
+names(T2Table)[4] <- "Sex"
 
-TimeTable <- merge(T0Table, T1Table, by = c("Speaker", "Task"), suffixes = c(".T0", ".T1"), sort = TRUE, all = TRUE)
-TimeTable <- merge(TimeTable, T2Table, by = c("Speaker", "Task"), sort = TRUE, all = TRUE)
+TimeTable <- merge(T0Table, T1Table, by = c("Speaker", "Sex", "Task"), suffixes = c(".T0", ".T1"), sort = TRUE, all = TRUE)
+TimeTable <- merge(TimeTable, T2Table, by = c("Speaker",  "Sex", "Task"), sort = TRUE, all = TRUE)
 
 selectionList <- names(TimeTable)[grep("^T[.]", names(TimeTable), invert = TRUE)]
 selectionList <- selectionList[grep("^Sex[.]T[12]", selectionList, invert = TRUE)]
 selectionList <- selectionList[grep("^Task[.]vowels[.]T[12]", selectionList, invert = TRUE)]
 TimeTable <- subset(TimeTable, select = c(selectionList))
-
+TimeTable$Speaker <- factor(TimeTable$Speaker)
 
 # Linear model
 # All
@@ -38,11 +45,11 @@ x <- summary(modelT1)
 p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
 print(paste("T1 ~ Area2.T0 + Area2.T2 R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT1),  ", p=", sprintf("%.3g",p), ")", sep=""), quote=FALSE)
 
-modelT1 <- lm(Area2.T1 ~ Area2.T0 + Area2.T2 + Speaker, TimeTable)
+modelT1 <- lm(Area2.T1 ~ Area2.T0 + Area2.T2 + Sex, TimeTable)
 aicmodelT1 <- AIC(modelT1)
 x <- summary(modelT1)
 p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
-print(paste("T1 ~ Area2.T0 + Area2.T2 + Speaker R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT1),  ", p=", sprintf("%.3g",p), ")", sep=""), quote=FALSE)
+print(paste("T1 ~ Area2.T0 + Area2.T2 + Sex R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT1),  ", p=", sprintf("%.3g",p), ")", sep=""), quote=FALSE)
 
 print("", quote=FALSE)
 # T2
@@ -58,11 +65,11 @@ x <- summary(modelT2)
 p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
 print(paste("T2 ~ Area2.T1 + Area2.T0 R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT2),  ", p=", sprintf("%.3g",p), ")", sep=""), quote=FALSE)
 
-modelT2 <- lm(Area2.T2 ~ Area2.T1 + Speaker, TimeTable)
+modelT2 <- lm(Area2.T2 ~ Area2.T1 + Sex, TimeTable)
 aicmodelT2 <- AIC(modelT2)
 x <- summary(modelT2)
 p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
-print(paste("T2 ~ Area2.T1 + Speaker: R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT2),  ", p=", sprintf("%.3g",p), ")", sep=""), quote=FALSE)
+print(paste("T2 ~ Area2.T1 + Sex: R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT2),  ", p=", sprintf("%.3g",p), ")", sep=""), quote=FALSE)
 
 # Dapre
 # T1
@@ -71,32 +78,65 @@ print("Dapre", quote=FALSE)
 DapreTimeTable <- subset(TimeTable, subset=Task=="Dapre")
 modelT1 <- lm(Area2.T1 ~ Area2.T0, DapreTimeTable)
 aicmodelT1 <- AIC(modelT1)
+x <- summary(modelT1)
+p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
 print(paste("T1 ~ Area.T0 R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT1),  ", p=", sprintf("%.3g",p), ")", sep=""), quote=FALSE)
 
 modelT1 <- lm(Area2.T1 ~ Area2.T0 + Area2.T2, DapreTimeTable)
 aicmodelT1 <- AIC(modelT1)
+x <- summary(modelT1)
+p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
 print(paste("T1 ~ Area2.T0 + Area2.T2 R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT1),  ", p=", sprintf("%.3g",p), ")", sep=""), quote=FALSE)
 
-modelT1 <- lm(Area2.T1 ~ Area2.T0 + Area2.T2 + Speaker, DapreTimeTable)
+modelT1 <- lm(Area2.T1 ~ Area2.T0 + Area2.T2 + Sex, DapreTimeTable)
 aicmodelT1 <- AIC(modelT1)
-print(paste("T1 ~ Area2.T0 + Area2.T2 + Speaker R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT1),  ", p=", sprintf("%.3g",p), ")", sep=""), quote=FALSE)
+print(paste("T1 ~ Area2.T0 + Area2.T2 + Sex R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT1),  ", p=", sprintf("%.3g",p), ")", sep=""), quote=FALSE)
 
 print("", quote=FALSE)
 # T2
 modelT2 <- lm(Area2.T2 ~ Area2.T1, DapreTimeTable)
 aicmodelT2 <- AIC(modelT2)
+x <- summary(modelT2)
+p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
 print(paste("T2 ~ Area.T1 R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT2),  ", p=", sprintf("%.3g",p), ")", sep=""), quote=FALSE)
 
 modelT2 <- lm(Area2.T2 ~ Area2.T1 + Area2.T0, DapreTimeTable)
 aicmodelT2 <- AIC(modelT2)
+x <- summary(modelT2)
+p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
 print(paste("T2 ~ Area2.T1 + Area2.T0 R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT2),  ", p=", sprintf("%.3g",p), ")", sep=""), quote=FALSE)
 
-modelT2 <- lm(Area2.T2 ~ Area2.T1 + Speaker, DapreTimeTable)
+modelT2 <- lm(Area2.T2 ~ Area2.T1 + Sex, DapreTimeTable)
 aicmodelT2 <- AIC(modelT2)
-print(paste("T2 ~ Area2.T1 + Speaker R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT2),  ", p=", sprintf("%.3g",p), ")", sep=""), quote=FALSE)
+x <- summary(modelT2)
+p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
+print(paste("T2 ~ Area2.T1 + Sex R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT2),  ", p=", sprintf("%.3g",p), ")", sep=""), quote=FALSE)
 
 
 # Words
+# T0
+print("", quote=FALSE)
+print("Words", quote=FALSE)
+WordsTimeTable <- subset(TimeTable, subset=Task=="Words")
+modelT1 <- lm(Area2.T0 ~ Sex, WordsTimeTable)
+aicmodelT1 <- AIC(modelT1)
+x <- summary(modelT1)
+p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
+print(paste("T0 ~ Area.T0 R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT1),  ", p=", sprintf("%.3g",p), ")", sep=""), quote=FALSE)
+
+modelT1 <- lm(Area2.T0 ~ Area2.T0 + Area2.T2, WordsTimeTable)
+aicmodelT1 <- AIC(modelT1)
+x <- summary(modelT1)
+p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
+print(paste("T0 ~ Area2.T0 + Area2.T2 R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT1),  ", p=", sprintf("%.3g",p), ")", sep=""), quote=FALSE)
+
+modelT1 <- lm(Area2.T0 ~ Area2.T0 + Area2.T2 + Sex, WordsTimeTable)
+aicmodelT1 <- AIC(modelT1)
+x <- summary(modelT1)
+p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
+print(paste("T0 ~ Area2.T0 + Area2.T2 + Sex R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT1),  ", p=", sprintf("%.3g",p), ")", sep=""), quote=FALSE)
+
+print("", quote=FALSE)
 # T1
 print("", quote=FALSE)
 print("Words", quote=FALSE)
@@ -113,11 +153,11 @@ x <- summary(modelT1)
 p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
 print(paste("T1 ~ Area2.T0 + Area2.T2 R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT1),  ", p=", sprintf("%.3g",p), ")", sep=""), quote=FALSE)
 
-modelT1 <- lm(Area2.T1 ~ Area2.T0 + Area2.T2 + Speaker, WordsTimeTable)
+modelT1 <- lm(Area2.T1 ~ Area2.T0 + Area2.T2 + Sex, WordsTimeTable)
 aicmodelT1 <- AIC(modelT1)
 x <- summary(modelT1)
 p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
-print(paste("T1 ~ Area2.T0 + Area2.T2 + Speaker R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT1),  ", p=", sprintf("%.3g",p), ")", sep=""), quote=FALSE)
+print(paste("T1 ~ Area2.T0 + Area2.T2 + Sex R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT1),  ", p=", sprintf("%.3g",p), ")", sep=""), quote=FALSE)
 
 print("", quote=FALSE)
 # T2
@@ -133,11 +173,11 @@ x <- summary(modelT2)
 p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
 print(paste("T2 ~ Area2.T1 + Area2.T0 R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT2),  ", p=", sprintf("%.3g",p), ")", sep=""), quote=FALSE)
 
-modelT2 <- lm(Area2.T2 ~ Area2.T1 + Speaker, WordsTimeTable)
+modelT2 <- lm(Area2.T2 ~ Area2.T1 + Sex, WordsTimeTable)
 aicmodelT2 <- AIC(modelT2)
 x <- summary(modelT2)
 p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
-print(paste("T2 ~ Area2.T1 + Speaker R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT2),  ", p=", sprintf("%.3g",p), ")", sep=""), quote=FALSE)
+print(paste("T2 ~ Area2.T1 + Sex R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT2),  ", p=", sprintf("%.3g",p), ")", sep=""), quote=FALSE)
 
 
 # All
@@ -151,37 +191,37 @@ x <- summary(modelT1)
 p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
 print(paste("T1 ~ Task R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT1),  ", p=", sprintf("%.3g",p), ")", sep=""), quote=FALSE)
 
-modelT1 <- lm(Area2.T1 ~ Speaker, TimeTable)
+modelT1 <- lm(Area2.T1 ~ Sex, TimeTable)
 aicmodelT1 <- AIC(modelT1)
 x <- summary(modelT1)
 p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
-print(paste("T1 ~ Speaker R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT1),  ", p=", sprintf("%.3g",p), ")", sep=""), quote=FALSE)
+print(paste("T1 ~ Sex R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT1),  ", p=", sprintf("%.3g",p), ")", sep=""), quote=FALSE)
 
-modelT1 <- lm(Area2.T1 ~ Speaker + Task, TimeTable)
+modelT1 <- lm(Area2.T1 ~ Sex + Task, TimeTable)
 aicmodelT1 <- AIC(modelT1)
 x <- summary(modelT1)
 p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
-print(paste("T1 ~ Speaker + Task R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT1),  ", p=", sprintf("%.3g",p), ")", sep=""), quote=FALSE)
+print(paste("T1 ~ Sex + Task R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT1),  ", p=", sprintf("%.3g",p), ")", sep=""), quote=FALSE)
 
 print("", quote=FALSE)
 # T2
-modelT2 <- lm(Area2.T2 ~ Speaker, TimeTable)
+modelT2 <- lm(Area2.T2 ~ Sex, TimeTable)
 aicmodelT2 <- AIC(modelT2)
 x <- summary(modelT2)
 p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
-print(paste("T2 ~ Speaker R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT2),  ", p=", sprintf("%.3g",p), ")", sep=""), quote=FALSE)
+print(paste("T2 ~ Sex R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT2),  ", p=", sprintf("%.3g",p), ")", sep=""), quote=FALSE)
 
-modelT2 <- lm(Area2.T2 ~ Speaker + Task, TimeTable)
+modelT2 <- lm(Area2.T2 ~ Sex + Task, TimeTable)
 aicmodelT2 <- AIC(modelT2)
 x <- summary(modelT2)
 p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
-print(paste("T2 ~ Speaker + Task R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT2),  ", p=", sprintf("%.3g",p), ")", sep=""), quote=FALSE)
+print(paste("T2 ~ Sex + Task R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT2),  ", p=", sprintf("%.3g",p), ")", sep=""), quote=FALSE)
 
 
 # Leave one out tests
 print("", quote=FALSE)
 print("Leave-One-Out predictions of linear models", quote=FALSE)
-speakerList <- unique(WordsTimeTable$Speaker)
+speakerList <- levels(WordsTimeTable$Speaker)
 
 diff0 <- c()
 diff1 <- c()
@@ -192,7 +232,7 @@ for(subject in speakerList){
 	
 	diff0 <- c(diff0, (testTable$Area2.T1 - mean(trainTable$Area2.T1, na.rm = TRUE)))
 	
-	model <- lm(Area2.T1 ~ Area2.T0 + Area2.T2 + Speaker, trainTable)
+	model <- lm(Area2.T1 ~ Area2.T0 + Area2.T2, trainTable)
 	predArea2T1 <- predict(model, testTable)
 	diff1 <- c(diff1, (testTable$Area2.T1 - predArea2T1))
 }
@@ -200,12 +240,12 @@ for(subject in speakerList){
 print("", quote=FALSE)
 rmse_mean <- sqrt(mean(diff0**2, na.rm = TRUE))
 mae_mean <- mean(abs(diff0), na.rm = TRUE)
-print(paste("RelAR.T1 ~ Mean", sep=""), quote=FALSE)
+print(paste("Area2.T1 ~ Mean", sep=""), quote=FALSE)
 print(paste("RMSE: ", sprintf("%.3g", rmse_mean), sep=""), quote=FALSE)
 print(paste("MAE: ", sprintf("%.3g", mae_mean), sep=""), quote=FALSE)
 
 print("", quote=FALSE)
-print(paste("Area2.T1 ~ Area2.T0 + Area2.T2 + Speaker", sep=""), quote=FALSE)
+print(paste("Area2.T1 ~ Area2.T0 + Area2.T2", sep=""), quote=FALSE)
 print(paste("RMSE: ", sprintf("%.3g", sqrt(mean(diff1**2, na.rm = TRUE))), " (", sprintf("%.3g", sqrt(mean(diff1**2, na.rm = TRUE))/rmse_mean), ")", sep=""), quote=FALSE)
 print(paste("MAE: ", sprintf("%.3g", mean(abs(diff1), na.rm = TRUE)), " (", sprintf("%.3g", mean(abs(diff1), na.rm = TRUE)/mae_mean), ")", sep=""), quote=FALSE)
 
@@ -213,7 +253,7 @@ print(paste("MAE: ", sprintf("%.3g", mean(abs(diff1), na.rm = TRUE)), " (", spri
 # Leave one out tests
 print("", quote=FALSE)
 print("Leave-One-Out predictions of linear models", quote=FALSE)
-speakerList <- unique(WordsTimeTable$Speaker)
+speakerList <- levels(WordsTimeTable$Speaker)
 
 diff0 <- c()
 diff1 <- c()
@@ -224,7 +264,7 @@ for(subject in speakerList){
 	
 	diff0 <- c(diff0, (testTable$Area2.T2 - mean(trainTable$Area2.T2, na.rm = TRUE)))
 	
-	model <- lm(Area2.T2 ~ Area2.T0 + Speaker, trainTable)
+	model <- lm(Area2.T2 ~ Area2.T0 + Sex, trainTable)
 	predArea2T2 <- predict(model, testTable)
 	diff1 <- c(diff1, (testTable$Area2.T2 - predArea2T2))
 }
@@ -232,11 +272,11 @@ for(subject in speakerList){
 print("", quote=FALSE)
 rmse_mean <- sqrt(mean(diff0**2, na.rm = TRUE))
 mae_mean <- mean(abs(diff0), na.rm = TRUE)
-print(paste("RelAR.T2 ~ Mean", sep=""), quote=FALSE)
+print(paste("Area2.T2 ~ Mean", sep=""), quote=FALSE)
 print(paste("RMSE: ", sprintf("%.3g", rmse_mean), sep=""), quote=FALSE)
 print(paste("MAE: ", sprintf("%.3g", mae_mean), sep=""), quote=FALSE)
 
 print("", quote=FALSE)
-print(paste("Area2.T2 ~ Area2.T0 + Speaker", sep=""), quote=FALSE)
+print(paste("Area2.T2 ~ Area2.T0 + Sex", sep=""), quote=FALSE)
 print(paste("RMSE: ", sprintf("%.3g", sqrt(mean(diff1**2, na.rm = TRUE))), " (", sprintf("%.3g", sqrt(mean(diff1**2, na.rm = TRUE))/rmse_mean), ")", sep=""), quote=FALSE)
 print(paste("MAE: ", sprintf("%.3g", mean(abs(diff1), na.rm = TRUE)), " (", sprintf("%.3g", mean(abs(diff1), na.rm = TRUE)/mae_mean), ")", sep=""), quote=FALSE)

@@ -246,7 +246,7 @@ print(paste("MAE: ", sprintf("%.3g", mae_mean), sep=""), quote=FALSE)
 
 print("", quote=FALSE)
 print(paste("Area2.T1 ~ Area2.T0 + Area2.T2", sep=""), quote=FALSE)
-print(paste("RMSE: ", sprintf("%.3g", sqrt(mean(diff1**2, na.rm = TRUE))), " (", sprintf("%.3g", sqrt(mean(diff1**2, na.rm = TRUE))/rmse_mean), ")", sep=""), quote=FALSE)
+print(paste("RMSE: ", sprintf("%.3g", sqrt(mean(diff1**2, na.rm = TRUE))), " (r^2=", sprintf("%.3g", (1-mean(diff1**2, na.rm = TRUE)/rmse_mean**2)), ")", sep=""), quote=FALSE)
 print(paste("MAE: ", sprintf("%.3g", mean(abs(diff1), na.rm = TRUE)), " (", sprintf("%.3g", mean(abs(diff1), na.rm = TRUE)/mae_mean), ")", sep=""), quote=FALSE)
 
 
@@ -278,5 +278,5 @@ print(paste("MAE: ", sprintf("%.3g", mae_mean), sep=""), quote=FALSE)
 
 print("", quote=FALSE)
 print(paste("Area2.T2 ~ Area2.T0 + Sex", sep=""), quote=FALSE)
-print(paste("RMSE: ", sprintf("%.3g", sqrt(mean(diff1**2, na.rm = TRUE))), " (", sprintf("%.3g", sqrt(mean(diff1**2, na.rm = TRUE))/rmse_mean), ")", sep=""), quote=FALSE)
+print(paste("RMSE: ", sprintf("%.3g", sqrt(mean(diff1**2, na.rm = TRUE))), " (r^2=", sprintf("%.3g", (1-mean(diff1**2, na.rm = TRUE)/rmse_mean**2)), ")", sep=""), quote=FALSE)
 print(paste("MAE: ", sprintf("%.3g", mean(abs(diff1), na.rm = TRUE)), " (", sprintf("%.3g", mean(abs(diff1), na.rm = TRUE)/mae_mean), ")", sep=""), quote=FALSE)

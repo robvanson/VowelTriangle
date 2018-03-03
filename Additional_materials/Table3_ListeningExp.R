@@ -205,7 +205,7 @@ print(paste("MAE: ", sprintf("%.3g", mae_mean), sep=""), quote=FALSE)
 
 print("", quote=FALSE)
 print(paste("NormRating.T0 ~ u.dist.T0 + a.dist.T0 + Sex + N.T0", sep=""), quote=FALSE)
-print(paste("RMSE: ", sprintf("%.3g", sqrt(mean(diff1**2, na.rm = TRUE))), " (", sprintf("%.3g", sqrt(mean(diff1**2, na.rm = TRUE))/rmse_mean), ")", sep=""), quote=FALSE)
+print(paste("RMSE: ", sprintf("%.3g", sqrt(mean(diff1**2, na.rm = TRUE))), " (r^2=", sprintf("%.3g", (1-mean(diff1**2, na.rm = TRUE)/rmse_mean**2)), ")", sep=""), quote=FALSE)
 print(paste("MAE: ", sprintf("%.3g", mean(abs(diff1), na.rm = TRUE)), " (", sprintf("%.3g", mean(abs(diff1), na.rm = TRUE)/mae_mean), ")", sep=""), quote=FALSE)
 
 
@@ -236,12 +236,12 @@ print(paste("MAE: ", sprintf("%.3g", mae_mean), sep=""), quote=FALSE)
 
 print("", quote=FALSE)
 print(paste("NormRating.T1 ~ NormRating.T0 + i.dist.T1 + a.dist.T1 + i.dist.T0", sep=""), quote=FALSE)
-print(paste("RMSE: ", sprintf("%.3g", sqrt(mean(diff1**2, na.rm = TRUE))), " (", sprintf("%.3g", sqrt(mean(diff1**2, na.rm = TRUE))/rmse_mean), ")", sep=""), quote=FALSE)
+print(paste("RMSE: ", sprintf("%.3g", sqrt(mean(diff1**2, na.rm = TRUE))), " (r^2=", sprintf("%.3g", (1-mean(diff1**2, na.rm = TRUE)/rmse_mean**2)), ")", sep=""), quote=FALSE)
 print(paste("MAE: ", sprintf("%.3g", mean(abs(diff1), na.rm = TRUE)), " (", sprintf("%.3g", mean(abs(diff1), na.rm = TRUE)/mae_mean), ")", sep=""), quote=FALSE)
 
 print("", quote=FALSE)
 print(paste("NormRating.T1 ~ NormRating.T0 + i.dist.T1 * a.dist.T1 * u.dist.T1 + i.dist.T0", sep=""), quote=FALSE)
-print(paste("RMSE: ", sprintf("%.3g", sqrt(mean(diff2**2, na.rm = TRUE))), " (", sprintf("%.3g", sqrt(mean(diff2**2, na.rm = TRUE))/rmse_mean), ")", sep=""), quote=FALSE)
+print(paste("RMSE: ", sprintf("%.3g", sqrt(mean(diff2**2, na.rm = TRUE))), " (r^2=", sprintf("%.3g", (1-mean(diff2**2, na.rm = TRUE)/rmse_mean**2)), ")", sep=""), quote=FALSE)
 print(paste("MAE: ", sprintf("%.3g", mean(abs(diff2), na.rm = TRUE)), " (", sprintf("%.3g", mean(abs(diff2), na.rm = TRUE)/mae_mean), ")", sep=""), quote=FALSE)
 
 
@@ -277,16 +277,16 @@ print(paste("MAE: ", sprintf("%.3g", mae_mean), sep=""), quote=FALSE)
 
 print("", quote=FALSE)
 print(paste("NormRating.T2 ~ NormRating.T1", sep=""), quote=FALSE)
-print(paste("RMSE: ", sprintf("%.3g", sqrt(mean(diff1**2, na.rm = TRUE))), " (", sprintf("%.3g", sqrt(mean(diff1**2, na.rm = TRUE))/rmse_mean), ")", sep=""), quote=FALSE)
+print(paste("RMSE: ", sprintf("%.3g", sqrt(mean(diff1**2, na.rm = TRUE))), " (r^2=", sprintf("%.3g", (1-mean(diff1**2, na.rm = TRUE)/rmse_mean**2)), ")", sep=""), quote=FALSE)
 print(paste("MAE: ", sprintf("%.3g", mean(abs(diff1), na.rm = TRUE)), " (", sprintf("%.3g", mean(abs(diff1), na.rm = TRUE)/mae_mean), ")", sep=""), quote=FALSE)
 
 print("", quote=FALSE)
 print(paste("NormRating.T2 ~ NormRating.T1 + a.dist.T2 + i.dist.T2 + u.dist.T2", sep=""), quote=FALSE)
-print(paste("RMSE: ", sprintf("%.3g", sqrt(mean(diff2**2, na.rm = TRUE))), " (", sprintf("%.3g", sqrt(mean(diff2**2, na.rm = TRUE))/rmse_mean), ")", sep=""), quote=FALSE)
+print(paste("RMSE: ", sprintf("%.3g", sqrt(mean(diff2**2, na.rm = TRUE))), " (r^2=", sprintf("%.3g", (1-mean(diff2**2, na.rm = TRUE)/rmse_mean**2)), ")", sep=""), quote=FALSE)
 print(paste("MAE: ", sprintf("%.3g", mean(abs(diff2), na.rm = TRUE)), " (", sprintf("%.3g", mean(abs(diff2), na.rm = TRUE)/mae_mean), ")", sep=""), quote=FALSE)
 
 print("", quote=FALSE)
 print(paste("NormRating.T2 ~ NormRating.T0 + i.dist.T1 * a.dist.T1 * u.dist.T1 + i.dist.T0", sep=""), quote=FALSE)
-print(paste("RMSE: ", sprintf("%.3g", sqrt(mean(diff3**2, na.rm = TRUE))), " (", sprintf("%.3g", sqrt(mean(diff3**2, na.rm = TRUE))/rmse_mean), ")", sep=""), quote=FALSE)
+print(paste("RMSE: ", sprintf("%.3g", sqrt(mean(diff3**2, na.rm = TRUE))), " (r^2=", sprintf("%.3g", (1-mean(diff3**2, na.rm = TRUE)/rmse_mean**2)), ")", sep=""), quote=FALSE)
 print(paste("MAE: ", sprintf("%.3g", mean(abs(diff3), na.rm = TRUE)), " (", sprintf("%.3g", mean(abs(diff3), na.rm = TRUE)/mae_mean), ")", sep=""), quote=FALSE)
 

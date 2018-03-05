@@ -7,7 +7,7 @@
 library(ggplot2)
 # A4 size in Inches
 OutputWidth <-  11.692;
-OutputHeight <- 8.267;
+OutputHeight <- 7.5;
 #
 filename <- "Figure2.pdf"
 
@@ -16,8 +16,8 @@ ci <- function(x) {t <- t.test(x); (t$conf.int[[2]]- t$conf.int[[1]])/2}
 
 VowelTable <- read.table("IFA_corpus_data.tsv", header = TRUE, sep = "\t", na.strings = "-");
 VowelTable$VowelDensity <- VowelTable$N/VowelTable$Duration
-AverageVowels <- aggregate(cbind(Area1, Area2, N, i.dist, u.dist, a.dist, Duration, VowelDensity)~Speaker+Sex+Style+Text, data=VowelTable, mean);
-SdevVowels <- aggregate(cbind(Area1, Area2, N, i.dist, u.dist, a.dist, Duration, VowelDensity)~Speaker+Sex+Style+Text, data=VowelTable, sd);
+AverageVowels <- aggregate(cbind(Area1, Area2, N, i.dist, u.dist, a.dist, Duration, VowelDensity)~Speaker+Sex+Style+Session, data=VowelTable, mean);
+SdevVowels <- aggregate(cbind(Area1, Area2, N, i.dist, u.dist, a.dist, Duration, VowelDensity)~Speaker+Sex+Style+Session, data=VowelTable, sd);
 
 AverageSpeakerVowels <- aggregate(cbind(Area1, Area2, N, i.dist, u.dist, a.dist, Duration, VowelDensity)~Speaker+Sex+Style, data=VowelTable, mean);
 SdevSpeakerVowels <- aggregate(cbind(Area1, Area2, N, i.dist, u.dist, a.dist, Duration, VowelDensity)~Speaker+Sex+Style, data=VowelTable, sd);
@@ -44,7 +44,7 @@ i <- 1
 
 # Draw lines with breaks
 # Average
-par(mai=c(1.02,1.02,0.82,0.42))
+par(mai=c(1.02,1.02,0.0,0.42))
 plot(as.numeric(AverageAllVowels$Style), AverageAllVowels$Area2, type="b", col="black", pch=21, ylab="Vowel space area (2SD)", cex.lab=2.5, xlab="Speaking style", ylim=c(51,145), bg="black", lty=2, axes=FALSE, frame.plot=TRUE)
 
 Axis(side=1, labels=c("Informal", "Retold", "Text", "Sentences", "Words", "Syllables"), at=1:length(c("Inf", "Ret", "Txt", "Sent", "Words", "Syll")), cex.axis=2)
@@ -68,7 +68,8 @@ for(i in 1:length(SpeakerList)){
 	ySpeaker <- AverageSpeakerVowels[AverageSpeakerVowels$Speaker==SpeakerList[[i]],]$Area2
 	ciSpeaker <- CintSpeakerVowels[AverageSpeakerVowels$Speaker==SpeakerList[[i]],]$Area2
 	
-	lines(AverageSpeakerVowels[AverageSpeakerVowels$Speaker==SpeakerList[[i]],]$Style, AverageSpeakerVowels[AverageSpeakerVowels$Speaker==SpeakerList[[i]],]$Area2, type="p", col=colorlist[[i]], pch=SpeakerList[[i]], cex=1.5)
+	reAdj <- runif(1, 0, 1)
+	lines(AverageSpeakerVowels[AverageSpeakerVowels$Speaker==SpeakerList[[i]],]$Style, AverageSpeakerVowels[AverageSpeakerVowels$Speaker==SpeakerList[[i]],]$Area2, type="p", col=colorlist[[i]], pch=SpeakerList[[i]], cex=2)
 
 	if(AverageSpeakerVowels[AverageSpeakerVowels$Speaker==SpeakerList[[i]]& AverageSpeakerVowels$Style=="Y",]$Sex == "F"){
 		sexlabel = '\\VE'
@@ -82,5 +83,5 @@ for(i in 1:length(SpeakerList)){
 	segments(xSpeaker-epsilon, ySpeaker+ciSpeaker, xSpeaker+epsilon, ySpeaker+ciSpeaker)
 }
 
-legend("topleft", c("Average over all speakers", "95% confidence intervals", "Female: E, G, I, L, N", "Male: D, H, K, O, R"), pch=c(21, 124, 26, 26), pt.bg=c("black"), bty="n", cex=1.5, pt.cex=1.5)
+legend("topleft", c("Average over all speakers", "95% confidence intervals", "Female: E, G, I, L, N", "Male: D, H, K, O, R"), pch=c(21, 124, 26, 26), pt.bg=c("black"), bty="n", cex=1.5, pt.cex=1.5, lty=c(2, 0, 0, 0))
 dev.off(dev.cur())

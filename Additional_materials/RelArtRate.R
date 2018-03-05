@@ -229,7 +229,7 @@ print(paste("MAE: ", sprintf("%.3g", mae_mean), sep=""), quote=FALSE)
 
 print("", quote=FALSE)
 print(paste("RelAR.T1 ~ a.dist.T0*i.dist.T0*u.dist.T0*Area2.T0", sep=""), quote=FALSE)
-print(paste("RMSE: ", sprintf("%.3g", sqrt(mean(diff1**2, na.rm = TRUE))), " (", sprintf("%.3g", sqrt(mean(diff1**2, na.rm = TRUE))/rmse_mean), ")", sep=""), quote=FALSE)
+print(paste("RMSE: ", sprintf("%.3g", sqrt(mean(diff1**2, na.rm = TRUE))), " (r^2=", sprintf("%.3g", (1-mean(diff1**2, na.rm = TRUE)/rmse_mean**2)), ")", sep=""), quote=FALSE)
 print(paste("MAE: ", sprintf("%.3g", mean(abs(diff1), na.rm = TRUE)), " (", sprintf("%.3g", mean(abs(diff1), na.rm = TRUE)/mae_mean), ")", sep=""), quote=FALSE)
 
 
@@ -261,7 +261,7 @@ print(paste("MAE: ", sprintf("%.3g", mae_mean), sep=""), quote=FALSE)
 
 print("", quote=FALSE)
 print(paste("RelAR.T2 ~ a.dist.T0*i.dist.T0*u.dist.T0*Area2.T0", sep=""), quote=FALSE)
-print(paste("RMSE: ", sprintf("%.3g", sqrt(mean(diff1**2, na.rm = TRUE))), " (", sprintf("%.3g", sqrt(mean(diff1**2, na.rm = TRUE))/rmse_mean), ")", sep=""), quote=FALSE)
+print(paste("RMSE: ", sprintf("%.3g", sqrt(mean(diff1**2, na.rm = TRUE))), " (r^2=", sprintf("%.3g", (1-mean(diff1**2, na.rm = TRUE)/rmse_mean**2)), ")", sep=""), quote=FALSE)
 print(paste("MAE: ", sprintf("%.3g", mean(abs(diff1), na.rm = TRUE)), " (", sprintf("%.3g", mean(abs(diff1), na.rm = TRUE)/mae_mean), ")", sep=""), quote=FALSE)
 
 
@@ -293,6 +293,6 @@ print(paste("MAE: ", sprintf("%.3g", mae_mean), sep=""), quote=FALSE)
 
 print("", quote=FALSE)
 print(paste("art.rate.T2 ~ art.rate.T0 + a.dist.T0*i.dist.T0*u.dist.T0*Area2.T0", sep=""), quote=FALSE)
-print(paste("RMSE: ", sprintf("%.3g", sqrt(mean(diff1**2, na.rm = TRUE))), " (", sprintf("%.3g", sqrt(mean(diff1**2, na.rm = TRUE))/rmse_mean), ")", sep=""), quote=FALSE)
+print(paste("RMSE: ", sprintf("%.3g", sqrt(mean(diff1**2, na.rm = TRUE))), " (r^2=", sprintf("%.3g", (1-mean(diff1**2, na.rm = TRUE)/rmse_mean**2)), ")", sep=""), quote=FALSE)
 print(paste("MAE: ", sprintf("%.3g", mean(abs(diff1), na.rm = TRUE)), " (", sprintf("%.3g", mean(abs(diff1), na.rm = TRUE)/mae_mean), ")", sep=""), quote=FALSE)
 

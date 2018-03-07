@@ -72,10 +72,20 @@ p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
 print(paste("T2 ~ Area2.T1 + Sex: R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT2),  ", p=", sprintf("%.3g",p), ")", sep=""), quote=FALSE)
 
 # Dapre
-# T1
+# T0
 print("", quote=FALSE)
 print("Dapre", quote=FALSE)
 DapreTimeTable <- subset(TimeTable, subset=Task=="Dapre")
+
+modelT0 <- lm(Area2.T0 ~ Sex, DapreTimeTable)
+aicmodelT0 <- AIC(modelT0)
+x <- summary(modelT0)
+p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
+print(paste("Area.T0 ~ Sex R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT1),  ", p=", sprintf("%.3g",p), ")", sep=""), quote=FALSE)
+
+
+# T1
+print("", quote=FALSE)
 modelT1 <- lm(Area2.T1 ~ Area2.T0, DapreTimeTable)
 aicmodelT1 <- AIC(modelT1)
 x <- summary(modelT1)
@@ -206,8 +216,41 @@ print(paste("T2 ~ Sex + Task R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=",
 
 
 # Leave one out tests
+# T0
 print("", quote=FALSE)
-print("Leave-One-Out predictions of linear models", quote=FALSE)
+print("Leave-One-Out predictions of linear models T0", quote=FALSE)
+speakerList <- levels(WordsTimeTable$Speaker)
+
+diff0 <- c()
+diff1 <- c()
+diff2 <- c()
+for(subject in speakerList){
+	trainTable <- subset(WordsTimeTable, subset=!(Speaker == subject))
+	testTable <- subset(WordsTimeTable, subset=Speaker == subject)
+	
+	diff0 <- c(diff0, (testTable$Area2.T0 - mean(trainTable$Area2.T0, na.rm = TRUE)))
+	
+	model <- lm(Area2.T0 ~ Sex, trainTable)
+	predArea2T0 <- predict(model, testTable)
+	diff1 <- c(diff1, (testTable$Area2.T0 - predArea2T0))
+}
+
+print("", quote=FALSE)
+rmse_mean <- sqrt(mean(diff0**2, na.rm = TRUE))
+mae_mean <- mean(abs(diff0), na.rm = TRUE)
+print(paste("Area2.T0 ~ Mean", sep=""), quote=FALSE)
+print(paste("RMSE: ", sprintf("%.3g", rmse_mean), sep=""), quote=FALSE)
+print(paste("MAE: ", sprintf("%.3g", mae_mean), sep=""), quote=FALSE)
+
+print("", quote=FALSE)
+print(paste("Area2.T0 ~ Sex", sep=""), quote=FALSE)
+print(paste("RMSE: ", sprintf("%.3g", sqrt(mean(diff1**2, na.rm = TRUE))), " (r^2=", sprintf("%.3g", (1-mean(diff1**2, na.rm = TRUE)/rmse_mean**2)), ")", sep=""), quote=FALSE)
+print(paste("MAE: ", sprintf("%.3g", mean(abs(diff1), na.rm = TRUE)), " (", sprintf("%.3g", mean(abs(diff1), na.rm = TRUE)/mae_mean), ")", sep=""), quote=FALSE)
+
+
+# T1
+print("", quote=FALSE)
+print("Leave-One-Out predictions of linear models T1", quote=FALSE)
 speakerList <- levels(WordsTimeTable$Speaker)
 
 diff0 <- c()
@@ -238,8 +281,9 @@ print(paste("MAE: ", sprintf("%.3g", mean(abs(diff1), na.rm = TRUE)), " (", spri
 
 
 # Leave one out tests
+# T2
 print("", quote=FALSE)
-print("Leave-One-Out predictions of linear models", quote=FALSE)
+print("Leave-One-Out predictions of linear models T2", quote=FALSE)
 speakerList <- levels(WordsTimeTable$Speaker)
 
 diff0 <- c()

@@ -36,7 +36,7 @@ VowelTable$Style <- factor(VowelTable$Style, levels=c("I", "R", "T", "S", "W", "
 VowelTable$StyleNum <- factor(VowelTable$Style, levels=c("I", "R", "T", "S", "W", "Y"), ordered=T);
 
 # Plot figure
-pdf(filename, width=OutputWidth, height=OutputHeight);
+pdf(filename, width=OutputWidth, height=OutputHeight, useDingbats=FALSE);
 
 SpeakerList <- c("N","I","G","L","E","R","K","H", "D", "O")
 colorlist <- c("darkgreen", "darkred", "darkblue", "deeppink4", "green", "blue", "red", "deeppink", "gold4", "darkolivegreen")

@@ -265,3 +265,99 @@ x <- summary(modelNormRating)
 p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
 print(paste("NormRating.T2 ~ NormRating.T1 + NormScore.T1 R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelNormRating), ", p=", sprintf("%.3g", p), ")", sep=""), quote=FALSE)
 
+
+print("", quote=FALSE)
+# Leave one out tests
+# T0
+print("", quote=FALSE)
+print("Leave-One-Out predictions of linear models T0", quote=FALSE)
+speakerList <- levels(TimeTable$Speaker)
+
+diff0 <- c()
+diff1 <- c()
+diff2 <- c()
+for(subject in speakerList){
+	trainTable <- subset(TimeTable, subset=!(Speaker == subject))
+	testTable <- subset(TimeTable, subset=Speaker == subject)
+	
+	diff0 <- c(diff0, (testTable$NormScore.T0 - mean(trainTable$NormScore.T0, na.rm = TRUE)))
+	
+	model <- lm(NormScore.T0 ~ a.dist.T0*u.dist.T0*Area2.T0, trainTable)
+	predNormScoreT0 <- predict(model, testTable)
+	diff1 <- c(diff1, (testTable$NormScore.T0 - predNormScoreT0))
+}
+
+print("", quote=FALSE)
+rmse_mean <- sqrt(mean(diff0**2, na.rm = TRUE))
+mae_mean <- mean(abs(diff0), na.rm = TRUE)
+print(paste("NormScore.T0 ~ Mean", sep=""), quote=FALSE)
+print(paste("RMSE: ", sprintf("%.3g", rmse_mean), sep=""), quote=FALSE)
+print(paste("MAE: ", sprintf("%.3g", mae_mean), sep=""), quote=FALSE)
+
+print("", quote=FALSE)
+print(paste("NormScore.T0 ~ a.dist.T0*u.dist.T0*Area.T0", sep=""), quote=FALSE)
+print(paste("RMSE: ", sprintf("%.3g", sqrt(mean(diff1**2, na.rm = TRUE))), " (r^2=", sprintf("%.3g", (1-mean(diff1**2, na.rm = TRUE)/rmse_mean**2)), ")", sep=""), quote=FALSE)
+print(paste("MAE: ", sprintf("%.3g", mean(abs(diff1), na.rm = TRUE)), " (", sprintf("%.3g", mean(abs(diff1), na.rm = TRUE)/mae_mean), ")", sep=""), quote=FALSE)
+
+# T1
+print("", quote=FALSE)
+print("Leave-One-Out predictions of linear models T1", quote=FALSE)
+speakerList <- levels(TimeTable$Speaker)
+
+diff0 <- c()
+diff1 <- c()
+diff2 <- c()
+for(subject in speakerList){
+	trainTable <- subset(TimeTable, subset=!(Speaker == subject))
+	testTable <- subset(TimeTable, subset=Speaker == subject)
+	
+	diff0 <- c(diff0, (testTable$NormScore.T1 - mean(trainTable$NormScore.T1, na.rm = TRUE)))
+	
+	model <- lm(NormScore.T1 ~ a.dist.T1*u.dist.T1*Area2.T1*i.dist.T1, trainTable)
+	predNormScoreT1 <- predict(model, testTable)
+	diff1 <- c(diff1, (testTable$NormScore.T1 - predNormScoreT1))
+}
+
+print("", quote=FALSE)
+rmse_mean <- sqrt(mean(diff0**2, na.rm = TRUE))
+mae_mean <- mean(abs(diff0), na.rm = TRUE)
+print(paste("NormScore.T1 ~ Mean", sep=""), quote=FALSE)
+print(paste("RMSE: ", sprintf("%.3g", rmse_mean), sep=""), quote=FALSE)
+print(paste("MAE: ", sprintf("%.3g", mae_mean), sep=""), quote=FALSE)
+
+print("", quote=FALSE)
+print(paste("NormScore.T1 ~ a.dist.T1*u.dist.T1*Area2.T1*i.dist.T1", sep=""), quote=FALSE)
+print(paste("RMSE: ", sprintf("%.3g", sqrt(mean(diff1**2, na.rm = TRUE))), " (r^2=", sprintf("%.3g", (1-mean(diff1**2, na.rm = TRUE)/rmse_mean**2)), ")", sep=""), quote=FALSE)
+print(paste("MAE: ", sprintf("%.3g", mean(abs(diff1), na.rm = TRUE)), " (", sprintf("%.3g", mean(abs(diff1), na.rm = TRUE)/mae_mean), ")", sep=""), quote=FALSE)
+
+
+# T2
+print("", quote=FALSE)
+print("Leave-One-Out predictions of linear models T2", quote=FALSE)
+speakerList <- levels(TimeTable$Speaker)
+
+diff0 <- c()
+diff1 <- c()
+diff2 <- c()
+for(subject in speakerList){
+	trainTable <- subset(TimeTable, subset=!(Speaker == subject))
+	testTable <- subset(TimeTable, subset=Speaker == subject)
+	
+	diff0 <- c(diff0, (testTable$NormScore.T2 - mean(trainTable$NormScore.T2, na.rm = TRUE)))
+	
+	model <- lm(NormScore.T2 ~ a.dist.T2*u.dist.T2*Area2.T2, trainTable)
+	predNormScoreT2 <- predict(model, testTable)
+	diff1 <- c(diff1, (testTable$NormScore.T2 - predNormScoreT2))
+}
+
+print("", quote=FALSE)
+rmse_mean <- sqrt(mean(diff0**2, na.rm = TRUE))
+mae_mean <- mean(abs(diff0), na.rm = TRUE)
+print(paste("NormScore.T2 ~ Mean", sep=""), quote=FALSE)
+print(paste("RMSE: ", sprintf("%.3g", rmse_mean), sep=""), quote=FALSE)
+print(paste("MAE: ", sprintf("%.3g", mae_mean), sep=""), quote=FALSE)
+
+print("", quote=FALSE)
+print(paste("NormScore.T2 ~ a.dist.T2*u.dist.T2*Area2.T2", sep=""), quote=FALSE)
+print(paste("RMSE: ", sprintf("%.3g", sqrt(mean(diff1**2, na.rm = TRUE))), " (r^2=", sprintf("%.3g", (1-mean(diff1**2, na.rm = TRUE)/rmse_mean**2)), ")", sep=""), quote=FALSE)
+print(paste("MAE: ", sprintf("%.3g", mean(abs(diff1), na.rm = TRUE)), " (", sprintf("%.3g", mean(abs(diff1), na.rm = TRUE)/mae_mean), ")", sep=""), quote=FALSE)

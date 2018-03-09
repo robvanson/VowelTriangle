@@ -86,7 +86,7 @@ for(i in 1:length(SpeakerList)){
 legend("topleft", c("Average over all speakers", "95% confidence intervals", "Female: E, G, I, L, N", "Male: D, H, K, O, R"), pch=c(21, 124, 26, 26), pt.bg=c("black"), bty="n", cex=1.5, pt.cex=1.5, lty=c(2, 0, 0, 0))
 
 # Add Average number of vowels
-mtext("N:", side=1, cex=1.5, , line=-1.05, at=0.65)
+mtext("#:", side=1, cex=1.5, , line=-1.05, at=0.65)
 
 
 dev.off(dev.cur())

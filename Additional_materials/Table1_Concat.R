@@ -15,7 +15,7 @@ VowelTable$Style <- factor(VowelTable$Style, levels=c("I", "R", "T", "S", "W", "
 # Linear models
 print("", quote=FALSE)
 print("Report Concat", quote=FALSE)
-print(paste("# Items: ", length(VowelTable$Area2)), quote=FALSE)
+print(paste("# Concatenated: ", length(VowelTable$Area2), ", Mean (sd): ", sprintf("%.3g", mean(VowelTable$Area2, na.rm = TRUE)), " (", sprintf("%.3g", sd(VowelTable$Area2, na.rm = TRUE)), ")", sep=""), quote=FALSE)
 
 print("", quote=FALSE)
 print("R^2 adjusted", quote=FALSE)

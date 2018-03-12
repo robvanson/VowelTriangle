@@ -8,6 +8,8 @@ library("lmtest")
 
 TaskTable <- read.table("Patient_data.tsv", header = TRUE, sep = "\t", na.strings = "-");
 
+print(paste("# N: ", length(TaskTable$Area2), ", Mean (sd): ", sprintf("%.3g", mean(TaskTable$Area2, na.rm = TRUE)), " (", sprintf("%.3g", sd(TaskTable$Area2, na.rm = TRUE)), ")", sep=""), quote=FALSE)
+
 # Convert to T0, T1, T2 table
 T0Table <- subset(TaskTable, subset = T == 0, select = c("Speaker", "T", "Task", "Sex", "N", "Area2", "i.dist", "u.dist", "a.dist"))
 T1Table <- subset(TaskTable, subset = T == 1, select = c("Speaker", "T", "Task", "Sex", "N", "Area2", "i.dist", "u.dist", "a.dist"))

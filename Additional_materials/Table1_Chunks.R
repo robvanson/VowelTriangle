@@ -11,11 +11,10 @@ ci <- function(x) {t <- t.test(x); (t$conf.int[[2]]- t$conf.int[[1]])/2}
 VowelTable <- read.table("IFA_corpus_data.tsv", header = TRUE, sep = "\t", na.strings = "-");
 VowelTable$Style <- factor(VowelTable$Style, levels=c("I", "R", "T", "S", "W", "Y"), ordered=T);
 
-
 # Linear models
 print("", quote=FALSE)
 print("Report Chunks", quote=FALSE)
-print(paste("# Chunks: ", length(VowelTable$Area2)), quote=FALSE)
+print(paste("# Chunks: ", length(VowelTable$Area2), ", Mean (sd): ", sprintf("%.3g", mean(VowelTable$Area2, na.rm = TRUE)), " (", sprintf("%.3g", sd(VowelTable$Area2, na.rm = TRUE)), ")", sep=""), quote=FALSE)
 
 print("", quote=FALSE)
 print("R^2 adjusted", quote=FALSE)

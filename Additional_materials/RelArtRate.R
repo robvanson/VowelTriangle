@@ -296,3 +296,97 @@ print(paste("art.rate.T2 ~ art.rate.T0 + a.dist.T0*i.dist.T0*u.dist.T0*Area2.T0"
 print(paste("RMSE: ", sprintf("%.3g", sqrt(mean(diff1**2, na.rm = TRUE))), " (r^2=", sprintf("%.3g", (1-mean(diff1**2, na.rm = TRUE)/rmse_mean**2)), ")", sep=""), quote=FALSE)
 print(paste("MAE: ", sprintf("%.3g", mean(abs(diff1), na.rm = TRUE)), " (", sprintf("%.3g", mean(abs(diff1), na.rm = TRUE)/mae_mean), ")", sep=""), quote=FALSE)
 
+
+
+# Add Listening Experiment
+LexpTableIndividual <- read.table("ListeningExp.tsv", header = TRUE, sep = "\t", na.strings = "-");
+LexpTableIndividual$T <- factor(LexpTableIndividual$T, ordered=TRUE)
+LexpTableIndividual$Speaker <- factor(LexpTableIndividual$Speaker, ordered=FALSE)
+
+VowelTable <- read.table("Patient_data.tsv", header = TRUE, sep = "\t", na.strings = "-");
+VowelTable$T <- factor(VowelTable$T, ordered=TRUE)
+VowelTable$Speaker <- factor(VowelTable$Speaker, ordered=TRUE)
+
+# Normalize scores
+LexpTableIndividual$NormRating <- LexpTableIndividual$Rating
+for(eval in unique(LexpTableIndividual$Evaluator)){
+	LexpTableIndividual[LexpTableIndividual$Evaluator==eval,]$NormRating <- as.vector(scale(LexpTableIndividual[LexpTableIndividual$Evaluator==eval,]$Rating))
+}
+
+LexpTable <- aggregate(cbind(Rating, NormRating)~Speaker+T+Sex, data=LexpTableIndividual, mean);
+
+VowelTable <- merge(subset(TaskTable, subset=Task=="Dapre"), LexpTable, by=c("Speaker", "T", "Sex"), sort = TRUE, all = TRUE)
+
+# Convert to T0, T1, T2 table
+ListT0Table <- subset(VowelTable, subset = T == 0, select = c("Speaker", "T", "Task", "Sex", "N", "Area2", "i.dist", "u.dist", "a.dist", "Rating", "NormRating", "art.rate"))
+ListT1Table <- subset(VowelTable, subset = T == 1, select = c("Speaker", "T", "Task", "Sex", "N", "Area2", "i.dist", "u.dist", "a.dist", "Rating", "NormRating", "art.rate"))
+ListT2Table <- subset(VowelTable, subset = T == 2, select = c("Speaker", "T", "Task", "Sex", "N", "Area2", "i.dist", "u.dist", "a.dist", "Rating", "NormRating", "art.rate"))
+names(ListT2Table) <- paste(names(ListT2Table),".T2", sep="")
+names(ListT2Table)[1] <- "Speaker"
+names(ListT2Table)[2] <- "T"
+names(ListT2Table)[3] <- "Task"
+names(ListT2Table)[4] <- "Sex"
+
+ListTimeTable <- merge(ListT0Table, ListT1Table, by = c("Speaker", "Task"), suffixes = c(".T0", ".T1"), sort = TRUE, all = TRUE)
+ListTimeTable <- merge(ListTimeTable, ListT2Table, by = c("Speaker", "Task"), sort = TRUE, all = TRUE)
+
+selectionList <- names(ListTimeTable)[grep("^T[.]", names(ListTimeTable), invert = TRUE)]
+selectionList <- selectionList[grep("^Sex[.]T[12]", selectionList, invert = TRUE)]
+selectionList <- selectionList[grep("^Task[.]vowels[.]T[12]", selectionList, invert = TRUE)]
+ListTimeTable <- subset(ListTimeTable, select = c(selectionList))
+names(ListTimeTable)[1] <- "Speaker"
+names(ListTimeTable)[2] <- "Task"
+names(ListTimeTable)[3] <- "Sex"
+
+ListTimeTable$RelAR.T1 <- ListTimeTable$art.rate.T1 / ListTimeTable$art.rate.T0
+ListTimeTable$RelAR.T2 <- ListTimeTable$art.rate.T2 / ListTimeTable$art.rate.T0
+ListTimeTable$RelAR.T21 <- ListTimeTable$art.rate.T2 / ListTimeTable$art.rate.T1
+
+ListTimeTable$RelNRT10 <- ListTimeTable$NormRating.T1 / ListTimeTable$NormRating.T0
+ListTimeTable$RelNRT20 <- ListTimeTable$NormRating.T2 / ListTimeTable$NormRating.T0
+ListTimeTable$RelNRT12 <- ListTimeTable$NormRating.T2 / ListTimeTable$NormRating.T1
+
+ListTimeTable$Relu.distT10 <- ListTimeTable$u.dist.T1 / ListTimeTable$u.dist.T0
+ListTimeTable$Relu.distT20 <- ListTimeTable$u.dist.T2 / ListTimeTable$u.dist.T0
+ListTimeTable$Relu.distT12 <- ListTimeTable$u.dist.T2 / ListTimeTable$u.dist.T1
+
+
+print("", quote=FALSE)
+modelT <- lm(NormRating.T0 ~ Area2.T0, ListTimeTable)
+aicmodelT <- AIC(modelT)
+x <- summary(modelT)
+p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
+print(paste("NormRating.T0 ~ Area2.T0 R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT), ", p=", sprintf("%.3g", p), ")", sep=""), quote=FALSE)
+
+modelT <- lm(NormRating.T0 ~ Area2.T0 + art.rate.T0, ListTimeTable)
+aicmodelT <- AIC(modelT)
+x <- summary(modelT)
+p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
+print(paste("NormRating.T0 ~ Area2.T0 + art.rate.T0 R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT), ", p=", sprintf("%.3g", p), ")", sep=""), quote=FALSE)
+
+print("", quote=FALSE)
+modelT <- lm(NormRating.T1 ~ NormRating.T0, ListTimeTable)
+aicmodelT <- AIC(modelT)
+x <- summary(modelT)
+p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
+print(paste("NormRating.T1 ~ NormRating.T0 R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT), ", p=", sprintf("%.3g", p), ")", sep=""), quote=FALSE)
+
+
+print("", quote=FALSE)
+modelT <- lm(NormRating.T2 ~ NormRating.T1, ListTimeTable)
+aicmodelT <- AIC(modelT)
+x <- summary(modelT)
+p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
+print(paste("NormRating.T2 ~ NormRating.T1  R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT), ", p=", sprintf("%.3g", p), ")", sep=""), quote=FALSE)
+
+modelT <- lm(NormRating.T2 ~ NormRating.T1 + RelAR.T1, ListTimeTable)
+aicmodelT <- AIC(modelT)
+x <- summary(modelT)
+p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
+print(paste("NormRating.T2 ~ NormRating.T1 + RelAR.T1  R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT), ", p=", sprintf("%.3g", p), ")", sep=""), quote=FALSE)
+
+modelT <- lm(NormRating.T2 ~ NormRating.T1 + RelAR.T1 + u.dist.T2, ListTimeTable)
+aicmodelT <- AIC(modelT)
+x <- summary(modelT)
+p <- pf(x$fstatistic[1],x$fstatistic[2],x$fstatistic[3],lower.tail=FALSE)
+print(paste("NormRating.T2 ~ NormRating.T1 + RelAR.T1 + u.dist.T2  R^2 =", sprintf("%.3g", x$adj.r.squared), " (aic=", sprintf("%.4g", aicmodelT), ", p=", sprintf("%.3g", p), ")", sep=""), quote=FALSE)

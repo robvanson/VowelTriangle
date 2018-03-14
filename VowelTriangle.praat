@@ -28,7 +28,7 @@
 # 
 #
 # Initialization
-uiLanguage$ = "NL"
+uiLanguage$ = "EN"
 .defaultLanguage = 1
 .sp_default = 1
 output_table$ = ""
@@ -99,6 +99,7 @@ color$ ["u"] = "Blue"
 color$ ["@"] = "{0.8,0.8,0.8}"
 
 # UI messages and texts
+
 # English
 uiMessage$ ["EN", "PauseRecord"] = "Record continuous speech"
 uiMessage$ ["EN", "Record1"] = "Record the %%continuous speech%"
@@ -168,6 +169,87 @@ uiMessage$ ["NL", "Done"] = "Klaar"
 uiMessage$ ["NL", "Stop"] = "Stop"
 uiMessage$ ["NL", "Open"] = "Open"
 uiMessage$ ["NL", "Record"] = "Opnemen"
+
+# German
+uiMessage$ ["DE", "PauseRecord"] = "Zeichne laufende Sprache auf"
+uiMessage$ ["DE", "Record1"] = "Die %%laufende Sprache% aufzeichnen"
+uiMessage$ ["DE", "Record2"] = "Bitte seien Sie bereit zu sprechen"
+uiMessage$ ["DE", "Record3"] = "Wählen Sie die Sprachaufnahme, die Sie analysieren möchten"
+uiMessage$ ["DE", "Open1"] = "Öffnen Sie die Sprachaufnahme"
+uiMessage$ ["DE", "Open2"] = "Wählen Sie die Sprachaufnahme, die Sie analysieren möchten"
+uiMessage$ ["DE", "Corneri"] = "L%%ie%d"
+uiMessage$ ["DE", "Corneru"] = "H%%u%t"
+uiMessage$ ["DE", "Cornera"] = "T%%a%l"
+uiMessage$ ["DE", "DistanceTitle"] = "Rel. Länge (N)"
+uiMessage$ ["DE", "AreaTitle"] = "Rel. Oberfläche"
+uiMessage$ ["DE", "Area1"] = "1"
+uiMessage$ ["DE", "Area2"] = "2"
+uiMessage$ ["DE", "AreaN"] = "N"
+                                     
+uiMessage$ ["DE", "LogFile"] = "Daten in Tabelle schreiben (""-"" in das Informationsfenster schreiben)"
+uiMessage$ ["DE", "CommentContinue"]= "Klicken Sie auf ""Weiter"", wenn Sie mehr Sprachproben analysieren möchten"
+uiMessage$ ["DE", "CommentOpen"] = "Klicke auf ""Öffnen"" und wähle eine Aufnahme"
+uiMessage$ ["DE", "CommentRecord"] = "Klicke auf ""Aufzeichnen"" und sprich"
+uiMessage$ ["DE", "CommentList"] = "Sprache aufnehmen, ""Save to list & Close"", dann klicken Sie auf ""Weiter"""
+uiMessage$ ["DE", "SavePicture"] = "Bild speichern"
+uiMessage$ ["DE", "DoContinue"] = "Möchten Sie weitergehen?"
+uiMessage$ ["DE", "SelectSound1"] = "Wählen Sie den Aufnahmebereich und gehen Sie weiter"
+uiMessage$ ["DE", "SelectSound2"] = "Es ist möglich, unerwünschte Geräusche aus der Auswahl zu entfernen"
+uiMessage$ ["DE", "SelectSound3"] = "Wählen Sie den unerwünschten Teil und wählen Sie dann ""Cut"" aus dem ""*Edit"" Menü"
+uiMessage$ ["DE", "Stopped"] = "VowelTriangle ist gestoppt"
+uiMessage$ ["DE", "ErrorSound"] = "Fehler: Keine Sprache gefunden"
+                                     
+uiMessage$ ["DE", "Continue"] = "Weitergehen"
+uiMessage$ ["DE", "Done"] = "Fertig"
+uiMessage$ ["DE", "Stop"] = "Halt"
+uiMessage$ ["DE", "Open"] = "Öffnen"
+uiMessage$ ["DE", "Record"] = "Aufzeichnung"
+
+#############################################################
+#
+# To add a new interface language, translate the text below
+# and substitute in the correct places. Keep the double quotes "" intact
+# Replace the "EN" in the ''uiMessage$ ["EN",'' to the code you
+# need. Then add the new language in the options (following "English" etc.)
+# and the code following the endPause below.
+#
+# "Record continuous speech"
+# "Record the %%continuous speech%"
+# "Please be ready to start"
+# "Select the speech you want to analyse"
+# "Open the recording containing the speech"
+# "Select the speech you want to analyse"
+# "h%%ea%t"
+# "h%%oo%t"
+# "h%%a%t"
+# "Rel. Distance (N)"
+# "Rel. Area"
+# "1"
+# "2"
+# "N"
+#
+# "Write log to table (""-"" write to the info window)"
+# "Click on ""Continue"" if you want to analyze more speech samples"
+# "Click on ""Open"" and select a recording"
+# "Click on ""Record"" and start speaking"
+# "Record sound, ""Save to list & Close"", then click ""Continue"""
+# "Save picture"
+# "Do you want to continue?"
+# "Select the sound and continue"
+# "It is possible to remove unwanted sounds from the selection"
+# "Select the unwanted part and then chose ""Cut"" from the ""Edit"" menu"
+# "Vowel Triangle stopped"
+# "Error: Not a sound "
+#
+# "Continue"
+# "Done"
+# "Stop"
+# "Open"
+# "Record"
+#
+##############################################################
+
+# Formant values
 
 # Male
 phonemes ["NL", "M", "i_corner", "F1"] = 250
@@ -393,6 +475,8 @@ while .continue
 		optionMenu: "Display language", .defaultLanguage
 			option: "English"
 			option: "Nederlands"
+			option: "Deutsch"
+		#   option: "MyLanguage"
 		boolean: "Log", (output_table$ <> "")
 	.clicked = endPause: (uiMessage$ [uiLanguage$, "Stop"]), (uiMessage$ [uiLanguage$, "Record"]), (uiMessage$ [uiLanguage$, "Open"]), 3, 1
 	if .clicked = 1
@@ -412,7 +496,16 @@ while .continue
 	if display_language$ = "Nederlands"
 		uiLanguage$ = "NL"
 		.defaultLanguage = 2
+	elsif display_language$ = "Deutsch"
+		uiLanguage$ = "DE"
+		.defaultLanguage = 3
+	#
+	# Add a new language
+	# elsif display_language$ = "MyLanguage"
+	#	uiLanguage$ = "MyCode"
+	#	.defaultLanguage = 4
 	endif
+	
 	if log and output_table$ = ""
 		Erase all
 		Select inner viewport: 0.5, 7.5, 0.5, 4.5

@@ -205,6 +205,41 @@ uiMessage$ ["DE", "Stop"] = "Halt"
 uiMessage$ ["DE", "Open"] = "Öffnen"
 uiMessage$ ["DE", "Record"] = "Aufzeichnung"
 
+# Chinese
+uiMessage$ ["ZH", "PauseRecord"] = "录音连续演讲"
+uiMessage$ ["ZH", "Record1"] = "录音%%连续演讲%"
+uiMessage$ ["ZH", "Record2"] = "请准备好开始"
+uiMessage$ ["ZH", "Record3"] = "选择你想要分析的语音"
+uiMessage$ ["ZH", "Open1"] = "打开包含演讲的录音"
+uiMessage$ ["ZH", "Open2"] = "选择你想要分析的语音"
+uiMessage$ ["ZH", "Corneri"] = "必"
+uiMessage$ ["ZH", "Corneru"] = "不"
+uiMessage$ ["ZH", "Cornera"] = "巴"
+uiMessage$ ["ZH", "DistanceTitle"] = "相对长度 (N)"
+uiMessage$ ["ZH", "AreaTitle"] = "相对表面"
+uiMessage$ ["ZH", "Area1"] = "1"
+uiMessage$ ["ZH", "Area2"] = "2"
+uiMessage$ ["ZH", "AreaN"] = "N"
+
+uiMessage$ ["ZH", "LogFile"] = "将日志写入表格 (""-"" 写入信息窗口)"
+uiMessage$ ["ZH", "CommentContinue"] = "点击 ""继续"" 如果你想分析更多的语音样本"
+uiMessage$ ["ZH", "CommentOpen"] = "点击 ""打开录音"" 并选择一个录音"
+uiMessage$ ["ZH", "CommentRecord"] = "点击 ""录制演讲"" 并开始讲话"
+uiMessage$ ["ZH", "CommentList"] = "录制声音, ""Save to list & Close"", 然后单击 ""Continue"""
+uiMessage$ ["ZH", "SavePicture"] = "保存图片"
+uiMessage$ ["ZH", "DoContinue"] = "你想继续吗"
+uiMessage$ ["ZH", "SelectSound1"] = "选择声音并继续"
+uiMessage$ ["ZH", "SelectSound2"] = "可以从选择中删除不需要的声音"
+uiMessage$ ["ZH", "SelectSound3"] = "选择不需要的部分，然后选择 ""Cut"" 从 ""编辑"" 菜单"
+uiMessage$ ["ZH", "Stopped"] = "VowelTriangle 停了下来"
+uiMessage$ ["ZH", "ErrorSound"] = "错误：没有声音"
+
+uiMessage$ ["ZH", "Continue"] = "继续"
+uiMessage$ ["ZH", "Done"] = "准备"
+uiMessage$ ["ZH", "Stop"] = "结束"
+uiMessage$ ["ZH", "Open"] = "打开录音"
+uiMessage$ ["ZH", "Record"] = "录制演讲"
+
 #############################################################
 #
 # To add a new interface language, translate the text below
@@ -476,6 +511,7 @@ while .continue
 			option: "English"
 			option: "Nederlands"
 			option: "Deutsch"
+			option: "汉语"
 		#   option: "MyLanguage"
 		boolean: "Log", (output_table$ <> "")
 	.clicked = endPause: (uiMessage$ [uiLanguage$, "Stop"]), (uiMessage$ [uiLanguage$, "Record"]), (uiMessage$ [uiLanguage$, "Open"]), 3, 1
@@ -499,11 +535,14 @@ while .continue
 	elsif display_language$ = "Deutsch"
 		uiLanguage$ = "DE"
 		.defaultLanguage = 3
+	elsif display_language$ = "汉语"
+		uiLanguage$ = "ZH"
+		.defaultLanguage = 4
 	#
 	# Add a new language
 	# elsif display_language$ = "MyLanguage"
 	#	uiLanguage$ = "MyCode"
-	#	.defaultLanguage = 4
+	#	.defaultLanguage = 5
 	endif
 	
 	if log and output_table$ = ""

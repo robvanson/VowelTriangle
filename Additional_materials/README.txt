@@ -9,7 +9,7 @@ VowelTriangle.praat
 chunkslist.tsv
 
 # List of concatenated chunks. * wildcard indicates that all files 
-# matching this wildcat should be concatenated.
+# matching this wildcard should be concatenated.
 concatlist.tsv
 # NOTE: TO USE THIS LIST, ALL FILES MATCHING: "*1FR2.aifc" IN THE 
 # IFA CORPUS SHOULD BE RENAMED OR MOVED AS THEY LEAD TO DOUBLE COUNTING.

@@ -40,8 +40,8 @@ dot_Radius_Cutoff = 300
 # 
 # Enter valid file path in input_file$ to run non-interactive
 #
-#input_file$ = "Concatlist.tsv"
-#input_file$ = "Chunkslist.tsv"
+#input_file$ = "concatlist.tsv"
+#input_file$ = "chunkslist.tsv"
 input_file$ = ""
 
 input_table = -1
@@ -60,14 +60,14 @@ if input_file$ <> "" and fileReadable(input_file$) and index_regex(input_file$, 
 	if .i <= 0
 		Append column: "Log"
 		for .r to .numRows
-			Set string value: .r, "-"
+			Set string value: .r, "Log", "-"
 		endfor
 	endif 
 	.i = Get column index: "Plotfile"
 	if .i <= 0
 		Append column: "Plotfile"
 		for .r to .numRows
-			Set string value: .r, "-"
+			Set string value: .r, "Plotfile", "-"
 		endfor
 	endif 
 endif

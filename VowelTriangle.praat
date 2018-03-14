@@ -32,6 +32,9 @@ uiLanguage$ = "NL"
 .defaultLanguage = 1
 .sp_default = 1
 output_table$ = ""
+
+default_Dot_Radius = 0.01
+dot_Radius_Cutoff = 300
 # 
 #######################################################################
 # 
@@ -574,7 +577,8 @@ endproc
 # Plot the vowels in a sound
 # .plot: Actually plot inside picture window or just calculate paramters
 procedure plot_vowels .plot .sp$ .sound
-	.startT = 0 
+	.startT = 0
+	.dot_Radius = default_Dot_Radius
 	#call syllable_nuclei -25 4 0.3 1 .sound
 	#.syllableKernels = syllable_nuclei.textgridid
 	call segment_syllables -25 4 0.3 1 .sound
@@ -595,12 +599,17 @@ procedure plot_vowels .plot .sp$ .sound
 	call select_vowel_target .sound .formants .syllableKernels
 	.vowelTier = select_vowel_target.vowelTier
 	.targetTier = select_vowel_target.targetTier
+	selectObject: .syllableKernels
+	.numTargets = Get number of points: .targetTier
+	if .numTargets > dot_Radius_Cutoff
+		.dot_Radius = default_Dot_Radius / sqrt(.numTargets/dot_Radius_Cutoff)
+	endif
+
 	
 	# Set new @_center
 	phonemes [language$, .sp$, "@_center", "F1"] = (phonemes [language$, .sp$, "a", "F1"] * phonemes [language$, .sp$, "i", "F1"] * phonemes [language$, .sp$, "u", "F1"]) ** (1/3) 
 	phonemes [language$, .sp$, "@_center", "F2"] = (phonemes [language$, .sp$, "a", "F2"] * phonemes [language$, .sp$, "i", "F2"] * phonemes [language$, .sp$, "u", "F2"]) ** (1/3) 
 	
-	selectObject: .syllableKernels
 	.f1_c = phonemes [language$, .sp$, "@_center", "F1"]
 	.f2_c = phonemes [language$, .sp$, "@_center", "F2"]
 	
@@ -622,7 +631,7 @@ procedure plot_vowels .plot .sp$ .sound
 			@vowel2point: .sp$, .f1, .f2
 			.x = vowel2point.x
 			.y = vowel2point.y
-			Paint circle: color$["@"], .x, .y, 0.01
+			Paint circle: color$["@"], .x, .y, .dot_Radius
 		endfor
 	endif
 	
@@ -641,7 +650,7 @@ procedure plot_vowels .plot .sp$ .sound
 			@vowel2point: .sp$, .f1, .f2
 			.x = vowel2point.x
 			.y = vowel2point.y
-			Paint circle: color$["i"], .x, .y, 0.01
+			Paint circle: color$["i"], .x, .y, .dot_Radius
 		endfor
 	endif
 	
@@ -660,7 +669,7 @@ procedure plot_vowels .plot .sp$ .sound
 			@vowel2point: .sp$, .f1, .f2
 			.x = vowel2point.x
 			.y = vowel2point.y
-			Paint circle: color$["u"], .x, .y, 0.01
+			Paint circle: color$["u"], .x, .y, .dot_Radius
 		endfor
 	endif
 	
@@ -679,7 +688,7 @@ procedure plot_vowels .plot .sp$ .sound
 			@vowel2point: .sp$, .f1, .f2
 			.x = vowel2point.x
 			.y = vowel2point.y
-			Paint circle: color$["a"], .x, .y, 0.01
+			Paint circle: color$["a"], .x, .y, .dot_Radius
 		endfor
 	endif
 	

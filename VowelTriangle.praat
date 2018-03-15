@@ -129,6 +129,8 @@ uiMessage$ ["EN", "SelectSound3"] = "Select the unwanted part and then chose ""C
 uiMessage$ ["EN", "Stopped"] = "Vowel Triangle stopped"
 uiMessage$ ["EN", "ErrorSound"] = "Error: Not a sound "
 
+uiMessage$ ["EN", "Male"] = "Male"
+uiMessage$ ["EN", "Female"] = "Female"
 uiMessage$ ["EN", "Continue"] = "Continue"
 uiMessage$ ["EN", "Done"] = "Done"
 uiMessage$ ["EN", "Stop"] = "Stop"
@@ -164,6 +166,8 @@ uiMessage$ ["NL", "SelectSound3"] = "Selecteer het ongewenste deel en kies ""Cut
 uiMessage$ ["NL", "Stopped"] = "Vowel Triangle is gestopt"
 uiMessage$ ["NL", "ErrorSound"] = "Fout: Dit is geen geluid "
 
+uiMessage$ ["NL", "Male"] = "Man"
+uiMessage$ ["NL", "Female"] = "Vrouw"
 uiMessage$ ["NL", "Continue"] = "Doorgaan"
 uiMessage$ ["NL", "Done"] = "Klaar"
 uiMessage$ ["NL", "Stop"] = "Stop"
@@ -199,11 +203,50 @@ uiMessage$ ["DE", "SelectSound3"] = "Wählen Sie den unerwünschten Teil und wä
 uiMessage$ ["DE", "Stopped"] = "VowelTriangle ist gestoppt"
 uiMessage$ ["DE", "ErrorSound"] = "Fehler: Keine Sprache gefunden"
                                      
+uiMessage$ ["DE", "Male"] = "Man"
+uiMessage$ ["DE", "Female"] = "Frau"
 uiMessage$ ["DE", "Continue"] = "Weitergehen"
 uiMessage$ ["DE", "Done"] = "Fertig"
 uiMessage$ ["DE", "Stop"] = "Halt"
 uiMessage$ ["DE", "Open"] = "Öffnen"
 uiMessage$ ["DE", "Record"] = "Aufzeichnung"
+
+# French
+uiMessage$ ["FR", "PauseRecord"]	= "Enregistrer un discours continu"
+uiMessage$ ["FR", "Record1"]		= "Enregistrer le %%discours continu%"
+uiMessage$ ["FR", "Record2"]		= "S'il vous plaît soyez prêt à commencer"
+uiMessage$ ["FR", "Record3"]		= "Sélectionnez le discours que vous voulez analyser"
+uiMessage$ ["FR", "Open1"]			= "Ouvrir l'enregistrement contenant le discours"
+uiMessage$ ["FR", "Open2"]			= "Sélectionnez le discours que vous voulez analyser"
+uiMessage$ ["FR", "Corneri"]		= "v%%ie%"
+uiMessage$ ["FR", "Corneru"]		= "f%%ou%"
+uiMessage$ ["FR", "Cornera"]		= "C%%a%se"
+uiMessage$ ["FR", "DistanceTitle"]	= "Longeur Relative (N)"
+uiMessage$ ["FR", "AreaTitle"]		= "Surface Relative"
+uiMessage$ ["FR", "Area1"]			= "1"
+uiMessage$ ["FR", "Area2"]			= "2"
+uiMessage$ ["FR", "AreaN"]			= "N"
+                                     
+uiMessage$ ["FR", "LogFile"]		= "Écrire un fichier journal dans une table (""-"" écrire dans la fenêtre d'information)"
+uiMessage$ ["FR", "CommentContinue"]= "Cliquez sur ""Continuer"" si vous voulez analyser plus d'échantillons de discours"
+uiMessage$ ["FR", "CommentOpen"]	= "Cliquez sur ""Ouvrir"" et sélectionnez un enregistrement"
+uiMessage$ ["FR", "CommentRecord"]	= "Cliquez sur ""Enregistrer"" et commencez à parler"
+uiMessage$ ["FR", "CommentList"]	= "Enregistrer le son, ""Save to list & Close"", puis cliquez sur ""Continue"""
+uiMessage$ ["FR", "SavePicture"]	= "Enregistrer l'image"
+uiMessage$ ["FR", "DoContinue"]		= "Voulez-vous continuer?"
+uiMessage$ ["FR", "SelectSound1"]	= "Sélectionnez le son et continuez"
+uiMessage$ ["FR", "SelectSound2"]	= "Il est possible de supprimer les sons indésirables de la sélection"
+uiMessage$ ["FR", "SelectSound3"]	= "Sélectionnez la partie indésirable, puis choisissez ""Cut"" dans le menu ""Edit"""
+uiMessage$ ["FR", "Stopped"]		= "VowelTriangle s'est arrêté"
+uiMessage$ ["FR", "ErrorSound"]		= "Erreur: pas du son"
+                                     
+uiMessage$ ["FR", "Male"] 			= "Homme"
+uiMessage$ ["FR", "Female"] 		= "Femme"
+uiMessage$ ["FR", "Continue"]		= "Continuer"
+uiMessage$ ["FR", "Done"]			= "Terminé"
+uiMessage$ ["FR", "Stop"]			= "Arrêtez"
+uiMessage$ ["FR", "Open"]			= "Ouvert"
+uiMessage$ ["FR", "Record"]			= "Enregistrer"
 
 # Chinese
 uiMessage$ ["ZH", "PauseRecord"] = "录音连续演讲"
@@ -234,6 +277,8 @@ uiMessage$ ["ZH", "SelectSound3"] = "选择不需要的部分，然后选择 ""C
 uiMessage$ ["ZH", "Stopped"] = "VowelTriangle 停了下来"
 uiMessage$ ["ZH", "ErrorSound"] = "错误：没有声音"
 
+uiMessage$ ["ZH", "Male"] = "男性"
+uiMessage$ ["ZH", "Female"] = "女性"
 uiMessage$ ["ZH", "Continue"] = "继续"
 uiMessage$ ["ZH", "Done"] = "准备"
 uiMessage$ ["ZH", "Stop"] = "结束"
@@ -505,12 +550,13 @@ while .continue
 		comment: uiMessage$ [uiLanguage$, "CommentOpen"]
 		comment: uiMessage$ [uiLanguage$, "CommentRecord"]
 		choice: "Speaker is a", .sp_default
-			option: "Female"
-			option: "Male"
+			option: uiMessage$ [uiLanguage$, "Female"]
+			option: uiMessage$ [uiLanguage$, "Male"]
 		optionMenu: "Display language", .defaultLanguage
 			option: "English"
 			option: "Nederlands"
 			option: "Deutsch"
+			option: "Français"
 			option: "汉语"
 		#   option: "MyLanguage"
 		boolean: "Log", (output_table$ <> "")
@@ -523,7 +569,7 @@ while .continue
 	endif
 	.sp$ = "M"
 	.sp_default = 2
-	if speaker_is_a$ = "Female"
+	if speaker_is_a$ = uiMessage$ [uiLanguage$, "Female"]
 		.sp$ = "F"
 		.sp_default = 1
 	endif
@@ -535,14 +581,17 @@ while .continue
 	elsif display_language$ = "Deutsch"
 		uiLanguage$ = "DE"
 		.defaultLanguage = 3
+	elsif display_language$ = "Français"
+		uiLanguage$ = "FR"
+		.defaultLanguage = 4
 	elsif display_language$ = "汉语"
 		uiLanguage$ = "ZH"
-		.defaultLanguage = 4
+		.defaultLanguage = 5
 	#
 	# Add a new language
 	# elsif display_language$ = "MyLanguage"
 	#	uiLanguage$ = "MyCode"
-	#	.defaultLanguage = 5
+	#	.defaultLanguage = 6
 	endif
 	
 	if log and output_table$ = ""

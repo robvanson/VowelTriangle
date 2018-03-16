@@ -28,8 +28,40 @@
 # 
 #
 # Initialization
+# Get current Locale
 uiLanguage$ = "EN"
 .defaultLanguage = 1
+
+.locale$ = "en"
+if macintosh
+	.scratch$ = replace_regex$("/tmp/scratch"+date$()+".txt", "[^\w.]", "_", 0)
+	runSystem_nocheck: "defaults read -g AppleLocale | cut -c 1-2 - > ",.scratch$
+	.locale$ = readFile$(.scratch$)
+	deleteFile: .scratch$
+elsif unix
+	.language$ = environment$("LANG")
+endif
+
+if startsWith(.locale$, "en")
+	uiLanguage$ = "EN"
+	.defaultLanguage = 1
+elsif startsWith(.locale$, "nl")
+	uiLanguage$ = "NL"
+	.defaultLanguage = 2
+elsif startsWith(.locale$, "de")
+	uiLanguage$ = "DE"
+	.defaultLanguage = 3
+elsif startsWith(.locale$, "fr")
+	uiLanguage$ = "FR"
+	.defaultLanguage = 4
+elsif startsWith(.locale$, "zh")
+	uiLanguage$ = "ZH"
+	.defaultLanguage = 5
+elsif startsWith(.locale$, "es")
+	uiLanguage$ = "ES"
+	.defaultLanguage = 6
+endif
+
 .sp_default = 1
 output_table$ = ""
 

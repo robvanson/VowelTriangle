@@ -285,6 +285,44 @@ uiMessage$ ["ZH", "Stop"] = "结束"
 uiMessage$ ["ZH", "Open"] = "打开录音"
 uiMessage$ ["ZH", "Record"] = "录制演讲"
 
+
+# Spanish
+uiMessage$ ["ES", "PauseRecord"]	= "Grabar un discurso continuo"
+uiMessage$ ["ES", "Record1"]		= "Guardar %%discurso continuo%"
+uiMessage$ ["ES", "Record2"]		= "Por favor, prepárate para comenzar"
+uiMessage$ ["ES", "Record3"]		= "Seleccione el discurso que quiere analizar"
+uiMessage$ ["ES", "Open1"]			= "Abre la grabación que contiene el discurso"
+uiMessage$ ["ES", "Open2"]			= "Seleccione el discurso que quiere analizar"
+uiMessage$ ["ES", "Corneri"]		= "s%%i%"
+uiMessage$ ["ES", "Corneru"]		= "u"
+uiMessage$ ["ES", "Cornera"]		= "h%%a%y"
+uiMessage$ ["ES", "DistanceTitle"]	= "Longitud relativa (N)"
+uiMessage$ ["ES", "AreaTitle"]		= "Superficie relativa"
+uiMessage$ ["ES", "Area1"]			= "1"
+uiMessage$ ["ES", "Area2"]			= "2"
+uiMessage$ ["ES", "AreaN"]			= "N"
+                                      
+uiMessage$ ["ES", "LogFile"]		= "Escribir un archivo de registro en una tabla (""-"" escribir en la ventana de información)"
+uiMessage$ ["ES", "CommentContinue"]= "Haga clic en ""Continuar"" si desea analizar más muestras de voz"
+uiMessage$ ["ES", "CommentOpen"]	= "Haga clic en ""Abrir"" y seleccione un registro"
+uiMessage$ ["ES", "CommentRecord"]	= "Haz clic en ""Guardar"" y comienza a hablar"
+uiMessage$ ["ES", "CommentList"]	= "Guardar sonido, ""Save to list & Close"", luego haga clic en ""Continue"""
+uiMessage$ ["ES", "SavePicture"]	= "Guardar imagen"
+uiMessage$ ["ES", "DoContinue"]		= "¿Quieres continuar?"
+uiMessage$ ["ES", "SelectSound1"]	= "Selecciona el sonido y continúa"
+uiMessage$ ["ES", "SelectSound2"]	= "Es posible eliminar sonidos no deseados de la selección"
+uiMessage$ ["ES", "SelectSound3"]	= "Seleccione la parte no deseada, luego elija ""Cut"" desde el menú ""Edit"""
+uiMessage$ ["ES", "Stopped"]		= "VowelTriangle se ha detenido"
+uiMessage$ ["ES", "ErrorSound"]		= "Error: no hay sonido"
+                                      
+uiMessage$ ["ES", "Male"] 			= "Hombre"
+uiMessage$ ["ES", "Female"] 		= "Mujer"
+uiMessage$ ["ES", "Continue"]		= "Seguir"
+uiMessage$ ["ES", "Done"]			= "Terminado"
+uiMessage$ ["ES", "Stop"]			= "Detener"
+uiMessage$ ["ES", "Open"]			= "Abrir"
+uiMessage$ ["ES", "Record"]			= "Guardar"
+
 #############################################################
 #
 # To add a new interface language, translate the text below
@@ -558,6 +596,7 @@ while .continue
 			option: "Deutsch"
 			option: "Français"
 			option: "汉语"
+			option: "Español"
 		#   option: "MyLanguage"
 		boolean: "Log", (output_table$ <> "")
 	.clicked = endPause: (uiMessage$ [uiLanguage$, "Stop"]), (uiMessage$ [uiLanguage$, "Record"]), (uiMessage$ [uiLanguage$, "Open"]), 3, 1
@@ -587,11 +626,14 @@ while .continue
 	elsif display_language$ = "汉语"
 		uiLanguage$ = "ZH"
 		.defaultLanguage = 5
+	elsif display_language$ = "Español"
+		uiLanguage$ = "ES"
+		.defaultLanguage = 6
 	#
 	# Add a new language
 	# elsif display_language$ = "MyLanguage"
 	#	uiLanguage$ = "MyCode"
-	#	.defaultLanguage = 6
+	#	.defaultLanguage = 7
 	endif
 	
 	if log and output_table$ = ""

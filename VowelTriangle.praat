@@ -161,6 +161,7 @@ uiMessage$ ["EN", "SelectSound3"] = "Select the unwanted part and then chose ""C
 uiMessage$ ["EN", "Stopped"] = "Vowel Triangle stopped"
 uiMessage$ ["EN", "ErrorSound"] = "Error: Not a sound "
 
+uiMessage$ ["EN", "Speaker is a"] = "Speaker is a"
 uiMessage$ ["EN", "Male"] = "Male"
 uiMessage$ ["EN", "Female"] = "Female"
 uiMessage$ ["EN", "Continue"] = "Continue"
@@ -198,6 +199,7 @@ uiMessage$ ["NL", "SelectSound3"] = "Selecteer het ongewenste deel en kies ""Cut
 uiMessage$ ["NL", "Stopped"] = "Vowel Triangle is gestopt"
 uiMessage$ ["NL", "ErrorSound"] = "Fout: Dit is geen geluid "
 
+uiMessage$ ["NL", "Speaker is a"] = "Spreker is een"
 uiMessage$ ["NL", "Male"] = "Man"
 uiMessage$ ["NL", "Female"] = "Vrouw"
 uiMessage$ ["NL", "Continue"] = "Doorgaan"
@@ -235,6 +237,7 @@ uiMessage$ ["DE", "SelectSound3"] = "Wählen Sie den unerwünschten Teil und wä
 uiMessage$ ["DE", "Stopped"] = "VowelTriangle ist gestoppt"
 uiMessage$ ["DE", "ErrorSound"] = "Fehler: Keine Sprache gefunden"
                                      
+uiMessage$ ["DE", "Speaker is a"] = "De rSprecher ist ein(e)"
 uiMessage$ ["DE", "Male"] = "Man"
 uiMessage$ ["DE", "Female"] = "Frau"
 uiMessage$ ["DE", "Continue"] = "Weitergehen"
@@ -272,6 +275,7 @@ uiMessage$ ["FR", "SelectSound3"]	= "Sélectionnez la partie indésirable, puis 
 uiMessage$ ["FR", "Stopped"]		= "VowelTriangle s'est arrêté"
 uiMessage$ ["FR", "ErrorSound"]		= "Erreur: pas du son"
                                      
+uiMessage$ ["FR", "Speaker is a"]	= "l'orateur est un(e)"
 uiMessage$ ["FR", "Male"] 			= "Homme"
 uiMessage$ ["FR", "Female"] 		= "Femme"
 uiMessage$ ["FR", "Continue"]		= "Continuer"
@@ -309,6 +313,7 @@ uiMessage$ ["ZH", "SelectSound3"] = "选择不需要的部分，然后选择 ""C
 uiMessage$ ["ZH", "Stopped"] = "VowelTriangle 停了下来"
 uiMessage$ ["ZH", "ErrorSound"] = "错误：没有声音"
 
+uiMessage$ ["ZH", "Speaker is a"]	= "演讲者是"
 uiMessage$ ["ZH", "Male"] = "男性"
 uiMessage$ ["ZH", "Female"] = "女性"
 uiMessage$ ["ZH", "Continue"] = "继续"
@@ -347,6 +352,7 @@ uiMessage$ ["ES", "SelectSound3"]	= "Seleccione la parte no deseada, luego elija
 uiMessage$ ["ES", "Stopped"]		= "VowelTriangle se ha detenido"
 uiMessage$ ["ES", "ErrorSound"]		= "Error: no hay sonido"
                                       
+uiMessage$ ["ES", "Speaker is a"]	= "el hablante es un(a)"
 uiMessage$ ["ES", "Male"] 			= "Hombre"
 uiMessage$ ["ES", "Female"] 		= "Mujer"
 uiMessage$ ["ES", "Continue"]		= "Seguir"

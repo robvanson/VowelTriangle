@@ -620,12 +620,16 @@ endif
 # Run master loop
 while .continue
 	
+	.speakerIsA$ = uiMessage$ [uiLanguage$, "Speaker is a"]
+	.speakerIsAVar$ = replace_regex$(.speakerIsA$, "[^\w]", "_", 0)
+	.speakerIsAVar$ = replace_regex$(.speakerIsAVar$, "^([A-Z])", "\l\1", 0)
+	
 	.recording = 0
 	beginPause: "Select a recording"
 		sentence: "Title", "untitled"
 		comment: uiMessage$ [uiLanguage$, "CommentOpen"]
 		comment: uiMessage$ [uiLanguage$, "CommentRecord"]
-		choice: "Speaker is a", .sp_default
+		choice: .speakerIsA$, .sp_default
 			option: uiMessage$ [uiLanguage$, "Female"]
 			option: uiMessage$ [uiLanguage$, "Male"]
 		optionMenu: "Display language", .defaultLanguage
@@ -646,7 +650,7 @@ while .continue
 	endif
 	.sp$ = "M"
 	.sp_default = 2
-	if speaker_is_a$ = uiMessage$ [uiLanguage$, "Female"]
+	if '.speakerIsAVar$'$ = uiMessage$ [uiLanguage$, "Female"]
 		.sp$ = "F"
 		.sp_default = 1
 	endif

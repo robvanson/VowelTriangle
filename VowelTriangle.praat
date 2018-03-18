@@ -199,7 +199,7 @@ uiMessage$ ["NL", "SelectSound3"] = "Selecteer het ongewenste deel en kies ""Cut
 uiMessage$ ["NL", "Stopped"] = "Vowel Triangle is gestopt"
 uiMessage$ ["NL", "ErrorSound"] = "Fout: Dit is geen geluid "
 
-uiMessage$ ["NL", "Speaker is a"] = "Spreker is een"
+uiMessage$ ["NL", "Speaker is a"] = "De Spreker is een"
 uiMessage$ ["NL", "Male"] = "Man"
 uiMessage$ ["NL", "Female"] = "Vrouw"
 uiMessage$ ["NL", "Continue"] = "Doorgaan"
@@ -237,7 +237,7 @@ uiMessage$ ["DE", "SelectSound3"] = "Wählen Sie den unerwünschten Teil und wä
 uiMessage$ ["DE", "Stopped"] = "VowelTriangle ist gestoppt"
 uiMessage$ ["DE", "ErrorSound"] = "Fehler: Keine Sprache gefunden"
                                      
-uiMessage$ ["DE", "Speaker is a"] = "De rSprecher ist ein(e)"
+uiMessage$ ["DE", "Speaker is a"] = "Der Sprecher ist ein(e)"
 uiMessage$ ["DE", "Male"] = "Man"
 uiMessage$ ["DE", "Female"] = "Frau"
 uiMessage$ ["DE", "Continue"] = "Weitergehen"
@@ -275,7 +275,7 @@ uiMessage$ ["FR", "SelectSound3"]	= "Sélectionnez la partie indésirable, puis 
 uiMessage$ ["FR", "Stopped"]		= "VowelTriangle s'est arrêté"
 uiMessage$ ["FR", "ErrorSound"]		= "Erreur: pas du son"
                                      
-uiMessage$ ["FR", "Speaker is a"]	= "l'orateur est un(e)"
+uiMessage$ ["FR", "Speaker is a"]	= "L'orateur est un(e)"
 uiMessage$ ["FR", "Male"] 			= "Homme"
 uiMessage$ ["FR", "Female"] 		= "Femme"
 uiMessage$ ["FR", "Continue"]		= "Continuer"
@@ -352,7 +352,7 @@ uiMessage$ ["ES", "SelectSound3"]	= "Seleccione la parte no deseada, luego elija
 uiMessage$ ["ES", "Stopped"]		= "VowelTriangle se ha detenido"
 uiMessage$ ["ES", "ErrorSound"]		= "Error: no hay sonido"
                                       
-uiMessage$ ["ES", "Speaker is a"]	= "el hablante es un(a)"
+uiMessage$ ["ES", "Speaker is a"]	= "El hablante es un(a)"
 uiMessage$ ["ES", "Male"] 			= "Hombre"
 uiMessage$ ["ES", "Female"] 		= "Mujer"
 uiMessage$ ["ES", "Continue"]		= "Seguir"
@@ -621,8 +621,8 @@ endif
 while .continue
 	
 	.speakerIsA$ = uiMessage$ [uiLanguage$, "Speaker is a"]
-	.speakerIsAVar$ = replace_regex$(.speakerIsA$, "[^\w]", "_", 0)
-	.speakerIsAVar$ = replace_regex$(.speakerIsAVar$, "^([A-Z])", "\l\1", 0)
+	.speakerIsAVar$ = replace_regex$(.speakerIsA$, "^([A-Z])", "\l\1", 0)
+	.speakerIsAVar$ = replace_regex$(.speakerIsAVar$, "[\s.?!]", "_", 0)
 	
 	.recording = 0
 	beginPause: "Select a recording"

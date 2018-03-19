@@ -81,9 +81,15 @@ elsif startsWith(.locale$, "zh")
 elsif startsWith(.locale$, "es")
 	uiLanguage$ = "ES"
 	.defaultLanguage = 6
+elsif startsWith(.locale$, "pt")
+	uiLanguage$ = "PT"
+	.defaultLanguage = 7
+elsif startsWith(.locale$, "it")
+	uiLanguage$ = "IT"
+	.defaultLanguage = 8
 #elsif startsWith(.locale$, "MYLANGUAGE")
 #	uiLanguage$ = "XX"
-#	.defaultLanguage = 7
+#	.defaultLanguage = 9
 endif
 
 .sp_default = 1
@@ -190,8 +196,8 @@ uiMessage$ ["EN", "No readable recording selected "] = "No readable recording se
 
 uiMessage$ ["EN", "Interface Language"] = "Language"
 uiMessage$ ["EN", "Speaker is a"] = "Speaker is a"
-uiMessage$ ["EN", "Male"] = "Male"
-uiMessage$ ["EN", "Female"] = "Female"
+uiMessage$ ["EN", "Male"] = "Male ♂"
+uiMessage$ ["EN", "Female"] = "Female ♀"
 uiMessage$ ["EN", "Continue"] = "Continue"
 uiMessage$ ["EN", "Done"] = "Done"
 uiMessage$ ["EN", "Stop"] = "Stop"
@@ -218,7 +224,7 @@ uiMessage$ ["NL", "LogFile"] 		= "Schrijf resultaten naar log bestand (""-"" sch
 uiMessage$ ["NL", "CommentContinue"] = "Klik op ""Doorgaan"" als u meer spraakopnamen wilt analyseren"
 uiMessage$ ["NL", "CommentOpen"] 	= "Klik op ""Open"" en selecteer een opname"
 uiMessage$ ["NL", "CommentRecord"] 	= "Klik op ""Opnemen"" en start met spreken"
-uiMessage$ ["NL", "CommentList"] 	= "Spraak opnemen, ""Save to list & Close"", daarna klik op ""Continue"""
+uiMessage$ ["NL", "CommentList"] 	= "Spraak opnemen, ""Save to list & Close"", daarna klik op ""Doorgaan"""
 uiMessage$ ["NL", "SavePicture"] 	= "Bewaar afbeelding"
 uiMessage$ ["NL", "DoContinue"] 	= "Wilt u doorgaan?"
 uiMessage$ ["NL", "SelectSound1"] 	= "Selecteer het spraakfragment en ga door"
@@ -231,8 +237,8 @@ uiMessage$ ["NL", "No readable recording selected "] = "Geen leesbare opname ges
 
 uiMessage$ ["NL", "Interface Language"] = "Taal (Language)"
 uiMessage$ ["NL", "Speaker is a"] 	= "De Spreker is een"
-uiMessage$ ["NL", "Male"] 			= "Man"
-uiMessage$ ["NL", "Female"] 		= "Vrouw"
+uiMessage$ ["NL", "Male"] 			= "Man ♂"
+uiMessage$ ["NL", "Female"] 		= "Vrouw ♀"
 uiMessage$ ["NL", "Continue"] 		= "Doorgaan"
 uiMessage$ ["NL", "Done"] 			= "Klaar"
 uiMessage$ ["NL", "Stop"] 			= "Stop"
@@ -259,12 +265,12 @@ uiMessage$ ["DE", "LogFile"] 		= "Daten in Tabelle schreiben (""-"" in das Infor
 uiMessage$ ["DE", "CommentContinue"]= "Klicken Sie auf ""Weiter"", wenn Sie mehr Sprachproben analysieren möchten"
 uiMessage$ ["DE", "CommentOpen"] 	= "Klicke auf ""Öffnen"" und wähle eine Aufnahme"
 uiMessage$ ["DE", "CommentRecord"] 	= "Klicke auf ""Aufzeichnen"" und sprich"
-uiMessage$ ["DE", "CommentList"] 	= "Sprache aufnehmen, ""Save to list & Close"", dann klicken Sie auf ""Weiter"""
+uiMessage$ ["DE", "CommentList"] 	= "Sprache aufnehmen, ""Save to list & Close"", dann klicken Sie auf ""Weitergehen"""
 uiMessage$ ["DE", "SavePicture"] 	= "Bild speichern"
 uiMessage$ ["DE", "DoContinue"] 	= "Möchten Sie weitergehen?"
 uiMessage$ ["DE", "SelectSound1"] 	= "Wählen Sie den Aufnahmebereich und gehen Sie weiter"
 uiMessage$ ["DE", "SelectSound2"] 	= "Es ist möglich, unerwünschte Geräusche aus der Auswahl zu entfernen"
-uiMessage$ ["DE", "SelectSound3"] 	= "Wählen Sie den unerwünschten Teil und wählen Sie dann ""Cut"" aus dem ""*Edit"" Menü"
+uiMessage$ ["DE", "SelectSound3"] 	= "Wählen Sie den unerwünschten Teil und wählen Sie dann ""Cut"" aus dem ""Edit"" Menü"
 uiMessage$ ["DE", "Stopped"] 		= "VowelTriangle ist gestoppt"
 uiMessage$ ["DE", "ErrorSound"] 	= "Fehler: Keine Sprache gefunden"
 uiMessage$ ["DE", "Nothing to do"] 	= "Keine Aufgaben"
@@ -272,13 +278,13 @@ uiMessage$ ["DE", "No readable recording selected "] = "Keine verwertbare Aufnah
                
 uiMessage$ ["DE", "Interface Language"] = "Sprache (Language)"
 uiMessage$ ["DE", "Speaker is a"] 	= "Der Sprecher ist ein(e)"
-uiMessage$ ["DE", "Male"] 			= "Man"
-uiMessage$ ["DE", "Female"] 		= "Frau"
+uiMessage$ ["DE", "Male"] 			= "Man ♂"
+uiMessage$ ["DE", "Female"] 		= "Frau ♀"
 uiMessage$ ["DE", "Continue"] 		= "Weitergehen"
 uiMessage$ ["DE", "Done"] 			= "Fertig"
 uiMessage$ ["DE", "Stop"] 			= "Halt"
 uiMessage$ ["DE", "Open"] 			= "Öffnen"
-uiMessage$ ["DE", "Record"] 		= "Aufzeichnung"
+uiMessage$ ["DE", "Record"] 		= "Aufzeichnen"
 
 # French
 uiMessage$ ["FR", "PauseRecord"]	= "Enregistrer un discours continu"
@@ -300,7 +306,7 @@ uiMessage$ ["FR", "LogFile"]		= "Écrire un fichier journal dans une table (""-"
 uiMessage$ ["FR", "CommentContinue"]= "Cliquez sur ""Continuer"" si vous voulez analyser plus d'échantillons de discours"
 uiMessage$ ["FR", "CommentOpen"]	= "Cliquez sur ""Ouvrir"" et sélectionnez un enregistrement"
 uiMessage$ ["FR", "CommentRecord"]	= "Cliquez sur ""Enregistrer"" et commencez à parler"
-uiMessage$ ["FR", "CommentList"]	= "Enregistrer le son, ""Save to list & Close"", puis cliquez sur ""Continue"""
+uiMessage$ ["FR", "CommentList"]	= "Enregistrer le son, ""Save to list & Close"", puis cliquez sur ""Continuer"""
 uiMessage$ ["FR", "SavePicture"]	= "Enregistrer l'image"
 uiMessage$ ["FR", "DoContinue"]		= "Voulez-vous continuer?"
 uiMessage$ ["FR", "SelectSound1"]	= "Sélectionnez le son et continuez"
@@ -313,11 +319,11 @@ uiMessage$ ["FR", "No readable recording selected "] = "Aucun enregistrement uti
                   
 uiMessage$ ["FR", "Interface Language"] = "Langue (Language)"
 uiMessage$ ["FR", "Speaker is a"]	= "Le locuteur est un(e)"
-uiMessage$ ["FR", "Male"] 			= "Homme"
-uiMessage$ ["FR", "Female"] 		= "Femme"
+uiMessage$ ["FR", "Male"] 			= "Homme ♂"
+uiMessage$ ["FR", "Female"] 		= "Femme ♀"
 uiMessage$ ["FR", "Continue"]		= "Continuer"
 uiMessage$ ["FR", "Done"]			= "Terminé"
-uiMessage$ ["FR", "Stop"]			= "Arrêtez"
+uiMessage$ ["FR", "Stop"]			= "fermarsi"
 uiMessage$ ["FR", "Open"]			= "Ouvert"
 uiMessage$ ["FR", "Record"]			= "Enregistrer"
 
@@ -341,7 +347,7 @@ uiMessage$ ["ZH", "LogFile"] 		= "将日志写入表格 (""-"" 写入信息窗�
 uiMessage$ ["ZH", "CommentContinue"] = "点击 ""继续"" 如果你想分析更多的语音样本"
 uiMessage$ ["ZH", "CommentOpen"] 	= "点击 ""打开录音"" 并选择一个录音"
 uiMessage$ ["ZH", "CommentRecord"] 	= "点击 ""录制演讲"" 并开始讲话"
-uiMessage$ ["ZH", "CommentList"] 	= "录制声音, ""Save to list & Close"", 然后单击 ""Continue"""
+uiMessage$ ["ZH", "CommentList"] 	= "录制声音, ""Save to list & Close"", 然后单击 ""继续"""
 uiMessage$ ["ZH", "SavePicture"] 	= "保存图片"
 uiMessage$ ["ZH", "DoContinue"] 	= "你想继续吗"
 uiMessage$ ["ZH", "SelectSound1"] 	= "选择声音并继续"
@@ -354,8 +360,8 @@ uiMessage$ ["ZH", "No readable recording selected "] = "没有选择可读的录
 
 uiMessage$ ["ZH", "Interface Language"] = "语言 (Language)"
 uiMessage$ ["ZH", "Speaker is a"]	= "演讲者是"
-uiMessage$ ["ZH", "Male"] = "男性"
-uiMessage$ ["ZH", "Female"] = "女性"
+uiMessage$ ["ZH", "Male"] = "男性 ♂"
+uiMessage$ ["ZH", "Female"] = "女性 ♀"
 uiMessage$ ["ZH", "Continue"] = "继续"
 uiMessage$ ["ZH", "Done"] = "准备"
 uiMessage$ ["ZH", "Stop"] = "结束"
@@ -371,7 +377,7 @@ uiMessage$ ["ES", "Record3"]		= "Seleccione el discurso que quiere analizar"
 uiMessage$ ["ES", "Open1"]			= "Abre la grabación que contiene el discurso"
 uiMessage$ ["ES", "Open2"]			= "Seleccione el discurso que quiere analizar"
 uiMessage$ ["ES", "Corneri"]		= "s%%i%"
-uiMessage$ ["ES", "Corneru"]		= "u"
+uiMessage$ ["ES", "Corneru"]		= "%%u%"
 uiMessage$ ["ES", "Cornera"]		= "h%%a%y"
 uiMessage$ ["ES", "DistanceTitle"]	= "Longitud relativa (N)"
 uiMessage$ ["ES", "AreaTitle"]		= "Superficie relativa"
@@ -382,8 +388,8 @@ uiMessage$ ["ES", "AreaN"]			= "N"
 uiMessage$ ["ES", "LogFile"]		= "Escribir un archivo de registro en una tabla (""-"" escribir en la ventana de información)"
 uiMessage$ ["ES", "CommentContinue"]= "Haga clic en ""Continuar"" si desea analizar más muestras de voz"
 uiMessage$ ["ES", "CommentOpen"]	= "Haga clic en ""Abrir"" y seleccione un registro"
-uiMessage$ ["ES", "CommentRecord"]	= "Haz clic en ""Guardar"" y comienza a hablar"
-uiMessage$ ["ES", "CommentList"]	= "Guardar sonido, ""Save to list & Close"", luego haga clic en ""Continue"""
+uiMessage$ ["ES", "CommentRecord"]	= "Haz clic en ""Grabar"" y comienza a hablar"
+uiMessage$ ["ES", "CommentList"]	= "Grabar sonido, ""Save to list & Close"", luego haga clic en ""Continúa"""
 uiMessage$ ["ES", "SavePicture"]	= "Guardar imagen"
 uiMessage$ ["ES", "DoContinue"]		= "¿Quieres continuar?"
 uiMessage$ ["ES", "SelectSound1"]	= "Selecciona el sonido y continúa"
@@ -396,13 +402,95 @@ uiMessage$ ["ES", "No readable recording selected "] = "No se ha seleccionado ni
 
 uiMessage$ ["ES", "Interface Language"] = "Idioma (Language)"
 uiMessage$ ["ES", "Speaker is a"]	= "El hablante es un(a)"
-uiMessage$ ["ES", "Male"] 			= "Hombre"
-uiMessage$ ["ES", "Female"] 		= "Mujer"
-uiMessage$ ["ES", "Continue"]		= "Seguir"
+uiMessage$ ["ES", "Male"] 			= "Hombre ♂"
+uiMessage$ ["ES", "Female"] 		= "Mujer ♀"
+uiMessage$ ["ES", "Continue"]		= "Continúa"
 uiMessage$ ["ES", "Done"]			= "Terminado"
 uiMessage$ ["ES", "Stop"]			= "Detener"
 uiMessage$ ["ES", "Open"]			= "Abrir"
-uiMessage$ ["ES", "Record"]			= "Guardar"
+uiMessage$ ["ES", "Record"]			= "Grabar"
+
+# Portugese
+uiMessage$ ["PT", "PauseRecord"]	= "Gravar um discurso contínuo"
+uiMessage$ ["PT", "Record1"]		= "Salvar %%discurso contínua%"
+uiMessage$ ["PT", "Record2"]		= "Por favor, prepare-se para começar"
+uiMessage$ ["PT", "Record3"]		= "Selecione o discurso que deseja analisar"
+uiMessage$ ["PT", "Open1"]			= "Abra a gravação que contém o discurso"
+uiMessage$ ["PT", "Open2"]			= "Selecione o discurso que deseja analisar"
+uiMessage$ ["PT", "Corneri"]		= "%%i%"
+uiMessage$ ["PT", "Corneru"]		= "%%u%"
+uiMessage$ ["PT", "Cornera"]		= "%%a%"
+uiMessage$ ["PT", "DistanceTitle"]	= "Comprimento relativo (N)"
+uiMessage$ ["PT", "AreaTitle"]		= "Superfície relativa"
+uiMessage$ ["PT", "Area1"]			= "1"
+uiMessage$ ["PT", "Area2"]			= "2"
+uiMessage$ ["PT", "AreaN"]			= "N"
+                                                                            
+uiMessage$ ["PT", "LogFile"]		= "Escreva um arquivo de registro em uma tabela (""-"" escreva na janela de informações)"
+uiMessage$ ["PT", "CommentContinue"]= "Clique em ""Continuar"" se quiser analisar mais amostras de voz"
+uiMessage$ ["PT", "CommentOpen"]	= "Clique em ""Abrir"" e selecione um registro"
+uiMessage$ ["PT", "CommentRecord"]	= "Clique ""Gravar"" e comece a falar "
+uiMessage$ ["PT", "CommentList"]	= "Gravar som, ""Save to list & Close"", depois clique em ""Continuar"""
+uiMessage$ ["PT", "SavePicture"]	= "Salvar imagem"
+uiMessage$ ["PT", "DoContinue"]		= "Você quer continuar?"
+uiMessage$ ["PT", "SelectSound1"]	= "Selecione o som e continue"
+uiMessage$ ["PT", "SelectSound2"]	= "É possível remover sons indesejados da seleção"
+uiMessage$ ["PT", "SelectSound3"]	= "Selecione a parte indesejada, então escolha ""Cut"" no menu ""Edit"""
+uiMessage$ ["PT", "Stopped"]		= "VowelTriangle parou"
+uiMessage$ ["PT", "ErrorSound"]		= "Erro: não há som"
+uiMessage$ ["PT", "Nothing to do"] 	= "Nada para fazer"
+uiMessage$ ["PT", "No readable recording selected "] = "Nenhum registro utilizável foi selecionado"
+
+uiMessage$ ["PT", "Interface Language"] = "Idioma (Language)"
+uiMessage$ ["PT", "Speaker is a"]	= "O falante é um(a)"
+uiMessage$ ["PT", "Male"] 			= "Homem ♂"
+uiMessage$ ["PT", "Female"] 		= "Mulher ♀"
+uiMessage$ ["PT", "Continue"]		= "Continuar"
+uiMessage$ ["PT", "Done"]			= "Terminado"
+uiMessage$ ["PT", "Stop"]			= "Pare"
+uiMessage$ ["PT", "Open"]			= "Abrir"
+uiMessage$ ["PT", "Record"]			= "Gravar"
+
+# Italian
+uiMessage$ ["IT", "PauseRecord"]	= "Registra un discorso continuo"
+uiMessage$ ["IT", "Record1"]		= "Salva %%discorso continuo%"
+uiMessage$ ["IT", "Record2"]		= "Per favore, preparati a iniziare"
+uiMessage$ ["IT", "Record3"]		= "Seleziona il discorso che vuoi analizzare"
+uiMessage$ ["IT", "Open1"]			= "Apri la registrazione che contiene il discorso"
+uiMessage$ ["IT", "Open2"]			= "Seleziona il discorso che vuoi analizzare"
+uiMessage$ ["IT", "Corneri"]		= "%%i%"
+uiMessage$ ["IT", "Corneru"]		= "%%u%"
+uiMessage$ ["IT", "Cornera"]		= "%%a%"
+uiMessage$ ["IT", "DistanceTitle"]	= "Lunghezza relativa (N)"
+uiMessage$ ["IT", "AreaTitle"]		= "Superficie relativa"
+uiMessage$ ["IT", "Area1"]			= "1"
+uiMessage$ ["IT", "Area2"]			= "2"
+uiMessage$ ["IT", "AreaN"]			= "N"
+                                                                            
+uiMessage$ ["IT", "LogFile"]		= "Scrivi un file di registrazione in una tabella (""-"" scrivi nella finestra delle informazioni)"
+uiMessage$ ["IT", "CommentContinue"]= "Clicca su ""Continua"" se vuoi analizzare più campioni vocali"
+uiMessage$ ["IT", "CommentOpen"]	= "Fare clic su ""Apri"" e selezionare un record"
+uiMessage$ ["IT", "CommentRecord"]	= "Fai clic su ""Registra"" e inizia a parlare"
+uiMessage$ ["IT", "CommentList"]	= "Registra suono, ""Save to list & Close"", quindi fai clic su ""Continua"""
+uiMessage$ ["IT", "SavePicture"]	= "Salva immagine"
+uiMessage$ ["IT", "DoContinue"]		= "Vuoi continuare?"
+uiMessage$ ["IT", "SelectSound1"]	= "Seleziona il suono e continua"
+uiMessage$ ["IT", "SelectSound2"]	= "È possibile rimuovere i suoni indesiderati dalla selezione"
+uiMessage$ ["IT", "SelectSound3"]	= "Seleziona la parte indesiderata, quindi scegli ""Cut"" dal menu ""Edit"""
+uiMessage$ ["IT", "Stopped"]		= "VowelTriangle si è fermato"
+uiMessage$ ["IT", "ErrorSound"]		= "Errore: non c'è suono"
+uiMessage$ ["IT", "Nothing to do"] 	= "Niente da fare"
+uiMessage$ ["IT", "No readable recording selected "] = "Nessun record utilizzabile è stato selezionato "
+
+uiMessage$ ["IT", "Interface Language"] = "Lingua (Language)"
+uiMessage$ ["IT", "Speaker is a"]	= "L‘oratore è un(a)"
+uiMessage$ ["IT", "Male"] 			= "Uomo ♂"
+uiMessage$ ["IT", "Female"] 		= "Donna ♀"
+uiMessage$ ["IT", "Continue"]		= "Continua"
+uiMessage$ ["IT", "Done"]			= "Finito"
+uiMessage$ ["IT", "Stop"]			= "Fermare"
+uiMessage$ ["IT", "Open"]			= "Apri"
+uiMessage$ ["IT", "Record"]			= "Registra"
 
 #############################################################
 #
@@ -693,6 +781,8 @@ while .continue
 			option: "Français"
 			option: "汉语"
 			option: "Español"
+			option: "Português"
+			option: "Italiano"
 		#   option: "MyLanguage"
 		boolean: "Log", (output_table$ <> "")
 	.clicked = endPause: (uiMessage$ [uiLanguage$, "Stop"]), (uiMessage$ [uiLanguage$, "Record"]), (uiMessage$ [uiLanguage$, "Open"]), 3, 1	
@@ -706,10 +796,11 @@ while .continue
 
 	.sp$ = "M"
 	.sp_default = 2
-	if '.speakerIsAVar$'$ = uiMessage$ [uiLanguage$, "Female"]
+	if uiMessage$ [uiLanguage$, "Female"] = '.speakerIsAVar$'$
 		.sp$ = "F"
 		.sp_default = 1
 	endif
+	
 	uiLanguage$ = "EN"
 	.defaultLanguage = 1
 	.display_language$ = '.languageInputVar$'$
@@ -728,11 +819,17 @@ while .continue
 	elsif .display_language$ = "Español"
 		uiLanguage$ = "ES"
 		.defaultLanguage = 6
+	elsif .display_language$ = "Português"
+		uiLanguage$ = "PT"
+		.defaultLanguage = 7
+	elsif .display_language$ = "Italiano"
+		uiLanguage$ = "IT"
+		.defaultLanguage = 8
 	#
 	# Add a new language
 	# elsif .display_language$ = "MyLanguage"
 	#	uiLanguage$ = "MyCode"
-	#	.defaultLanguage = 7
+	#	.defaultLanguage = 9
 	endif
 	
 	# Store preferences

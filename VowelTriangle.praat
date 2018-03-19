@@ -31,15 +31,36 @@
 # Get current Locale
 uiLanguage$ = "EN"
 .defaultLanguage = 1
+.preferencesLanguageFile$ = preferencesDirectory$+"/VowelTriangle.prefs"
+.preferencesLang$ = ""
+if fileReadable(.preferencesLanguageFile$)
+	.preferencesLang$ = readFile$(.preferencesLanguageFile$)
+	if index_regex(.preferencesLang$, "Language\s*=\s*([^\n]+)") > 0
+		.preferencesLang$ = replace_regex$(.preferencesLang$, "^.*Language=([^\n]+).*", "\L\1", 0)
+	else
+		.preferencesLang$ = ""
+	endif
+endif
 
 .locale$ = "en"
-if macintosh
-	.scratch$ = replace_regex$("/tmp/scratch"+date$()+".txt", "[^\w.]", "_", 0)
-	runSystem_nocheck: "defaults read -g AppleLocale | cut -c 1-2 - > ",.scratch$
-	.locale$ = readFile$(.scratch$)
-	deleteFile: .scratch$
-elsif unix
-	.language$ = environment$("LANG")
+if .preferencesLang$ <> ""
+	.locale$ = .preferencesLang$
+else
+	if macintosh
+		.scratch$ = replace_regex$(temporaryDirectory$+"/scratch"+date$()+".txt", "[^\w.]", "_", 0)
+		runSystem_nocheck: "defaults read -g AppleLocale | cut -c 1-2 - > ",.scratch$
+		.locale$ = readFile$(.scratch$)
+		deleteFile: .scratch$
+	elsif unix
+		.locale$ = environment$("LANG")
+	elsif windows
+		.scratch$ = replace_regex$(temporaryDirectory$+"/scratch"+date$()+".txt", "[^\w.]", "_", 0)
+		runSystem_nocheck: "dism /online /get-intl > ",.scratch$
+		.locale$ = readFile$(.scratch$)
+		.locale$ = replace_regex$(.locale$, "\n", " ", 0)	
+		.locale$ = replace_regex$(.locale$, "^.*Default System UI language : ([^\s]+).*", "\1", 0)
+		deleteFile: .scratch$	
+	endif
 endif
 
 if startsWith(.locale$, "en")
@@ -60,6 +81,9 @@ elsif startsWith(.locale$, "zh")
 elsif startsWith(.locale$, "es")
 	uiLanguage$ = "ES"
 	.defaultLanguage = 6
+#elsif startsWith(.locale$, "MYLANGUAGE")
+#	uiLanguage$ = "XX"
+#	.defaultLanguage = 7
 endif
 
 .sp_default = 1
@@ -161,6 +185,8 @@ uiMessage$ ["EN", "SelectSound2"] = "It is possible to remove unwanted sounds fr
 uiMessage$ ["EN", "SelectSound3"] = "Select the unwanted part and then chose ""Cut"" from the ""Edit"" menu"
 uiMessage$ ["EN", "Stopped"] = "Vowel Triangle stopped"
 uiMessage$ ["EN", "ErrorSound"] = "Error: Not a sound "
+uiMessage$ ["EN", "Nothing to do"] = "Nothing to do"
+uiMessage$ ["EN", "No readable recording selected "] = "No readable recording selected "
 
 uiMessage$ ["EN", "Interface Language"] = "Language"
 uiMessage$ ["EN", "Speaker is a"] = "Speaker is a"
@@ -173,82 +199,86 @@ uiMessage$ ["EN", "Open"] = "Open"
 uiMessage$ ["EN", "Record"] = "Record"
 
 # Dutch
-uiMessage$ ["NL", "PauseRecord"] = "Neem lopende spraak op"
-uiMessage$ ["NL", "Record1"] = "Neem de %%lopende spraak% op"
-uiMessage$ ["NL", "Record2"] = "Zorg dat u klaar ben om te spreken"
-uiMessage$ ["NL", "Record3"] = "Selecteer de spraak die u wilt analyseren"
-uiMessage$ ["NL", "Open1"] = "Open de spraakopname"
-uiMessage$ ["NL", "Open2"] = "Selecteer de spraak die u wilt analyseren"
-uiMessage$ ["NL", "Corneri"] = "h%%ie%t"
-uiMessage$ ["NL", "Corneru"] = "h%%oe%d"
-uiMessage$ ["NL", "Cornera"] = "h%%aa%t"
-uiMessage$ ["NL", "DistanceTitle"] = "Rel. Afstand (N)"
-uiMessage$ ["NL", "AreaTitle"] = "Rel. Oppervlak"
-uiMessage$ ["NL", "Area1"] = "1"
-uiMessage$ ["NL", "Area2"] = "2"
-uiMessage$ ["NL", "AreaN"] = "N"
+uiMessage$ ["NL", "PauseRecord"] 	= "Neem lopende spraak op"
+uiMessage$ ["NL", "Record1"] 		= "Neem de %%lopende spraak% op"
+uiMessage$ ["NL", "Record2"] 		= "Zorg dat u klaar ben om te spreken"
+uiMessage$ ["NL", "Record3"] 		= "Selecteer de spraak die u wilt analyseren"
+uiMessage$ ["NL", "Open1"] 			= "Open de spraakopname"
+uiMessage$ ["NL", "Open2"] 			= "Selecteer de spraak die u wilt analyseren"
+uiMessage$ ["NL", "Corneri"] 		= "h%%ie%t"
+uiMessage$ ["NL", "Corneru"] 		= "h%%oe%d"
+uiMessage$ ["NL", "Cornera"] 		= "h%%aa%t"
+uiMessage$ ["NL", "DistanceTitle"] 	= "Rel. Afstand (N)"
+uiMessage$ ["NL", "AreaTitle"] 		= "Rel. Oppervlak"
+uiMessage$ ["NL", "Area1"] 			= "1"
+uiMessage$ ["NL", "Area2"] 			= "2"
+uiMessage$ ["NL", "AreaN"] 			= "N"
 
-uiMessage$ ["NL", "LogFile"] = "Schrijf resultaten naar log bestand (""-"" schrijft naar info venster)"
+uiMessage$ ["NL", "LogFile"] 		= "Schrijf resultaten naar log bestand (""-"" schrijft naar info venster)"
 uiMessage$ ["NL", "CommentContinue"] = "Klik op ""Doorgaan"" als u meer spraakopnamen wilt analyseren"
-uiMessage$ ["NL", "CommentOpen"] = "Klik op ""Open"" en selecteer een opname"
-uiMessage$ ["NL", "CommentRecord"] = "Klik op ""Opnemen"" en start met spreken"
-uiMessage$ ["NL", "CommentList"] = "Spraak opnemen, ""Save to list & Close"", daarna klik op ""Continue"""
-uiMessage$ ["NL", "SavePicture"] = "Bewaar afbeelding"
-uiMessage$ ["NL", "DoContinue"] = "Wilt u doorgaan?"
-uiMessage$ ["NL", "SelectSound1"] = "Selecteer het spraakfragment en ga door"
-uiMessage$ ["NL", "SelectSound2"] = "Het is mogelijk om ongewenste geluiden uit de opname te verwijderen"
-uiMessage$ ["NL", "SelectSound3"] = "Selecteer het ongewenste deel en kies ""Cut"" in het ""Edit"" menue"
-uiMessage$ ["NL", "Stopped"] = "Vowel Triangle is gestopt"
-uiMessage$ ["NL", "ErrorSound"] = "Fout: Dit is geen geluid "
+uiMessage$ ["NL", "CommentOpen"] 	= "Klik op ""Open"" en selecteer een opname"
+uiMessage$ ["NL", "CommentRecord"] 	= "Klik op ""Opnemen"" en start met spreken"
+uiMessage$ ["NL", "CommentList"] 	= "Spraak opnemen, ""Save to list & Close"", daarna klik op ""Continue"""
+uiMessage$ ["NL", "SavePicture"] 	= "Bewaar afbeelding"
+uiMessage$ ["NL", "DoContinue"] 	= "Wilt u doorgaan?"
+uiMessage$ ["NL", "SelectSound1"] 	= "Selecteer het spraakfragment en ga door"
+uiMessage$ ["NL", "SelectSound2"] 	= "Het is mogelijk om ongewenste geluiden uit de opname te verwijderen"
+uiMessage$ ["NL", "SelectSound3"] 	= "Selecteer het ongewenste deel en kies ""Cut"" in het ""Edit"" menue"
+uiMessage$ ["NL", "Stopped"] 		= "Vowel Triangle is gestopt"
+uiMessage$ ["NL", "ErrorSound"] 	= "Fout: Dit is geen geluid "
+uiMessage$ ["NL", "Nothing to do"] 	= "Geen taken"
+uiMessage$ ["NL", "No readable recording selected "] = "Geen leesbare opname geselecteerd "
 
 uiMessage$ ["NL", "Interface Language"] = "Taal (Language)"
-uiMessage$ ["NL", "Speaker is a"] = "De Spreker is een"
-uiMessage$ ["NL", "Male"] = "Man"
-uiMessage$ ["NL", "Female"] = "Vrouw"
-uiMessage$ ["NL", "Continue"] = "Doorgaan"
-uiMessage$ ["NL", "Done"] = "Klaar"
-uiMessage$ ["NL", "Stop"] = "Stop"
-uiMessage$ ["NL", "Open"] = "Open"
-uiMessage$ ["NL", "Record"] = "Opnemen"
+uiMessage$ ["NL", "Speaker is a"] 	= "De Spreker is een"
+uiMessage$ ["NL", "Male"] 			= "Man"
+uiMessage$ ["NL", "Female"] 		= "Vrouw"
+uiMessage$ ["NL", "Continue"] 		= "Doorgaan"
+uiMessage$ ["NL", "Done"] 			= "Klaar"
+uiMessage$ ["NL", "Stop"] 			= "Stop"
+uiMessage$ ["NL", "Open"] 			= "Open"
+uiMessage$ ["NL", "Record"] 		= "Opnemen"
 
 # German
-uiMessage$ ["DE", "PauseRecord"] = "Zeichne laufende Sprache auf"
-uiMessage$ ["DE", "Record1"] = "Die %%laufende Sprache% aufzeichnen"
-uiMessage$ ["DE", "Record2"] = "Bitte seien Sie bereit zu sprechen"
-uiMessage$ ["DE", "Record3"] = "Wählen Sie die Sprachaufnahme, die Sie analysieren möchten"
-uiMessage$ ["DE", "Open1"] = "Öffnen Sie die Sprachaufnahme"
-uiMessage$ ["DE", "Open2"] = "Wählen Sie die Sprachaufnahme, die Sie analysieren möchten"
-uiMessage$ ["DE", "Corneri"] = "L%%ie%d"
-uiMessage$ ["DE", "Corneru"] = "H%%u%t"
-uiMessage$ ["DE", "Cornera"] = "T%%a%l"
-uiMessage$ ["DE", "DistanceTitle"] = "Rel. Länge (N)"
-uiMessage$ ["DE", "AreaTitle"] = "Rel. Oberfläche"
-uiMessage$ ["DE", "Area1"] = "1"
-uiMessage$ ["DE", "Area2"] = "2"
-uiMessage$ ["DE", "AreaN"] = "N"
+uiMessage$ ["DE", "PauseRecord"] 	= "Zeichne laufende Sprache auf"
+uiMessage$ ["DE", "Record1"] 		= "Die %%laufende Sprache% aufzeichnen"
+uiMessage$ ["DE", "Record2"] 		= "Bitte seien Sie bereit zu sprechen"
+uiMessage$ ["DE", "Record3"] 		= "Wählen Sie die Sprachaufnahme, die Sie analysieren möchten"
+uiMessage$ ["DE", "Open1"] 			= "Öffnen Sie die Sprachaufnahme"
+uiMessage$ ["DE", "Open2"] 			= "Wählen Sie die Sprachaufnahme, die Sie analysieren möchten"
+uiMessage$ ["DE", "Corneri"] 		= "L%%ie%d"
+uiMessage$ ["DE", "Corneru"] 		= "H%%u%t"
+uiMessage$ ["DE", "Cornera"] 		= "T%%a%l"
+uiMessage$ ["DE", "DistanceTitle"] 	= "Rel. Länge (N)"
+uiMessage$ ["DE", "AreaTitle"] 		= "Rel. Oberfläche"
+uiMessage$ ["DE", "Area1"] 			= "1"
+uiMessage$ ["DE", "Area2"] 			= "2"
+uiMessage$ ["DE", "AreaN"] 			= "N"
                                      
-uiMessage$ ["DE", "LogFile"] = "Daten in Tabelle schreiben (""-"" in das Informationsfenster schreiben)"
+uiMessage$ ["DE", "LogFile"] 		= "Daten in Tabelle schreiben (""-"" in das Informationsfenster schreiben)"
 uiMessage$ ["DE", "CommentContinue"]= "Klicken Sie auf ""Weiter"", wenn Sie mehr Sprachproben analysieren möchten"
-uiMessage$ ["DE", "CommentOpen"] = "Klicke auf ""Öffnen"" und wähle eine Aufnahme"
-uiMessage$ ["DE", "CommentRecord"] = "Klicke auf ""Aufzeichnen"" und sprich"
-uiMessage$ ["DE", "CommentList"] = "Sprache aufnehmen, ""Save to list & Close"", dann klicken Sie auf ""Weiter"""
-uiMessage$ ["DE", "SavePicture"] = "Bild speichern"
-uiMessage$ ["DE", "DoContinue"] = "Möchten Sie weitergehen?"
-uiMessage$ ["DE", "SelectSound1"] = "Wählen Sie den Aufnahmebereich und gehen Sie weiter"
-uiMessage$ ["DE", "SelectSound2"] = "Es ist möglich, unerwünschte Geräusche aus der Auswahl zu entfernen"
-uiMessage$ ["DE", "SelectSound3"] = "Wählen Sie den unerwünschten Teil und wählen Sie dann ""Cut"" aus dem ""*Edit"" Menü"
-uiMessage$ ["DE", "Stopped"] = "VowelTriangle ist gestoppt"
-uiMessage$ ["DE", "ErrorSound"] = "Fehler: Keine Sprache gefunden"
-                                     
+uiMessage$ ["DE", "CommentOpen"] 	= "Klicke auf ""Öffnen"" und wähle eine Aufnahme"
+uiMessage$ ["DE", "CommentRecord"] 	= "Klicke auf ""Aufzeichnen"" und sprich"
+uiMessage$ ["DE", "CommentList"] 	= "Sprache aufnehmen, ""Save to list & Close"", dann klicken Sie auf ""Weiter"""
+uiMessage$ ["DE", "SavePicture"] 	= "Bild speichern"
+uiMessage$ ["DE", "DoContinue"] 	= "Möchten Sie weitergehen?"
+uiMessage$ ["DE", "SelectSound1"] 	= "Wählen Sie den Aufnahmebereich und gehen Sie weiter"
+uiMessage$ ["DE", "SelectSound2"] 	= "Es ist möglich, unerwünschte Geräusche aus der Auswahl zu entfernen"
+uiMessage$ ["DE", "SelectSound3"] 	= "Wählen Sie den unerwünschten Teil und wählen Sie dann ""Cut"" aus dem ""*Edit"" Menü"
+uiMessage$ ["DE", "Stopped"] 		= "VowelTriangle ist gestoppt"
+uiMessage$ ["DE", "ErrorSound"] 	= "Fehler: Keine Sprache gefunden"
+uiMessage$ ["DE", "Nothing to do"] 	= "Keine Aufgaben"
+uiMessage$ ["DE", "No readable recording selected "] = "Keine verwertbare Aufnahme ausgewählt "
+               
 uiMessage$ ["DE", "Interface Language"] = "Sprache (Language)"
-uiMessage$ ["DE", "Speaker is a"] = "Der Sprecher ist ein(e)"
-uiMessage$ ["DE", "Male"] = "Man"
-uiMessage$ ["DE", "Female"] = "Frau"
-uiMessage$ ["DE", "Continue"] = "Weitergehen"
-uiMessage$ ["DE", "Done"] = "Fertig"
-uiMessage$ ["DE", "Stop"] = "Halt"
-uiMessage$ ["DE", "Open"] = "Öffnen"
-uiMessage$ ["DE", "Record"] = "Aufzeichnung"
+uiMessage$ ["DE", "Speaker is a"] 	= "Der Sprecher ist ein(e)"
+uiMessage$ ["DE", "Male"] 			= "Man"
+uiMessage$ ["DE", "Female"] 		= "Frau"
+uiMessage$ ["DE", "Continue"] 		= "Weitergehen"
+uiMessage$ ["DE", "Done"] 			= "Fertig"
+uiMessage$ ["DE", "Stop"] 			= "Halt"
+uiMessage$ ["DE", "Open"] 			= "Öffnen"
+uiMessage$ ["DE", "Record"] 		= "Aufzeichnung"
 
 # French
 uiMessage$ ["FR", "PauseRecord"]	= "Enregistrer un discours continu"
@@ -278,7 +308,9 @@ uiMessage$ ["FR", "SelectSound2"]	= "Il est possible de supprimer les sons indé
 uiMessage$ ["FR", "SelectSound3"]	= "Sélectionnez la partie indésirable, puis choisissez ""Cut"" dans le menu ""Edit"""
 uiMessage$ ["FR", "Stopped"]		= "VowelTriangle s'est arrêté"
 uiMessage$ ["FR", "ErrorSound"]		= "Erreur: pas du son"
-                                     
+uiMessage$ ["FR", "Nothing to do"] 	= "Rien à faire"
+uiMessage$ ["FR", "No readable recording selected "] = "Aucun enregistrement utilisable sélectionné "
+                  
 uiMessage$ ["FR", "Interface Language"] = "Langue (Language)"
 uiMessage$ ["FR", "Speaker is a"]	= "Le locuteur est un(e)"
 uiMessage$ ["FR", "Male"] 			= "Homme"
@@ -305,18 +337,20 @@ uiMessage$ ["ZH", "Area1"] = "1"
 uiMessage$ ["ZH", "Area2"] = "2"
 uiMessage$ ["ZH", "AreaN"] = "N"
 
-uiMessage$ ["ZH", "LogFile"] = "将日志写入表格 (""-"" 写入信息窗口)"
+uiMessage$ ["ZH", "LogFile"] 		= "将日志写入表格 (""-"" 写入信息窗口)"
 uiMessage$ ["ZH", "CommentContinue"] = "点击 ""继续"" 如果你想分析更多的语音样本"
-uiMessage$ ["ZH", "CommentOpen"] = "点击 ""打开录音"" 并选择一个录音"
-uiMessage$ ["ZH", "CommentRecord"] = "点击 ""录制演讲"" 并开始讲话"
-uiMessage$ ["ZH", "CommentList"] = "录制声音, ""Save to list & Close"", 然后单击 ""Continue"""
-uiMessage$ ["ZH", "SavePicture"] = "保存图片"
-uiMessage$ ["ZH", "DoContinue"] = "你想继续吗"
-uiMessage$ ["ZH", "SelectSound1"] = "选择声音并继续"
-uiMessage$ ["ZH", "SelectSound2"] = "可以从选择中删除不需要的声音"
-uiMessage$ ["ZH", "SelectSound3"] = "选择不需要的部分，然后选择 ""Cut"" 从 ""编辑"" 菜单"
-uiMessage$ ["ZH", "Stopped"] = "VowelTriangle 停了下来"
-uiMessage$ ["ZH", "ErrorSound"] = "错误：没有声音"
+uiMessage$ ["ZH", "CommentOpen"] 	= "点击 ""打开录音"" 并选择一个录音"
+uiMessage$ ["ZH", "CommentRecord"] 	= "点击 ""录制演讲"" 并开始讲话"
+uiMessage$ ["ZH", "CommentList"] 	= "录制声音, ""Save to list & Close"", 然后单击 ""Continue"""
+uiMessage$ ["ZH", "SavePicture"] 	= "保存图片"
+uiMessage$ ["ZH", "DoContinue"] 	= "你想继续吗"
+uiMessage$ ["ZH", "SelectSound1"] 	= "选择声音并继续"
+uiMessage$ ["ZH", "SelectSound2"] 	= "可以从选择中删除不需要的声音"
+uiMessage$ ["ZH", "SelectSound3"] 	= "选择不需要的部分，然后选择 ""Cut"" 从 ""编辑"" 菜单"
+uiMessage$ ["ZH", "Stopped"] 		= "VowelTriangle 停了下来"
+uiMessage$ ["ZH", "ErrorSound"] 	= "错误：没有声音"
+uiMessage$ ["ZH", "Nothing to do"] 	= "无事可做"
+uiMessage$ ["ZH", "No readable recording selected "] = "没有选择可读的录音 "
 
 uiMessage$ ["ZH", "Interface Language"] = "语言 (Language)"
 uiMessage$ ["ZH", "Speaker is a"]	= "演讲者是"
@@ -357,8 +391,10 @@ uiMessage$ ["ES", "SelectSound2"]	= "Es posible eliminar sonidos no deseados de 
 uiMessage$ ["ES", "SelectSound3"]	= "Seleccione la parte no deseada, luego elija ""Cut"" desde el menú ""Edit"""
 uiMessage$ ["ES", "Stopped"]		= "VowelTriangle se ha detenido"
 uiMessage$ ["ES", "ErrorSound"]		= "Error: no hay sonido"
-                                      
-uiMessage$ ["ES", "Interface Language"] 		= "Idioma (Language)"
+uiMessage$ ["ES", "Nothing to do"] 	= "Nada que hacer"
+uiMessage$ ["ES", "No readable recording selected "] = "No se ha seleccionado ningún registro utilizable "
+
+uiMessage$ ["ES", "Interface Language"] = "Idioma (Language)"
 uiMessage$ ["ES", "Speaker is a"]	= "El hablante es un(a)"
 uiMessage$ ["ES", "Male"] 			= "Hombre"
 uiMessage$ ["ES", "Female"] 		= "Mujer"
@@ -390,7 +426,7 @@ uiMessage$ ["ES", "Record"]			= "Guardar"
 # "1"
 # "2"
 # "N"
-#
+
 # "Write log to table (""-"" write to the info window)"
 # "Click on ""Continue"" if you want to analyze more speech samples"
 # "Click on ""Open"" and select a recording"
@@ -403,7 +439,13 @@ uiMessage$ ["ES", "Record"]			= "Guardar"
 # "Select the unwanted part and then chose ""Cut"" from the ""Edit"" menu"
 # "Vowel Triangle stopped"
 # "Error: Not a sound "
-#
+# "Nothing to do"
+# "No readable recording selected "
+
+# "Language"
+# "Speaker is a"
+# "Male"
+# "Female"
 # "Continue"
 # "Done"
 # "Stop"
@@ -653,13 +695,15 @@ while .continue
 			option: "Español"
 		#   option: "MyLanguage"
 		boolean: "Log", (output_table$ <> "")
-	.clicked = endPause: (uiMessage$ [uiLanguage$, "Stop"]), (uiMessage$ [uiLanguage$, "Record"]), (uiMessage$ [uiLanguage$, "Open"]), 3, 1
+	.clicked = endPause: (uiMessage$ [uiLanguage$, "Stop"]), (uiMessage$ [uiLanguage$, "Record"]), (uiMessage$ [uiLanguage$, "Open"]), 3, 1	
 	if .clicked = 1
 		.continue = 0
-		@exitVowelTriangle: "Nothing to do"
+		.message$ = uiMessage$ [uiLanguage$, "Nothing to do"]
+		@exitVowelTriangle: .message$
 	elsif .clicked = 2
 		.recording = 1
 	endif
+
 	.sp$ = "M"
 	.sp_default = 2
 	if '.speakerIsAVar$'$ = uiMessage$ [uiLanguage$, "Female"]
@@ -690,6 +734,11 @@ while .continue
 	#	uiLanguage$ = "MyCode"
 	#	.defaultLanguage = 7
 	endif
+	
+	# Store preferences
+	writeFileLine: .preferencesLanguageFile$, "Language=",uiLanguage$
+	
+	# Start
 	if log and output_table$ = ""
 		Erase all
 		Select inner viewport: 0.5, 7.5, 0.5, 4.5
@@ -775,7 +824,7 @@ procedure read_and_select_audio .type .message1$ .message2$
 			comment: uiMessage$ [uiLanguage$, "CommentList"]
 		.clicked = endPause: (uiMessage$ [uiLanguage$, "Stop"]), (uiMessage$ [uiLanguage$, "Continue"]), 2, 1
 		if .clicked = 1
-			@exitVowelTriangle: "Vowel Triangle stopped"
+			@exitVowelTriangle: (uiMessage$ [uiLanguage$, "Stopped"])
 		endif
 		if numberOfSelected("Sound") <= 0
 			@exitVowelTriangle: (uiMessage$ [uiLanguage$, "ErrorSound"])
@@ -785,7 +834,7 @@ procedure read_and_select_audio .type .message1$ .message2$
 	else
 		.filename$ = chooseReadFile$: .message1$
 		if .filename$ = "" or not fileReadable(.filename$) or not index_regex(.filename$, "(?i\.(wav|mp3|aif[fc]))")
-			@exitVowelTriangle: "No readable recording selected "+.filename$
+			@exitVowelTriangle: (uiMessage$ [uiLanguage$, "No readable recording selected "])+.filename$
 		endif
 		
 		.source = Open long sound file: .filename$

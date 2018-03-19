@@ -110,7 +110,8 @@ endif
 .recordingTime = 4
 
 # Define Language
-language$ = "NL"
+# Add new targets if necessary
+phonLanguage$ = "NL"
 numVowels = 12
 vowelList$ [1] = "i"
 vowelList$ [2] = "I"
@@ -161,6 +162,7 @@ uiMessage$ ["EN", "SelectSound3"] = "Select the unwanted part and then chose ""C
 uiMessage$ ["EN", "Stopped"] = "Vowel Triangle stopped"
 uiMessage$ ["EN", "ErrorSound"] = "Error: Not a sound "
 
+uiMessage$ ["EN", "Interface Language"] = "Language"
 uiMessage$ ["EN", "Speaker is a"] = "Speaker is a"
 uiMessage$ ["EN", "Male"] = "Male"
 uiMessage$ ["EN", "Female"] = "Female"
@@ -199,6 +201,7 @@ uiMessage$ ["NL", "SelectSound3"] = "Selecteer het ongewenste deel en kies ""Cut
 uiMessage$ ["NL", "Stopped"] = "Vowel Triangle is gestopt"
 uiMessage$ ["NL", "ErrorSound"] = "Fout: Dit is geen geluid "
 
+uiMessage$ ["NL", "Interface Language"] = "Taal (Language)"
 uiMessage$ ["NL", "Speaker is a"] = "De Spreker is een"
 uiMessage$ ["NL", "Male"] = "Man"
 uiMessage$ ["NL", "Female"] = "Vrouw"
@@ -237,6 +240,7 @@ uiMessage$ ["DE", "SelectSound3"] = "Wählen Sie den unerwünschten Teil und wä
 uiMessage$ ["DE", "Stopped"] = "VowelTriangle ist gestoppt"
 uiMessage$ ["DE", "ErrorSound"] = "Fehler: Keine Sprache gefunden"
                                      
+uiMessage$ ["DE", "Interface Language"] = "Sprache (Language)"
 uiMessage$ ["DE", "Speaker is a"] = "Der Sprecher ist ein(e)"
 uiMessage$ ["DE", "Male"] = "Man"
 uiMessage$ ["DE", "Female"] = "Frau"
@@ -275,7 +279,8 @@ uiMessage$ ["FR", "SelectSound3"]	= "Sélectionnez la partie indésirable, puis 
 uiMessage$ ["FR", "Stopped"]		= "VowelTriangle s'est arrêté"
 uiMessage$ ["FR", "ErrorSound"]		= "Erreur: pas du son"
                                      
-uiMessage$ ["FR", "Speaker is a"]	= "L'orateur est un(e)"
+uiMessage$ ["FR", "Interface Language"] = "Langue (Language)"
+uiMessage$ ["FR", "Speaker is a"]	= "Le locuteur est un(e)"
 uiMessage$ ["FR", "Male"] 			= "Homme"
 uiMessage$ ["FR", "Female"] 		= "Femme"
 uiMessage$ ["FR", "Continue"]		= "Continuer"
@@ -313,6 +318,7 @@ uiMessage$ ["ZH", "SelectSound3"] = "选择不需要的部分，然后选择 ""C
 uiMessage$ ["ZH", "Stopped"] = "VowelTriangle 停了下来"
 uiMessage$ ["ZH", "ErrorSound"] = "错误：没有声音"
 
+uiMessage$ ["ZH", "Interface Language"] = "语言 (Language)"
 uiMessage$ ["ZH", "Speaker is a"]	= "演讲者是"
 uiMessage$ ["ZH", "Male"] = "男性"
 uiMessage$ ["ZH", "Female"] = "女性"
@@ -352,6 +358,7 @@ uiMessage$ ["ES", "SelectSound3"]	= "Seleccione la parte no deseada, luego elija
 uiMessage$ ["ES", "Stopped"]		= "VowelTriangle se ha detenido"
 uiMessage$ ["ES", "ErrorSound"]		= "Error: no hay sonido"
                                       
+uiMessage$ ["ES", "Interface Language"] 		= "Idioma (Language)"
 uiMessage$ ["ES", "Speaker is a"]	= "El hablante es un(a)"
 uiMessage$ ["ES", "Male"] 			= "Hombre"
 uiMessage$ ["ES", "Female"] 		= "Mujer"
@@ -407,101 +414,101 @@ uiMessage$ ["ES", "Record"]			= "Guardar"
 
 # Formant values
 
-# Male
-phonemes ["NL", "M", "i_corner", "F1"] = 250
-phonemes ["NL", "M", "i_corner", "F2"] = 2100
-phonemes ["NL", "M", "a_corner", "F1"] = 850
-phonemes ["NL", "M", "a_corner", "F2"] = 1290
-phonemes ["NL", "M", "u_corner", "F1"] = 285
-phonemes ["NL", "M", "u_corner", "F2"] = 650
+# Male 
+phonemes [phonLanguage$, "M", "i_corner", "F1"] = 250
+phonemes [phonLanguage$, "M", "i_corner", "F2"] = 2100
+phonemes [phonLanguage$, "M", "a_corner", "F1"] = 850
+phonemes [phonLanguage$, "M", "a_corner", "F2"] = 1290
+phonemes [phonLanguage$, "M", "u_corner", "F1"] = 285
+phonemes [phonLanguage$, "M", "u_corner", "F2"] = 650
 # @_center is not fixed but derived from current corners
-phonemes ["NL", "M", "@_center", "F1"] =(phonemes ["NL", "M", "i_corner", "F1"]*phonemes ["NL", "M", "u_corner", "F1"]*phonemes ["NL", "M", "a_corner", "F1"])^(1/3)
-phonemes ["NL", "M", "@_center", "F2"] = (phonemes ["NL", "M", "i_corner", "F2"]*phonemes ["NL", "M", "u_corner", "F2"]*phonemes ["NL", "M", "a_corner", "F2"])^(1/3)
+phonemes [phonLanguage$, "M", "@_center", "F1"] =(phonemes [phonLanguage$, "M", "i_corner", "F1"]*phonemes [phonLanguage$, "M", "u_corner", "F1"]*phonemes [phonLanguage$, "M", "a_corner", "F1"])^(1/3)
+phonemes [phonLanguage$, "M", "@_center", "F2"] = (phonemes [phonLanguage$, "M", "i_corner", "F2"]*phonemes [phonLanguage$, "M", "u_corner", "F2"]*phonemes [phonLanguage$, "M", "a_corner", "F2"])^(1/3)
 
 # Formant values according to 
 # IFA corpus averages from FPA isolated vowels
 # Using Split-Levinson algorithm
-phonemes ["NL", "M", "A", "F1"] = 695.6000
-phonemes ["NL", "M", "A", "F2"] = 1065.500
-phonemes ["NL", "M", "E", "F1"] = 552.5000
-phonemes ["NL", "M", "E", "F2"] = 1659.200
-phonemes ["NL", "M", "I", "F1"] = 378.0909
-phonemes ["NL", "M", "I", "F2"] = 1868.545
-phonemes ["NL", "M", "O", "F1"] = 482.9000
-phonemes ["NL", "M", "O", "F2"] = 725.800
-phonemes ["NL", "M", "Y", "F1"] = 417.7000
-phonemes ["NL", "M", "Y", "F2"] = 1455.100
-phonemes ["NL", "M", "Y:", "F1"] = 386.3000
-phonemes ["NL", "M", "Y:", "F2"] = 1492.400
-phonemes ["NL", "M", "a", "F1"] = 788.6000
-phonemes ["NL", "M", "a", "F2"] = 1290.600
-phonemes ["NL", "M", "au", "F1"] = 583.8000
-phonemes ["NL", "M", "au", "F2"] = 959.300
-phonemes ["NL", "M", "e", "F1"] = 372.3000
-phonemes ["NL", "M", "e", "F2"] = 1959.700
-phonemes ["NL", "M", "ei", "F1"] = 499.5000
-phonemes ["NL", "M", "ei", "F2"] = 1733.000
-phonemes ["NL", "M", "i", "F1"] = 259.5556
-phonemes ["NL", "M", "i", "F2"] = 1971.889
-phonemes ["NL", "M", "o", "F1"] = 426.7000
-phonemes ["NL", "M", "o", "F2"] = 743.600
-phonemes ["NL", "M", "u", "F1"] = 287.5000
-phonemes ["NL", "M", "u", "F2"] = 666.500
-phonemes ["NL", "M", "ui", "F1"] = 495.3000
-phonemes ["NL", "M", "ui", "F2"] = 1468.600
-phonemes ["NL", "M", "y", "F1"] = 268.4000
-phonemes ["NL", "M", "y", "F2"] = 1581.400
+phonemes [phonLanguage$, "M", "A", "F1"] = 695.6000
+phonemes [phonLanguage$, "M", "A", "F2"] = 1065.500
+phonemes [phonLanguage$, "M", "E", "F1"] = 552.5000
+phonemes [phonLanguage$, "M", "E", "F2"] = 1659.200
+phonemes [phonLanguage$, "M", "I", "F1"] = 378.0909
+phonemes [phonLanguage$, "M", "I", "F2"] = 1868.545
+phonemes [phonLanguage$, "M", "O", "F1"] = 482.9000
+phonemes [phonLanguage$, "M", "O", "F2"] = 725.800
+phonemes [phonLanguage$, "M", "Y", "F1"] = 417.7000
+phonemes [phonLanguage$, "M", "Y", "F2"] = 1455.100
+phonemes [phonLanguage$, "M", "Y:", "F1"] = 386.3000
+phonemes [phonLanguage$, "M", "Y:", "F2"] = 1492.400
+phonemes [phonLanguage$, "M", "a", "F1"] = 788.6000
+phonemes [phonLanguage$, "M", "a", "F2"] = 1290.600
+phonemes [phonLanguage$, "M", "au", "F1"] = 583.8000
+phonemes [phonLanguage$, "M", "au", "F2"] = 959.300
+phonemes [phonLanguage$, "M", "e", "F1"] = 372.3000
+phonemes [phonLanguage$, "M", "e", "F2"] = 1959.700
+phonemes [phonLanguage$, "M", "ei", "F1"] = 499.5000
+phonemes [phonLanguage$, "M", "ei", "F2"] = 1733.000
+phonemes [phonLanguage$, "M", "i", "F1"] = 259.5556
+phonemes [phonLanguage$, "M", "i", "F2"] = 1971.889
+phonemes [phonLanguage$, "M", "o", "F1"] = 426.7000
+phonemes [phonLanguage$, "M", "o", "F2"] = 743.600
+phonemes [phonLanguage$, "M", "u", "F1"] = 287.5000
+phonemes [phonLanguage$, "M", "u", "F2"] = 666.500
+phonemes [phonLanguage$, "M", "ui", "F1"] = 495.3000
+phonemes [phonLanguage$, "M", "ui", "F2"] = 1468.600
+phonemes [phonLanguage$, "M", "y", "F1"] = 268.4000
+phonemes [phonLanguage$, "M", "y", "F2"] = 1581.400
 # Guessed
-phonemes ["NL", "M", "@", "F1"] = 417.7000
-phonemes ["NL", "M", "@", "F2"] = 1455.100
+phonemes [phonLanguage$, "M", "@", "F1"] = 417.7000
+phonemes [phonLanguage$, "M", "@", "F2"] = 1455.100
 
 # Female
-phonemes ["NL", "F", "i_corner", "F1"] = 280
-phonemes ["NL", "F", "i_corner", "F2"] = 2200
-phonemes ["NL", "F", "a_corner", "F1"] = 900
-phonemes ["NL", "F", "a_corner", "F2"] = 1435
-phonemes ["NL", "F", "u_corner", "F1"] = 370
-phonemes ["NL", "F", "u_corner", "F2"] = 700
+phonemes [phonLanguage$, "F", "i_corner", "F1"] = 280
+phonemes [phonLanguage$, "F", "i_corner", "F2"] = 2200
+phonemes [phonLanguage$, "F", "a_corner", "F1"] = 900
+phonemes [phonLanguage$, "F", "a_corner", "F2"] = 1435
+phonemes [phonLanguage$, "F", "u_corner", "F1"] = 370
+phonemes [phonLanguage$, "F", "u_corner", "F2"] = 700
 # @_center is not fixed but derived from current corners
-phonemes ["NL", "F", "@_center", "F1"] =(phonemes ["NL", "F", "i_corner", "F1"]*phonemes ["NL", "F", "u_corner", "F1"]*phonemes ["NL", "F", "a_corner", "F1"])^(1/3)
-phonemes ["NL", "F", "@_center", "F2"] = (phonemes ["NL", "F", "i_corner", "F2"]*phonemes ["NL", "F", "u_corner", "F2"]*phonemes ["NL", "F", "a_corner", "F2"])^(1/3)
+phonemes [phonLanguage$, "F", "@_center", "F1"] =(phonemes [phonLanguage$, "F", "i_corner", "F1"]*phonemes [phonLanguage$, "F", "u_corner", "F1"]*phonemes [phonLanguage$, "F", "a_corner", "F1"])^(1/3)
+phonemes [phonLanguage$, "F", "@_center", "F2"] = (phonemes [phonLanguage$, "F", "i_corner", "F2"]*phonemes [phonLanguage$, "F", "u_corner", "F2"]*phonemes [phonLanguage$, "F", "a_corner", "F2"])^(1/3)
 
 # Formant values according to 
 # IFA corpus average from FPA isolated vowels
 # Using Split-Levinson algorithm
-phonemes ["NL", "F", "A", "F1"] = 817.7000
-phonemes ["NL", "F", "A", "F2"] = 1197.300
-phonemes ["NL", "F", "E", "F1"] = 667.9000
-phonemes ["NL", "F", "E", "F2"] = 1748.500
-phonemes ["NL", "F", "I", "F1"] = 429.2222
-phonemes ["NL", "F", "I", "F2"] = 1937.333
-phonemes ["NL", "F", "O", "F1"] = 570.8000
-phonemes ["NL", "F", "O", "F2"] = 882.100
-phonemes ["NL", "F", "Y", "F1"] = 495.7000
-phonemes ["NL", "F", "Y", "F2"] = 1635.600
-phonemes ["NL", "F", "Y:", "F1"] = 431.1000
-phonemes ["NL", "F", "Y:", "F2"] = 1695.100
-phonemes ["NL", "F", "a", "F1"] = 853.6000
-phonemes ["NL", "F", "a", "F2"] = 1435.800
-phonemes ["NL", "F", "au", "F1"] = 647.6000
-phonemes ["NL", "F", "au", "F2"] = 1056.700
-phonemes ["NL", "F", "e", "F1"] = 429.9000
-phonemes ["NL", "F", "e", "F2"] = 1861.700
-phonemes ["NL", "F", "ei", "F1"] = 619.9000
-phonemes ["NL", "F", "ei", "F2"] = 1718.500
-phonemes ["NL", "F", "i", "F1"] = 294.3000
-phonemes ["NL", "F", "i", "F2"] = 1855.000
-phonemes ["NL", "F", "o", "F1"] = 527.5000
-phonemes ["NL", "F", "o", "F2"] = 894.100
-phonemes ["NL", "F", "u", "F1"] = 376.0000
-phonemes ["NL", "F", "u", "F2"] = 735.200
-phonemes ["NL", "F", "ui", "F1"] = 612.8000
-phonemes ["NL", "F", "ui", "F2"] = 1559.200
-phonemes ["NL", "F", "y", "F1"] = 321.2000
-phonemes ["NL", "F", "y", "F2"] = 1741.700
+phonemes [phonLanguage$, "F", "A", "F1"] = 817.7000
+phonemes [phonLanguage$, "F", "A", "F2"] = 1197.300
+phonemes [phonLanguage$, "F", "E", "F1"] = 667.9000
+phonemes [phonLanguage$, "F", "E", "F2"] = 1748.500
+phonemes [phonLanguage$, "F", "I", "F1"] = 429.2222
+phonemes [phonLanguage$, "F", "I", "F2"] = 1937.333
+phonemes [phonLanguage$, "F", "O", "F1"] = 570.8000
+phonemes [phonLanguage$, "F", "O", "F2"] = 882.100
+phonemes [phonLanguage$, "F", "Y", "F1"] = 495.7000
+phonemes [phonLanguage$, "F", "Y", "F2"] = 1635.600
+phonemes [phonLanguage$, "F", "Y:", "F1"] = 431.1000
+phonemes [phonLanguage$, "F", "Y:", "F2"] = 1695.100
+phonemes [phonLanguage$, "F", "a", "F1"] = 853.6000
+phonemes [phonLanguage$, "F", "a", "F2"] = 1435.800
+phonemes [phonLanguage$, "F", "au", "F1"] = 647.6000
+phonemes [phonLanguage$, "F", "au", "F2"] = 1056.700
+phonemes [phonLanguage$, "F", "e", "F1"] = 429.9000
+phonemes [phonLanguage$, "F", "e", "F2"] = 1861.700
+phonemes [phonLanguage$, "F", "ei", "F1"] = 619.9000
+phonemes [phonLanguage$, "F", "ei", "F2"] = 1718.500
+phonemes [phonLanguage$, "F", "i", "F1"] = 294.3000
+phonemes [phonLanguage$, "F", "i", "F2"] = 1855.000
+phonemes [phonLanguage$, "F", "o", "F1"] = 527.5000
+phonemes [phonLanguage$, "F", "o", "F2"] = 894.100
+phonemes [phonLanguage$, "F", "u", "F1"] = 376.0000
+phonemes [phonLanguage$, "F", "u", "F2"] = 735.200
+phonemes [phonLanguage$, "F", "ui", "F1"] = 612.8000
+phonemes [phonLanguage$, "F", "ui", "F2"] = 1559.200
+phonemes [phonLanguage$, "F", "y", "F1"] = 321.2000
+phonemes [phonLanguage$, "F", "y", "F2"] = 1741.700
 # Guessed
-phonemes ["NL", "F", "@", "F1"] = 500.5
-phonemes ["NL", "F", "@", "F2"] = 1706.6
+phonemes [phonLanguage$, "F", "@", "F1"] = 500.5
+phonemes [phonLanguage$, "F", "@", "F2"] = 1706.6
 
 # Run as a non interactive program
 if input_table > 0
@@ -622,8 +629,13 @@ while .continue
 	
 	.speakerIsA$ = uiMessage$ [uiLanguage$, "Speaker is a"]
 	.speakerIsAVar$ = replace_regex$(.speakerIsA$, "^([A-Z])", "\l\1", 0)
-	.speakerIsAVar$ = replace_regex$(.speakerIsAVar$, "[\s.?!]", "_", 0)
-	
+	.speakerIsAVar$ = replace_regex$(.speakerIsAVar$, "\s*\(.*$", "", 0)
+	.speakerIsAVar$ = replace_regex$(.speakerIsAVar$, "[\s.?!()/\\\\]", "_", 0)
+	.languageInput$ = uiMessage$ [uiLanguage$, "Interface Language"]
+	.languageInputVar$ = replace_regex$(.languageInput$, "^([A-Z])", "\l\1", 0)
+	.languageInputVar$ = replace_regex$(.languageInputVar$, "\s*\(.*$", "", 0)
+	.languageInputVar$ = replace_regex$(.languageInputVar$, "[\s.?!()/\\\\]", "_", 0)
+
 	.recording = 0
 	beginPause: "Select a recording"
 		sentence: "Title", "untitled"
@@ -632,7 +644,7 @@ while .continue
 		choice: .speakerIsA$, .sp_default
 			option: uiMessage$ [uiLanguage$, "Female"]
 			option: uiMessage$ [uiLanguage$, "Male"]
-		optionMenu: "Display language", .defaultLanguage
+		optionMenu: .languageInput$, .defaultLanguage
 			option: "English"
 			option: "Nederlands"
 			option: "Deutsch"
@@ -656,28 +668,28 @@ while .continue
 	endif
 	uiLanguage$ = "EN"
 	.defaultLanguage = 1
-	if display_language$ = "Nederlands"
+	.display_language$ = '.languageInputVar$'$
+	if .display_language$ = "Nederlands"
 		uiLanguage$ = "NL"
 		.defaultLanguage = 2
-	elsif display_language$ = "Deutsch"
+	elsif .display_language$ = "Deutsch"
 		uiLanguage$ = "DE"
 		.defaultLanguage = 3
-	elsif display_language$ = "Français"
+	elsif .display_language$ = "Français"
 		uiLanguage$ = "FR"
 		.defaultLanguage = 4
-	elsif display_language$ = "汉语"
+	elsif .display_language$ = "汉语"
 		uiLanguage$ = "ZH"
 		.defaultLanguage = 5
-	elsif display_language$ = "Español"
+	elsif .display_language$ = "Español"
 		uiLanguage$ = "ES"
 		.defaultLanguage = 6
 	#
 	# Add a new language
-	# elsif display_language$ = "MyLanguage"
+	# elsif .display_language$ = "MyLanguage"
 	#	uiLanguage$ = "MyCode"
 	#	.defaultLanguage = 7
 	endif
-	
 	if log and output_table$ = ""
 		Erase all
 		Select inner viewport: 0.5, 7.5, 0.5, 4.5
@@ -872,11 +884,11 @@ procedure plot_vowels .plot .sp$ .sound
 
 	
 	# Set new @_center
-	phonemes [language$, .sp$, "@_center", "F1"] = (phonemes [language$, .sp$, "a", "F1"] * phonemes [language$, .sp$, "i", "F1"] * phonemes [language$, .sp$, "u", "F1"]) ** (1/3) 
-	phonemes [language$, .sp$, "@_center", "F2"] = (phonemes [language$, .sp$, "a", "F2"] * phonemes [language$, .sp$, "i", "F2"] * phonemes [language$, .sp$, "u", "F2"]) ** (1/3) 
+	phonemes [phonLanguage$, .sp$, "@_center", "F1"] = (phonemes [phonLanguage$, .sp$, "a", "F1"] * phonemes [phonLanguage$, .sp$, "i", "F1"] * phonemes [phonLanguage$, .sp$, "u", "F1"]) ** (1/3) 
+	phonemes [phonLanguage$, .sp$, "@_center", "F2"] = (phonemes [phonLanguage$, .sp$, "a", "F2"] * phonemes [phonLanguage$, .sp$, "i", "F2"] * phonemes [phonLanguage$, .sp$, "u", "F2"]) ** (1/3) 
 	
-	.f1_c = phonemes [language$, .sp$, "@_center", "F1"]
-	.f2_c = phonemes [language$, .sp$, "@_center", "F2"]
+	.f1_c = phonemes [phonLanguage$, .sp$, "@_center", "F1"]
+	.f2_c = phonemes [phonLanguage$, .sp$, "@_center", "F2"]
 	
 	# Plot center
 	@vowel2point: .sp$, .f1_c, .f2_c
@@ -884,8 +896,8 @@ procedure plot_vowels .plot .sp$ .sound
 	.st_c2 = vowel2point.y
 	
 	# Near /@/
-	.f1_c = phonemes [language$, .sp$, "@_center", "F1"]
-	.f2_c = phonemes [language$, .sp$, "@_center", "F2"]
+	.f1_c = phonemes [phonLanguage$, .sp$, "@_center", "F1"]
+	.f2_c = phonemes [phonLanguage$, .sp$, "@_center", "F2"]
 	@get_closest_vowels: 0, .sp$, .formants, .syllableKernels, .f1_c, .f2_c
 	.numVowelIntervals = get_closest_vowels.vowelNum
 	# Actually plot the vowels
@@ -901,8 +913,8 @@ procedure plot_vowels .plot .sp$ .sound
 	endif
 	
 	# Near /i/
-	.f1_i = phonemes [language$, .sp$, "i", "F1"]
-	.f2_i = phonemes [language$, .sp$, "i", "F2"]
+	.f1_i = phonemes [phonLanguage$, .sp$, "i", "F1"]
+	.f2_i = phonemes [phonLanguage$, .sp$, "i", "F2"]
 	@get_closest_vowels: 0, .sp$, .formants, .syllableKernels, .f1_i, .f2_i
 	.meanDistToCenter ["i"] = get_closest_vowels.meanDistance
 	.stdevDistToCenter ["i"] = get_closest_vowels.stdevDistance
@@ -920,8 +932,8 @@ procedure plot_vowels .plot .sp$ .sound
 	endif
 	
 	# Near /u/
-	.f1_u = phonemes [language$, .sp$, "u", "F1"]
-	.f2_u = phonemes [language$, .sp$, "u", "F2"]
+	.f1_u = phonemes [phonLanguage$, .sp$, "u", "F1"]
+	.f2_u = phonemes [phonLanguage$, .sp$, "u", "F2"]
 	@get_closest_vowels: 0, .sp$, .formants, .syllableKernels, .f1_u, .f2_u
 	.meanDistToCenter ["u"] = get_closest_vowels.meanDistance
 	.stdevDistToCenter ["u"] = get_closest_vowels.stdevDistance
@@ -939,8 +951,8 @@ procedure plot_vowels .plot .sp$ .sound
 	endif
 	
 	# Near /a/
-	.f1_a = phonemes [language$, .sp$, "a", "F1"]
-	.f2_a = phonemes [language$, .sp$, "a", "F2"]
+	.f1_a = phonemes [phonLanguage$, .sp$, "a", "F1"]
+	.f2_a = phonemes [phonLanguage$, .sp$, "a", "F2"]
 	@get_closest_vowels: 0, .sp$, .formants, .syllableKernels, .f1_a, .f2_a
 	.meanDistToCenter ["a"] = get_closest_vowels.meanDistance
 	.stdevDistToCenter ["a"] = get_closest_vowels.stdevDistance
@@ -1118,12 +1130,12 @@ procedure plot_standard_vowel .color$ .sp$ .vowel$ .reduction
 	while .vowel$ <> ""
 		.i += 1
 		.v$ = replace_regex$(.vowel$, "^\s*(\S[`]?).*$", "\1", 0)
-		.f1 = phonemes [language$, .sp$, .v$, "F1"]
-		.f2 = phonemes [language$, .sp$, .v$, "F2"]
+		.f1 = phonemes [phonLanguage$, .sp$, .v$, "F1"]
+		.f2 = phonemes [phonLanguage$, .sp$, .v$, "F2"]
 		if .reduction
 			.factor = 0.9^.reduction
-			.f1 = .factor * (.f1 - phonemes [language$, .sp$, "@", "F1"]) + phonemes [language$, .sp$, "@", "F1"]
-			.f2 = .factor * (.f2 - phonemes [language$, .sp$, "@", "F2"]) + phonemes [language$, .sp$, "@", "F2"]
+			.f1 = .factor * (.f1 - phonemes [phonLanguage$, .sp$, "@", "F1"]) + phonemes [phonLanguage$, .sp$, "@", "F1"]
+			.f2 = .factor * (.f2 - phonemes [phonLanguage$, .sp$, "@", "F2"]) + phonemes [phonLanguage$, .sp$, "@", "F2"]
 		endif
 		@vowel2point: .sp$, .f1, .f2
 		.x [.i] = vowel2point.x
@@ -1144,14 +1156,14 @@ endproc
 # Plot the vowel triangle
 procedure plot_vowel_triangle .sp$
 	# Draw vowel triangle
-	.a_F1 = phonemes [language$, .sp$, "a_corner", "F1"]
-	.a_F2 = phonemes [language$, .sp$, "a_corner", "F2"]
+	.a_F1 = phonemes [phonLanguage$, .sp$, "a_corner", "F1"]
+	.a_F2 = phonemes [phonLanguage$, .sp$, "a_corner", "F2"]
 
-	.i_F1 = phonemes [language$, .sp$, "i_corner", "F1"]
-	.i_F2 = phonemes [language$, .sp$, "i_corner", "F2"]
+	.i_F1 = phonemes [phonLanguage$, .sp$, "i_corner", "F1"]
+	.i_F2 = phonemes [phonLanguage$, .sp$, "i_corner", "F2"]
 
-	.u_F1 = phonemes [language$, .sp$, "u_corner", "F1"]
-	.u_F2 = phonemes [language$, .sp$, "u_corner", "F2"]
+	.u_F1 = phonemes [phonLanguage$, .sp$, "u_corner", "F1"]
+	.u_F2 = phonemes [phonLanguage$, .sp$, "u_corner", "F2"]
 	
 	Dashed line
 	# u - i
@@ -1197,14 +1209,14 @@ procedure vowel2point .sp$ .f1 .f2
 	.spt1 = 12*log2(.f1)
 	.spt2 = 12*log2(.f2)
 	
-	.a_St1 = 12*log2(phonemes [language$, .sp$, "a_corner", "F1"])
-	.a_St2 = 12*log2(phonemes [language$, .sp$, "a_corner", "F2"])
+	.a_St1 = 12*log2(phonemes [phonLanguage$, .sp$, "a_corner", "F1"])
+	.a_St2 = 12*log2(phonemes [phonLanguage$, .sp$, "a_corner", "F2"])
 
-	.i_St1 = 12*log2(phonemes [language$, .sp$, "i_corner", "F1"])
-	.i_St2 = 12*log2(phonemes [language$, .sp$, "i_corner", "F2"])
+	.i_St1 = 12*log2(phonemes [phonLanguage$, .sp$, "i_corner", "F1"])
+	.i_St2 = 12*log2(phonemes [phonLanguage$, .sp$, "i_corner", "F2"])
 
-	.u_St1 = 12*log2(phonemes [language$, .sp$, "u_corner", "F1"])
-	.u_St2 = 12*log2(phonemes [language$, .sp$, "u_corner", "F2"])
+	.u_St1 = 12*log2(phonemes [phonLanguage$, .sp$, "u_corner", "F1"])
+	.u_St2 = 12*log2(phonemes [phonLanguage$, .sp$, "u_corner", "F2"])
 	
 	.dist_iu = sqrt((.i_St1 - .u_St1)^2 + (.i_St2 - .u_St2)^2)
 	.theta = arcsin((.u_St1 - .i_St1)/.dist_iu)
@@ -1243,8 +1255,8 @@ procedure get_closest_vowels .cutoff .sp$ .formants .textgrid .f1_o .f2_o
 	.st_o2 = vowel2point.y
 	
 	# Get center coordinates
-	.fc1 = phonemes ["NL", .sp$, "@_center", "F1"]
-	.fc2 = phonemes ["NL", .sp$, "@_center", "F2"]
+	.fc1 = phonemes [phonLanguage$, .sp$, "@_center", "F1"]
+	.fc2 = phonemes [phonLanguage$, .sp$, "@_center", "F2"]
 	@vowel2point: .sp$, .fc1, .fc2
 	.st_c1 = vowel2point.x
 	.st_c2 = vowel2point.y

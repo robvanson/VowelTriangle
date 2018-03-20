@@ -165,14 +165,14 @@ color$ ["@"] = "{0.8,0.8,0.8}"
 
 # English
 uiMessage$ ["EN", "PauseRecord"] = "Record continuous speech"
-uiMessage$ ["EN", "Record1"] = "Record the %%continuous speech%"
+uiMessage$ ["EN", "Record1"] = "Record the ##continuous speech#"
 uiMessage$ ["EN", "Record2"] = "Please be ready to start"
 uiMessage$ ["EN", "Record3"] = "Select the speech you want to analyse"
 uiMessage$ ["EN", "Open1"] = "Open the recording containing the speech"
 uiMessage$ ["EN", "Open2"] = "Select the speech you want to analyse"
-uiMessage$ ["EN", "Corneri"] = "h%%ea%t"
-uiMessage$ ["EN", "Corneru"] = "h%%oo%t"
-uiMessage$ ["EN", "Cornera"] = "h%%a%t"
+uiMessage$ ["EN", "Corneri"] = "h##ea#t"
+uiMessage$ ["EN", "Corneru"] = "h##oo#t"
+uiMessage$ ["EN", "Cornera"] = "h##a#t"
 uiMessage$ ["EN", "DistanceTitle"] = "Rel. Distance (N)"
 uiMessage$ ["EN", "AreaTitle"] = "Rel. Area"
 uiMessage$ ["EN", "Area1"] = "1"
@@ -206,14 +206,14 @@ uiMessage$ ["EN", "Record"] = "Record"
 
 # Dutch
 uiMessage$ ["NL", "PauseRecord"] 	= "Neem lopende spraak op"
-uiMessage$ ["NL", "Record1"] 		= "Neem de %%lopende spraak% op"
+uiMessage$ ["NL", "Record1"] 		= "Neem de ##lopende spraak# op"
 uiMessage$ ["NL", "Record2"] 		= "Zorg dat u klaar ben om te spreken"
 uiMessage$ ["NL", "Record3"] 		= "Selecteer de spraak die u wilt analyseren"
 uiMessage$ ["NL", "Open1"] 			= "Open de spraakopname"
 uiMessage$ ["NL", "Open2"] 			= "Selecteer de spraak die u wilt analyseren"
-uiMessage$ ["NL", "Corneri"] 		= "h%%ie%t"
-uiMessage$ ["NL", "Corneru"] 		= "h%%oe%d"
-uiMessage$ ["NL", "Cornera"] 		= "h%%aa%t"
+uiMessage$ ["NL", "Corneri"] 		= "h##ie#t"
+uiMessage$ ["NL", "Corneru"] 		= "h##oe#d"
+uiMessage$ ["NL", "Cornera"] 		= "h##aa#t"
 uiMessage$ ["NL", "DistanceTitle"] 	= "Rel. Afstand (N)"
 uiMessage$ ["NL", "AreaTitle"] 		= "Rel. Oppervlak"
 uiMessage$ ["NL", "Area1"] 			= "1"
@@ -247,14 +247,14 @@ uiMessage$ ["NL", "Record"] 		= "Opnemen"
 
 # German
 uiMessage$ ["DE", "PauseRecord"] 	= "Zeichne laufende Sprache auf"
-uiMessage$ ["DE", "Record1"] 		= "Die %%laufende Sprache% aufzeichnen"
+uiMessage$ ["DE", "Record1"] 		= "Die ##laufende Sprache# aufzeichnen"
 uiMessage$ ["DE", "Record2"] 		= "Bitte seien Sie bereit zu sprechen"
 uiMessage$ ["DE", "Record3"] 		= "Wählen Sie die Sprachaufnahme, die Sie analysieren möchten"
 uiMessage$ ["DE", "Open1"] 			= "Öffnen Sie die Sprachaufnahme"
 uiMessage$ ["DE", "Open2"] 			= "Wählen Sie die Sprachaufnahme, die Sie analysieren möchten"
-uiMessage$ ["DE", "Corneri"] 		= "L%%ie%d"
-uiMessage$ ["DE", "Corneru"] 		= "H%%u%t"
-uiMessage$ ["DE", "Cornera"] 		= "T%%a%l"
+uiMessage$ ["DE", "Corneri"] 		= "L##ie#d"
+uiMessage$ ["DE", "Corneru"] 		= "H##u#t"
+uiMessage$ ["DE", "Cornera"] 		= "T##a#l"
 uiMessage$ ["DE", "DistanceTitle"] 	= "Rel. Länge (N)"
 uiMessage$ ["DE", "AreaTitle"] 		= "Rel. Oberfläche"
 uiMessage$ ["DE", "Area1"] 			= "1"
@@ -288,14 +288,14 @@ uiMessage$ ["DE", "Record"] 		= "Aufzeichnen"
 
 # French
 uiMessage$ ["FR", "PauseRecord"]	= "Enregistrer un discours continu"
-uiMessage$ ["FR", "Record1"]		= "Enregistrer le %%discours continu%"
+uiMessage$ ["FR", "Record1"]		= "Enregistrer le ##discours continu#"
 uiMessage$ ["FR", "Record2"]		= "S'il vous plaît soyez prêt à commencer"
 uiMessage$ ["FR", "Record3"]		= "Sélectionnez le discours que vous voulez analyser"
 uiMessage$ ["FR", "Open1"]			= "Ouvrir l'enregistrement contenant le discours"
 uiMessage$ ["FR", "Open2"]			= "Sélectionnez le discours que vous voulez analyser"
-uiMessage$ ["FR", "Corneri"]		= "v%%ie%"
-uiMessage$ ["FR", "Corneru"]		= "f%%ou%"
-uiMessage$ ["FR", "Cornera"]		= "C%%a%se"
+uiMessage$ ["FR", "Corneri"]		= "s##i#"
+uiMessage$ ["FR", "Corneru"]		= "f##ou#"
+uiMessage$ ["FR", "Cornera"]		= "l##à#"
 uiMessage$ ["FR", "DistanceTitle"]	= "Longeur Relative (N)"
 uiMessage$ ["FR", "AreaTitle"]		= "Surface Relative"
 uiMessage$ ["FR", "Area1"]			= "1"
@@ -329,7 +329,7 @@ uiMessage$ ["FR", "Record"]			= "Enregistrer"
 
 # Chinese
 uiMessage$ ["ZH", "PauseRecord"] = "录音连续演讲"
-uiMessage$ ["ZH", "Record1"] = "录音%%连续演讲%"
+uiMessage$ ["ZH", "Record1"] = "录音##连续演讲#"
 uiMessage$ ["ZH", "Record2"] = "请准备好开始"
 uiMessage$ ["ZH", "Record3"] = "选择你想要分析的语音"
 uiMessage$ ["ZH", "Open1"] = "打开包含演讲的录音"
@@ -371,14 +371,14 @@ uiMessage$ ["ZH", "Record"] = "录制演讲"
 
 # Spanish
 uiMessage$ ["ES", "PauseRecord"]	= "Grabar un discurso continuo"
-uiMessage$ ["ES", "Record1"]		= "Guardar %%discurso continuo%"
+uiMessage$ ["ES", "Record1"]		= "Guardar ##discurso continuo#"
 uiMessage$ ["ES", "Record2"]		= "Por favor, prepárate para comenzar"
 uiMessage$ ["ES", "Record3"]		= "Seleccione el discurso que quiere analizar"
 uiMessage$ ["ES", "Open1"]			= "Abre la grabación que contiene el discurso"
 uiMessage$ ["ES", "Open2"]			= "Seleccione el discurso que quiere analizar"
-uiMessage$ ["ES", "Corneri"]		= "s%%i%"
-uiMessage$ ["ES", "Corneru"]		= "%%u%"
-uiMessage$ ["ES", "Cornera"]		= "h%%a%y"
+uiMessage$ ["ES", "Corneri"]		= "s##i#"
+uiMessage$ ["ES", "Corneru"]		= "##u#so"
+uiMessage$ ["ES", "Cornera"]		= "h##a#"
 uiMessage$ ["ES", "DistanceTitle"]	= "Longitud relativa (N)"
 uiMessage$ ["ES", "AreaTitle"]		= "Superficie relativa"
 uiMessage$ ["ES", "Area1"]			= "1"
@@ -412,14 +412,14 @@ uiMessage$ ["ES", "Record"]			= "Grabar"
 
 # Portugese
 uiMessage$ ["PT", "PauseRecord"]	= "Gravar um discurso contínuo"
-uiMessage$ ["PT", "Record1"]		= "Salvar %%discurso contínua%"
+uiMessage$ ["PT", "Record1"]		= "Salvar ##discurso contínua#"
 uiMessage$ ["PT", "Record2"]		= "Por favor, prepare-se para começar"
 uiMessage$ ["PT", "Record3"]		= "Selecione o discurso que deseja analisar"
 uiMessage$ ["PT", "Open1"]			= "Abra a gravação que contém o discurso"
 uiMessage$ ["PT", "Open2"]			= "Selecione o discurso que deseja analisar"
-uiMessage$ ["PT", "Corneri"]		= "%%i%"
-uiMessage$ ["PT", "Corneru"]		= "%%u%"
-uiMessage$ ["PT", "Cornera"]		= "%%a%"
+uiMessage$ ["PT", "Corneri"]		= "s##i#"
+uiMessage$ ["PT", "Corneru"]		= "r##u#a"
+uiMessage$ ["PT", "Cornera"]		= "d##á#"
 uiMessage$ ["PT", "DistanceTitle"]	= "Comprimento relativo (N)"
 uiMessage$ ["PT", "AreaTitle"]		= "Superfície relativa"
 uiMessage$ ["PT", "Area1"]			= "1"
@@ -453,14 +453,14 @@ uiMessage$ ["PT", "Record"]			= "Gravar"
 
 # Italian
 uiMessage$ ["IT", "PauseRecord"]	= "Registra un discorso continuo"
-uiMessage$ ["IT", "Record1"]		= "Salva %%discorso continuo%"
+uiMessage$ ["IT", "Record1"]		= "Salva ##discorso continuo#"
 uiMessage$ ["IT", "Record2"]		= "Per favore, preparati a iniziare"
 uiMessage$ ["IT", "Record3"]		= "Seleziona il discorso che vuoi analizzare"
 uiMessage$ ["IT", "Open1"]			= "Apri la registrazione che contiene il discorso"
 uiMessage$ ["IT", "Open2"]			= "Seleziona il discorso che vuoi analizzare"
-uiMessage$ ["IT", "Corneri"]		= "%%i%"
-uiMessage$ ["IT", "Corneru"]		= "%%u%"
-uiMessage$ ["IT", "Cornera"]		= "%%a%"
+uiMessage$ ["IT", "Corneri"]		= "s##ì#"
+uiMessage$ ["IT", "Corneru"]		= "##u#si"
+uiMessage$ ["IT", "Cornera"]		= "sar##à#"
 uiMessage$ ["IT", "DistanceTitle"]	= "Lunghezza relativa (N)"
 uiMessage$ ["IT", "AreaTitle"]		= "Superficie relativa"
 uiMessage$ ["IT", "Area1"]			= "1"
@@ -501,14 +501,14 @@ uiMessage$ ["IT", "Record"]			= "Registra"
 # and the code following the endPause below.
 #
 # "Record continuous speech"
-# "Record the %%continuous speech%"
+# "Record the ##continuous speech#"
 # "Please be ready to start"
 # "Select the speech you want to analyse"
 # "Open the recording containing the speech"
 # "Select the speech you want to analyse"
-# "h%%ea%t"
-# "h%%oo%t"
-# "h%%a%t"
+# "h##ea#t"
+# "h##oo#t"
+# "h##a#t"
 # "Rel. Distance (N)"
 # "Rel. Area"
 # "1"
@@ -734,7 +734,7 @@ if input_table > 0
 			Erase all
 			call set_up_Canvas
 			call plot_vowel_triangle '.sp$'
-			Text special... 0.5 Centre 1.05 bottom Helvetica 18 0 %%'title$'%
+			Text special... 0.5 Centre 1.05 bottom Helvetica 18 0 ##'title$'#
 		endif
 		@plot_vowels: .plotVowels, .sp$, .sound
 		@print_output_line: title$, .sp$, plot_vowels.numVowelIntervals, plot_vowels.area2perc, plot_vowels.area1perc, plot_vowels.relDist_i, plot_vowels.relDist_u, plot_vowels.relDist_a, .duration, .intensity
@@ -884,7 +884,7 @@ while .continue
 	Erase all
 	call set_up_Canvas
 	call plot_vowel_triangle '.sp$'
-	Text special... 0.5 Centre 1.05 bottom Helvetica 18 0 %%'title$'%
+	Text special... 0.5 Centre 1.05 bottom Helvetica 18 0 ##'title$'#
 	
 	selectObject: .sound
 	.duration = Get total duration

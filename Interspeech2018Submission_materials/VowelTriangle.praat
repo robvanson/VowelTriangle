@@ -28,8 +28,70 @@
 # 
 #
 # Initialization
+# Get current Locale
 uiLanguage$ = "EN"
 .defaultLanguage = 1
+.preferencesLanguageFile$ = preferencesDirectory$+"/VowelTriangle.prefs"
+.preferencesLang$ = ""
+if fileReadable(.preferencesLanguageFile$)
+	.preferencesLang$ = readFile$(.preferencesLanguageFile$)
+	if index_regex(.preferencesLang$, "Language\s*=\s*([^\n]+)") > 0
+		.preferencesLang$ = replace_regex$(.preferencesLang$, "^.*Language=([^\n]+).*", "\L\1", 0)
+	else
+		.preferencesLang$ = ""
+	endif
+endif
+
+.locale$ = "en"
+if .preferencesLang$ <> ""
+	.locale$ = .preferencesLang$
+else
+	if macintosh
+		.scratch$ = replace_regex$(temporaryDirectory$+"/scratch"+date$()+".txt", "[^\w.]", "_", 0)
+		runSystem_nocheck: "defaults read -g AppleLocale | cut -c 1-2 - > ",.scratch$
+		.locale$ = readFile$(.scratch$)
+		deleteFile: .scratch$
+	elsif unix
+		.locale$ = environment$("LANG")
+	elsif windows
+		.scratch$ = replace_regex$(temporaryDirectory$+"/scratch"+date$()+".txt", "[^\w.]", "_", 0)
+		runSystem_nocheck: "dism /online /get-intl > ",.scratch$
+		.locale$ = readFile$(.scratch$)
+		.locale$ = replace_regex$(.locale$, "\n", " ", 0)	
+		.locale$ = replace_regex$(.locale$, "^.*Default System UI language : ([^\s]+).*", "\1", 0)
+		deleteFile: .scratch$	
+	endif
+endif
+
+if startsWith(.locale$, "en")
+	uiLanguage$ = "EN"
+	.defaultLanguage = 1
+elsif startsWith(.locale$, "nl")
+	uiLanguage$ = "NL"
+	.defaultLanguage = 2
+elsif startsWith(.locale$, "de")
+	uiLanguage$ = "DE"
+	.defaultLanguage = 3
+elsif startsWith(.locale$, "fr")
+	uiLanguage$ = "FR"
+	.defaultLanguage = 4
+elsif startsWith(.locale$, "zh")
+	uiLanguage$ = "ZH"
+	.defaultLanguage = 5
+elsif startsWith(.locale$, "es")
+	uiLanguage$ = "ES"
+	.defaultLanguage = 6
+elsif startsWith(.locale$, "pt")
+	uiLanguage$ = "PT"
+	.defaultLanguage = 7
+elsif startsWith(.locale$, "it")
+	uiLanguage$ = "IT"
+	.defaultLanguage = 8
+#elsif startsWith(.locale$, "MYLANGUAGE")
+#	uiLanguage$ = "XX"
+#	.defaultLanguage = 9
+endif
+
 .sp_default = 1
 output_table$ = ""
 
@@ -78,7 +140,8 @@ endif
 .recordingTime = 4
 
 # Define Language
-language$ = "NL"
+# Add new targets if necessary
+phonLanguage$ = "NL"
 numVowels = 12
 vowelList$ [1] = "i"
 vowelList$ [2] = "I"
@@ -102,14 +165,14 @@ color$ ["@"] = "{0.8,0.8,0.8}"
 
 # English
 uiMessage$ ["EN", "PauseRecord"] = "Record continuous speech"
-uiMessage$ ["EN", "Record1"] = "Record the %%continuous speech%"
+uiMessage$ ["EN", "Record1"] = "Record the ##continuous speech#"
 uiMessage$ ["EN", "Record2"] = "Please be ready to start"
 uiMessage$ ["EN", "Record3"] = "Select the speech you want to analyse"
 uiMessage$ ["EN", "Open1"] = "Open the recording containing the speech"
 uiMessage$ ["EN", "Open2"] = "Select the speech you want to analyse"
-uiMessage$ ["EN", "Corneri"] = "h%%ea%t"
-uiMessage$ ["EN", "Corneru"] = "h%%oo%t"
-uiMessage$ ["EN", "Cornera"] = "h%%a%t"
+uiMessage$ ["EN", "Corneri"] = "h##ea#t"
+uiMessage$ ["EN", "Corneru"] = "h##oo#t"
+uiMessage$ ["EN", "Cornera"] = "h##a#t"
 uiMessage$ ["EN", "DistanceTitle"] = "Rel. Distance (N)"
 uiMessage$ ["EN", "AreaTitle"] = "Rel. Area"
 uiMessage$ ["EN", "Area1"] = "1"
@@ -128,9 +191,13 @@ uiMessage$ ["EN", "SelectSound2"] = "It is possible to remove unwanted sounds fr
 uiMessage$ ["EN", "SelectSound3"] = "Select the unwanted part and then chose ""Cut"" from the ""Edit"" menu"
 uiMessage$ ["EN", "Stopped"] = "Vowel Triangle stopped"
 uiMessage$ ["EN", "ErrorSound"] = "Error: Not a sound "
+uiMessage$ ["EN", "Nothing to do"] = "Nothing to do"
+uiMessage$ ["EN", "No readable recording selected "] = "No readable recording selected "
 
-uiMessage$ ["EN", "Male"] = "Male"
-uiMessage$ ["EN", "Female"] = "Female"
+uiMessage$ ["EN", "Interface Language"] = "Language"
+uiMessage$ ["EN", "Speaker is a"] = "Speaker is a"
+uiMessage$ ["EN", "Male"] = "Male ♂"
+uiMessage$ ["EN", "Female"] = "Female ♀"
 uiMessage$ ["EN", "Continue"] = "Continue"
 uiMessage$ ["EN", "Done"] = "Done"
 uiMessage$ ["EN", "Stop"] = "Stop"
@@ -138,89 +205,97 @@ uiMessage$ ["EN", "Open"] = "Open"
 uiMessage$ ["EN", "Record"] = "Record"
 
 # Dutch
-uiMessage$ ["NL", "PauseRecord"] = "Neem lopende spraak op"
-uiMessage$ ["NL", "Record1"] = "Neem de %%lopende spraak% op"
-uiMessage$ ["NL", "Record2"] = "Zorg dat u klaar ben om te spreken"
-uiMessage$ ["NL", "Record3"] = "Selecteer de spraak die u wilt analyseren"
-uiMessage$ ["NL", "Open1"] = "Open de spraakopname"
-uiMessage$ ["NL", "Open2"] = "Selecteer de spraak die u wilt analyseren"
-uiMessage$ ["NL", "Corneri"] = "h%%ie%t"
-uiMessage$ ["NL", "Corneru"] = "h%%oe%d"
-uiMessage$ ["NL", "Cornera"] = "h%%aa%t"
-uiMessage$ ["NL", "DistanceTitle"] = "Rel. Afstand (N)"
-uiMessage$ ["NL", "AreaTitle"] = "Rel. Oppervlak"
-uiMessage$ ["NL", "Area1"] = "1"
-uiMessage$ ["NL", "Area2"] = "2"
-uiMessage$ ["NL", "AreaN"] = "N"
+uiMessage$ ["NL", "PauseRecord"] 	= "Neem lopende spraak op"
+uiMessage$ ["NL", "Record1"] 		= "Neem de ##lopende spraak# op"
+uiMessage$ ["NL", "Record2"] 		= "Zorg dat u klaar ben om te spreken"
+uiMessage$ ["NL", "Record3"] 		= "Selecteer de spraak die u wilt analyseren"
+uiMessage$ ["NL", "Open1"] 			= "Open de spraakopname"
+uiMessage$ ["NL", "Open2"] 			= "Selecteer de spraak die u wilt analyseren"
+uiMessage$ ["NL", "Corneri"] 		= "h##ie#t"
+uiMessage$ ["NL", "Corneru"] 		= "h##oe#d"
+uiMessage$ ["NL", "Cornera"] 		= "h##aa#t"
+uiMessage$ ["NL", "DistanceTitle"] 	= "Rel. Afstand (N)"
+uiMessage$ ["NL", "AreaTitle"] 		= "Rel. Oppervlak"
+uiMessage$ ["NL", "Area1"] 			= "1"
+uiMessage$ ["NL", "Area2"] 			= "2"
+uiMessage$ ["NL", "AreaN"] 			= "N"
 
-uiMessage$ ["NL", "LogFile"] = "Schrijf resultaten naar log bestand (""-"" schrijft naar info venster)"
+uiMessage$ ["NL", "LogFile"] 		= "Schrijf resultaten naar log bestand (""-"" schrijft naar info venster)"
 uiMessage$ ["NL", "CommentContinue"] = "Klik op ""Doorgaan"" als u meer spraakopnamen wilt analyseren"
-uiMessage$ ["NL", "CommentOpen"] = "Klik op ""Open"" en selecteer een opname"
-uiMessage$ ["NL", "CommentRecord"] = "Klik op ""Opnemen"" en start met spreken"
-uiMessage$ ["NL", "CommentList"] = "Spraak opnemen, ""Save to list & Close"", daarna klik op ""Continue"""
-uiMessage$ ["NL", "SavePicture"] = "Bewaar afbeelding"
-uiMessage$ ["NL", "DoContinue"] = "Wilt u doorgaan?"
-uiMessage$ ["NL", "SelectSound1"] = "Selecteer het spraakfragment en ga door"
-uiMessage$ ["NL", "SelectSound2"] = "Het is mogelijk om ongewenste geluiden uit de opname te verwijderen"
-uiMessage$ ["NL", "SelectSound3"] = "Selecteer het ongewenste deel en kies ""Cut"" in het ""Edit"" menue"
-uiMessage$ ["NL", "Stopped"] = "Vowel Triangle is gestopt"
-uiMessage$ ["NL", "ErrorSound"] = "Fout: Dit is geen geluid "
+uiMessage$ ["NL", "CommentOpen"] 	= "Klik op ""Open"" en selecteer een opname"
+uiMessage$ ["NL", "CommentRecord"] 	= "Klik op ""Opnemen"" en start met spreken"
+uiMessage$ ["NL", "CommentList"] 	= "Spraak opnemen, ""Save to list & Close"", daarna klik op ""Doorgaan"""
+uiMessage$ ["NL", "SavePicture"] 	= "Bewaar afbeelding"
+uiMessage$ ["NL", "DoContinue"] 	= "Wilt u doorgaan?"
+uiMessage$ ["NL", "SelectSound1"] 	= "Selecteer het spraakfragment en ga door"
+uiMessage$ ["NL", "SelectSound2"] 	= "Het is mogelijk om ongewenste geluiden uit de opname te verwijderen"
+uiMessage$ ["NL", "SelectSound3"] 	= "Selecteer het ongewenste deel en kies ""Cut"" in het ""Edit"" menu"
+uiMessage$ ["NL", "Stopped"] 		= "Vowel Triangle is gestopt"
+uiMessage$ ["NL", "ErrorSound"] 	= "Fout: Dit is geen geluid "
+uiMessage$ ["NL", "Nothing to do"] 	= "Geen taken"
+uiMessage$ ["NL", "No readable recording selected "] = "Geen leesbare opname geselecteerd "
 
-uiMessage$ ["NL", "Male"] = "Man"
-uiMessage$ ["NL", "Female"] = "Vrouw"
-uiMessage$ ["NL", "Continue"] = "Doorgaan"
-uiMessage$ ["NL", "Done"] = "Klaar"
-uiMessage$ ["NL", "Stop"] = "Stop"
-uiMessage$ ["NL", "Open"] = "Open"
-uiMessage$ ["NL", "Record"] = "Opnemen"
+uiMessage$ ["NL", "Interface Language"] = "Taal (Language)"
+uiMessage$ ["NL", "Speaker is a"] 	= "De Spreker is een"
+uiMessage$ ["NL", "Male"] 			= "Man ♂"
+uiMessage$ ["NL", "Female"] 		= "Vrouw ♀"
+uiMessage$ ["NL", "Continue"] 		= "Doorgaan"
+uiMessage$ ["NL", "Done"] 			= "Klaar"
+uiMessage$ ["NL", "Stop"] 			= "Stop"
+uiMessage$ ["NL", "Open"] 			= "Open"
+uiMessage$ ["NL", "Record"] 		= "Opnemen"
 
 # German
-uiMessage$ ["DE", "PauseRecord"] = "Zeichne laufende Sprache auf"
-uiMessage$ ["DE", "Record1"] = "Die %%laufende Sprache% aufzeichnen"
-uiMessage$ ["DE", "Record2"] = "Bitte seien Sie bereit zu sprechen"
-uiMessage$ ["DE", "Record3"] = "Wählen Sie die Sprachaufnahme, die Sie analysieren möchten"
-uiMessage$ ["DE", "Open1"] = "Öffnen Sie die Sprachaufnahme"
-uiMessage$ ["DE", "Open2"] = "Wählen Sie die Sprachaufnahme, die Sie analysieren möchten"
-uiMessage$ ["DE", "Corneri"] = "L%%ie%d"
-uiMessage$ ["DE", "Corneru"] = "H%%u%t"
-uiMessage$ ["DE", "Cornera"] = "T%%a%l"
-uiMessage$ ["DE", "DistanceTitle"] = "Rel. Länge (N)"
-uiMessage$ ["DE", "AreaTitle"] = "Rel. Oberfläche"
-uiMessage$ ["DE", "Area1"] = "1"
-uiMessage$ ["DE", "Area2"] = "2"
-uiMessage$ ["DE", "AreaN"] = "N"
+uiMessage$ ["DE", "PauseRecord"] 	= "Zeichne laufende Sprache auf"
+uiMessage$ ["DE", "Record1"] 		= "Die ##laufende Sprache# aufzeichnen"
+uiMessage$ ["DE", "Record2"] 		= "Bitte seien Sie bereit zu sprechen"
+uiMessage$ ["DE", "Record3"] 		= "Wählen Sie die Sprachaufnahme, die Sie analysieren möchten"
+uiMessage$ ["DE", "Open1"] 			= "Öffnen Sie die Sprachaufnahme"
+uiMessage$ ["DE", "Open2"] 			= "Wählen Sie die Sprachaufnahme, die Sie analysieren möchten"
+uiMessage$ ["DE", "Corneri"] 		= "L##ie#d"
+uiMessage$ ["DE", "Corneru"] 		= "H##u#t"
+uiMessage$ ["DE", "Cornera"] 		= "T##a#l"
+uiMessage$ ["DE", "DistanceTitle"] 	= "Rel. Länge (N)"
+uiMessage$ ["DE", "AreaTitle"] 		= "Rel. Oberfläche"
+uiMessage$ ["DE", "Area1"] 			= "1"
+uiMessage$ ["DE", "Area2"] 			= "2"
+uiMessage$ ["DE", "AreaN"] 			= "N"
                                      
-uiMessage$ ["DE", "LogFile"] = "Daten in Tabelle schreiben (""-"" in das Informationsfenster schreiben)"
+uiMessage$ ["DE", "LogFile"] 		= "Daten in Tabelle schreiben (""-"" in das Informationsfenster schreiben)"
 uiMessage$ ["DE", "CommentContinue"]= "Klicken Sie auf ""Weiter"", wenn Sie mehr Sprachproben analysieren möchten"
-uiMessage$ ["DE", "CommentOpen"] = "Klicke auf ""Öffnen"" und wähle eine Aufnahme"
-uiMessage$ ["DE", "CommentRecord"] = "Klicke auf ""Aufzeichnen"" und sprich"
-uiMessage$ ["DE", "CommentList"] = "Sprache aufnehmen, ""Save to list & Close"", dann klicken Sie auf ""Weiter"""
-uiMessage$ ["DE", "SavePicture"] = "Bild speichern"
-uiMessage$ ["DE", "DoContinue"] = "Möchten Sie weitergehen?"
-uiMessage$ ["DE", "SelectSound1"] = "Wählen Sie den Aufnahmebereich und gehen Sie weiter"
-uiMessage$ ["DE", "SelectSound2"] = "Es ist möglich, unerwünschte Geräusche aus der Auswahl zu entfernen"
-uiMessage$ ["DE", "SelectSound3"] = "Wählen Sie den unerwünschten Teil und wählen Sie dann ""Cut"" aus dem ""*Edit"" Menü"
-uiMessage$ ["DE", "Stopped"] = "VowelTriangle ist gestoppt"
-uiMessage$ ["DE", "ErrorSound"] = "Fehler: Keine Sprache gefunden"
-                                     
-uiMessage$ ["DE", "Male"] = "Man"
-uiMessage$ ["DE", "Female"] = "Frau"
-uiMessage$ ["DE", "Continue"] = "Weitergehen"
-uiMessage$ ["DE", "Done"] = "Fertig"
-uiMessage$ ["DE", "Stop"] = "Halt"
-uiMessage$ ["DE", "Open"] = "Öffnen"
-uiMessage$ ["DE", "Record"] = "Aufzeichnung"
+uiMessage$ ["DE", "CommentOpen"] 	= "Klicke auf ""Öffnen"" und wähle eine Aufnahme"
+uiMessage$ ["DE", "CommentRecord"] 	= "Klicke auf ""Aufzeichnen"" und sprich"
+uiMessage$ ["DE", "CommentList"] 	= "Sprache aufnehmen, ""Save to list & Close"", dann klicken Sie auf ""Weitergehen"""
+uiMessage$ ["DE", "SavePicture"] 	= "Bild speichern"
+uiMessage$ ["DE", "DoContinue"] 	= "Möchten Sie weitergehen?"
+uiMessage$ ["DE", "SelectSound1"] 	= "Wählen Sie den Aufnahmebereich und gehen Sie weiter"
+uiMessage$ ["DE", "SelectSound2"] 	= "Es ist möglich, unerwünschte Geräusche aus der Auswahl zu entfernen"
+uiMessage$ ["DE", "SelectSound3"] 	= "Wählen Sie den unerwünschten Teil und wählen Sie dann ""Cut"" aus dem ""Edit"" Menü"
+uiMessage$ ["DE", "Stopped"] 		= "VowelTriangle ist gestoppt"
+uiMessage$ ["DE", "ErrorSound"] 	= "Fehler: Keine Sprache gefunden"
+uiMessage$ ["DE", "Nothing to do"] 	= "Keine Aufgaben"
+uiMessage$ ["DE", "No readable recording selected "] = "Keine verwertbare Aufnahme ausgewählt "
+               
+uiMessage$ ["DE", "Interface Language"] = "Sprache (Language)"
+uiMessage$ ["DE", "Speaker is a"] 	= "Der Sprecher ist ein(e)"
+uiMessage$ ["DE", "Male"] 			= "Man ♂"
+uiMessage$ ["DE", "Female"] 		= "Frau ♀"
+uiMessage$ ["DE", "Continue"] 		= "Weitergehen"
+uiMessage$ ["DE", "Done"] 			= "Fertig"
+uiMessage$ ["DE", "Stop"] 			= "Halt"
+uiMessage$ ["DE", "Open"] 			= "Öffnen"
+uiMessage$ ["DE", "Record"] 		= "Aufzeichnen"
 
 # French
 uiMessage$ ["FR", "PauseRecord"]	= "Enregistrer un discours continu"
-uiMessage$ ["FR", "Record1"]		= "Enregistrer le %%discours continu%"
+uiMessage$ ["FR", "Record1"]		= "Enregistrer le ##discours continu#"
 uiMessage$ ["FR", "Record2"]		= "S'il vous plaît soyez prêt à commencer"
 uiMessage$ ["FR", "Record3"]		= "Sélectionnez le discours que vous voulez analyser"
 uiMessage$ ["FR", "Open1"]			= "Ouvrir l'enregistrement contenant le discours"
 uiMessage$ ["FR", "Open2"]			= "Sélectionnez le discours que vous voulez analyser"
-uiMessage$ ["FR", "Corneri"]		= "v%%ie%"
-uiMessage$ ["FR", "Corneru"]		= "f%%ou%"
-uiMessage$ ["FR", "Cornera"]		= "C%%a%se"
+uiMessage$ ["FR", "Corneri"]		= "s##i#"
+uiMessage$ ["FR", "Corneru"]		= "f##ou#"
+uiMessage$ ["FR", "Cornera"]		= "l##à#"
 uiMessage$ ["FR", "DistanceTitle"]	= "Longeur Relative (N)"
 uiMessage$ ["FR", "AreaTitle"]		= "Surface Relative"
 uiMessage$ ["FR", "Area1"]			= "1"
@@ -231,7 +306,7 @@ uiMessage$ ["FR", "LogFile"]		= "Écrire un fichier journal dans une table (""-"
 uiMessage$ ["FR", "CommentContinue"]= "Cliquez sur ""Continuer"" si vous voulez analyser plus d'échantillons de discours"
 uiMessage$ ["FR", "CommentOpen"]	= "Cliquez sur ""Ouvrir"" et sélectionnez un enregistrement"
 uiMessage$ ["FR", "CommentRecord"]	= "Cliquez sur ""Enregistrer"" et commencez à parler"
-uiMessage$ ["FR", "CommentList"]	= "Enregistrer le son, ""Save to list & Close"", puis cliquez sur ""Continue"""
+uiMessage$ ["FR", "CommentList"]	= "Enregistrer le son, ""Save to list & Close"", puis cliquez sur ""Continuer"""
 uiMessage$ ["FR", "SavePicture"]	= "Enregistrer l'image"
 uiMessage$ ["FR", "DoContinue"]		= "Voulez-vous continuer?"
 uiMessage$ ["FR", "SelectSound1"]	= "Sélectionnez le son et continuez"
@@ -239,18 +314,22 @@ uiMessage$ ["FR", "SelectSound2"]	= "Il est possible de supprimer les sons indé
 uiMessage$ ["FR", "SelectSound3"]	= "Sélectionnez la partie indésirable, puis choisissez ""Cut"" dans le menu ""Edit"""
 uiMessage$ ["FR", "Stopped"]		= "VowelTriangle s'est arrêté"
 uiMessage$ ["FR", "ErrorSound"]		= "Erreur: pas du son"
-                                     
-uiMessage$ ["FR", "Male"] 			= "Homme"
-uiMessage$ ["FR", "Female"] 		= "Femme"
+uiMessage$ ["FR", "Nothing to do"] 	= "Rien à faire"
+uiMessage$ ["FR", "No readable recording selected "] = "Aucun enregistrement utilisable sélectionné "
+                  
+uiMessage$ ["FR", "Interface Language"] = "Langue (Language)"
+uiMessage$ ["FR", "Speaker is a"]	= "Le locuteur est un(e)"
+uiMessage$ ["FR", "Male"] 			= "Homme ♂"
+uiMessage$ ["FR", "Female"] 		= "Femme ♀"
 uiMessage$ ["FR", "Continue"]		= "Continuer"
 uiMessage$ ["FR", "Done"]			= "Terminé"
-uiMessage$ ["FR", "Stop"]			= "Arrêtez"
+uiMessage$ ["FR", "Stop"]			= "Arrêt"
 uiMessage$ ["FR", "Open"]			= "Ouvert"
 uiMessage$ ["FR", "Record"]			= "Enregistrer"
 
 # Chinese
 uiMessage$ ["ZH", "PauseRecord"] = "录音连续演讲"
-uiMessage$ ["ZH", "Record1"] = "录音%%连续演讲%"
+uiMessage$ ["ZH", "Record1"] = "录音##连续演讲#"
 uiMessage$ ["ZH", "Record2"] = "请准备好开始"
 uiMessage$ ["ZH", "Record3"] = "选择你想要分析的语音"
 uiMessage$ ["ZH", "Open1"] = "打开包含演讲的录音"
@@ -264,26 +343,154 @@ uiMessage$ ["ZH", "Area1"] = "1"
 uiMessage$ ["ZH", "Area2"] = "2"
 uiMessage$ ["ZH", "AreaN"] = "N"
 
-uiMessage$ ["ZH", "LogFile"] = "将日志写入表格 (""-"" 写入信息窗口)"
+uiMessage$ ["ZH", "LogFile"] 		= "将日志写入表格 (""-"" 写入信息窗口)"
 uiMessage$ ["ZH", "CommentContinue"] = "点击 ""继续"" 如果你想分析更多的语音样本"
-uiMessage$ ["ZH", "CommentOpen"] = "点击 ""打开录音"" 并选择一个录音"
-uiMessage$ ["ZH", "CommentRecord"] = "点击 ""录制演讲"" 并开始讲话"
-uiMessage$ ["ZH", "CommentList"] = "录制声音, ""Save to list & Close"", 然后单击 ""Continue"""
-uiMessage$ ["ZH", "SavePicture"] = "保存图片"
-uiMessage$ ["ZH", "DoContinue"] = "你想继续吗"
-uiMessage$ ["ZH", "SelectSound1"] = "选择声音并继续"
-uiMessage$ ["ZH", "SelectSound2"] = "可以从选择中删除不需要的声音"
-uiMessage$ ["ZH", "SelectSound3"] = "选择不需要的部分，然后选择 ""Cut"" 从 ""编辑"" 菜单"
-uiMessage$ ["ZH", "Stopped"] = "VowelTriangle 停了下来"
-uiMessage$ ["ZH", "ErrorSound"] = "错误：没有声音"
+uiMessage$ ["ZH", "CommentOpen"] 	= "点击 ""打开录音"" 并选择一个录音"
+uiMessage$ ["ZH", "CommentRecord"] 	= "点击 ""录制演讲"" 并开始讲话"
+uiMessage$ ["ZH", "CommentList"] 	= "录制声音, ""Save to list & Close"", 然后单击 ""继续"""
+uiMessage$ ["ZH", "SavePicture"] 	= "保存图片"
+uiMessage$ ["ZH", "DoContinue"] 	= "你想继续吗"
+uiMessage$ ["ZH", "SelectSound1"] 	= "选择声音并继续"
+uiMessage$ ["ZH", "SelectSound2"] 	= "可以从选择中删除不需要的声音"
+uiMessage$ ["ZH", "SelectSound3"] 	= "选择不需要的部分，然后选择 ""Cut"" 从 ""编辑"" 菜单"
+uiMessage$ ["ZH", "Stopped"] 		= "VowelTriangle 停了下来"
+uiMessage$ ["ZH", "ErrorSound"] 	= "错误：没有声音"
+uiMessage$ ["ZH", "Nothing to do"] 	= "无事可做"
+uiMessage$ ["ZH", "No readable recording selected "] = "没有选择可读的录音 "
 
-uiMessage$ ["ZH", "Male"] = "男性"
-uiMessage$ ["ZH", "Female"] = "女性"
+uiMessage$ ["ZH", "Interface Language"] = "语言 (Language)"
+uiMessage$ ["ZH", "Speaker is a"]	= "演讲者是"
+uiMessage$ ["ZH", "Male"] = "男性 ♂"
+uiMessage$ ["ZH", "Female"] = "女性 ♀"
 uiMessage$ ["ZH", "Continue"] = "继续"
 uiMessage$ ["ZH", "Done"] = "准备"
 uiMessage$ ["ZH", "Stop"] = "结束"
 uiMessage$ ["ZH", "Open"] = "打开录音"
 uiMessage$ ["ZH", "Record"] = "录制演讲"
+
+
+# Spanish
+uiMessage$ ["ES", "PauseRecord"]	= "Grabar un discurso continuo"
+uiMessage$ ["ES", "Record1"]		= "Guardar ##discurso continuo#"
+uiMessage$ ["ES", "Record2"]		= "Por favor, prepárate para comenzar"
+uiMessage$ ["ES", "Record3"]		= "Seleccione el discurso que quiere analizar"
+uiMessage$ ["ES", "Open1"]			= "Abre la grabación que contiene el discurso"
+uiMessage$ ["ES", "Open2"]			= "Seleccione el discurso que quiere analizar"
+uiMessage$ ["ES", "Corneri"]		= "s##i#"
+uiMessage$ ["ES", "Corneru"]		= "##u#so"
+uiMessage$ ["ES", "Cornera"]		= "h##a#"
+uiMessage$ ["ES", "DistanceTitle"]	= "Longitud relativa (N)"
+uiMessage$ ["ES", "AreaTitle"]		= "Superficie relativa"
+uiMessage$ ["ES", "Area1"]			= "1"
+uiMessage$ ["ES", "Area2"]			= "2"
+uiMessage$ ["ES", "AreaN"]			= "N"
+                                      
+uiMessage$ ["ES", "LogFile"]		= "Escribir un archivo de registro en una tabla (""-"" escribir en la ventana de información)"
+uiMessage$ ["ES", "CommentContinue"]= "Haga clic en ""Continúa"" si desea analizar más muestras de voz"
+uiMessage$ ["ES", "CommentOpen"]	= "Haga clic en ""Abrir"" y seleccione un registro"
+uiMessage$ ["ES", "CommentRecord"]	= "Haz clic en ""Grabar"" y comienza a hablar"
+uiMessage$ ["ES", "CommentList"]	= "Grabar sonido, ""Save to list & Close"", luego haga clic en ""Continúa"""
+uiMessage$ ["ES", "SavePicture"]	= "Guardar imagen"
+uiMessage$ ["ES", "DoContinue"]		= "¿Quieres continuar?"
+uiMessage$ ["ES", "SelectSound1"]	= "Selecciona el sonido y continúa"
+uiMessage$ ["ES", "SelectSound2"]	= "Es posible eliminar sonidos no deseados de la selección"
+uiMessage$ ["ES", "SelectSound3"]	= "Seleccione la parte no deseada, luego elija ""Cut"" desde el menú ""Edit"""
+uiMessage$ ["ES", "Stopped"]		= "VowelTriangle se ha detenido"
+uiMessage$ ["ES", "ErrorSound"]		= "Error: no hay sonido"
+uiMessage$ ["ES", "Nothing to do"] 	= "Nada que hacer"
+uiMessage$ ["ES", "No readable recording selected "] = "No se ha seleccionado ningún registro utilizable "
+
+uiMessage$ ["ES", "Interface Language"] = "Idioma (Language)"
+uiMessage$ ["ES", "Speaker is a"]	= "El hablante es un(a)"
+uiMessage$ ["ES", "Male"] 			= "Hombre ♂"
+uiMessage$ ["ES", "Female"] 		= "Mujer ♀"
+uiMessage$ ["ES", "Continue"]		= "Continúa"
+uiMessage$ ["ES", "Done"]			= "Terminado"
+uiMessage$ ["ES", "Stop"]			= "Detener"
+uiMessage$ ["ES", "Open"]			= "Abrir"
+uiMessage$ ["ES", "Record"]			= "Grabar"
+
+# Portugese
+uiMessage$ ["PT", "PauseRecord"]	= "Gravar um discurso contínuo"
+uiMessage$ ["PT", "Record1"]		= "Salvar ##discurso contínua#"
+uiMessage$ ["PT", "Record2"]		= "Por favor, prepare-se para começar"
+uiMessage$ ["PT", "Record3"]		= "Selecione o discurso que deseja analisar"
+uiMessage$ ["PT", "Open1"]			= "Abra a gravação que contém o discurso"
+uiMessage$ ["PT", "Open2"]			= "Selecione o discurso que deseja analisar"
+uiMessage$ ["PT", "Corneri"]		= "s##i#"
+uiMessage$ ["PT", "Corneru"]		= "r##u#a"
+uiMessage$ ["PT", "Cornera"]		= "d##á#"
+uiMessage$ ["PT", "DistanceTitle"]	= "Comprimento relativo (N)"
+uiMessage$ ["PT", "AreaTitle"]		= "Superfície relativa"
+uiMessage$ ["PT", "Area1"]			= "1"
+uiMessage$ ["PT", "Area2"]			= "2"
+uiMessage$ ["PT", "AreaN"]			= "N"
+                                                                            
+uiMessage$ ["PT", "LogFile"]		= "Escreva um arquivo de registro em uma tabela (""-"" escreva na janela de informações)"
+uiMessage$ ["PT", "CommentContinue"]= "Clique em ""Continuar"" se quiser analisar mais amostras de voz"
+uiMessage$ ["PT", "CommentOpen"]	= "Clique em ""Abrir"" e selecione um registro"
+uiMessage$ ["PT", "CommentRecord"]	= "Clique ""Gravar"" e comece a falar "
+uiMessage$ ["PT", "CommentList"]	= "Gravar som, ""Save to list & Close"", depois clique em ""Continuar"""
+uiMessage$ ["PT", "SavePicture"]	= "Salvar imagem"
+uiMessage$ ["PT", "DoContinue"]		= "Você quer continuar?"
+uiMessage$ ["PT", "SelectSound1"]	= "Selecione o som e continue"
+uiMessage$ ["PT", "SelectSound2"]	= "É possível remover sons indesejados da seleção"
+uiMessage$ ["PT", "SelectSound3"]	= "Selecione a parte indesejada, então escolha ""Cut"" no menu ""Edit"""
+uiMessage$ ["PT", "Stopped"]		= "VowelTriangle parou"
+uiMessage$ ["PT", "ErrorSound"]		= "Erro: não há som"
+uiMessage$ ["PT", "Nothing to do"] 	= "Nada para fazer"
+uiMessage$ ["PT", "No readable recording selected "] = "Nenhum registro utilizável foi selecionado"
+
+uiMessage$ ["PT", "Interface Language"] = "Idioma (Language)"
+uiMessage$ ["PT", "Speaker is a"]	= "O falante é um(a)"
+uiMessage$ ["PT", "Male"] 			= "Homem ♂"
+uiMessage$ ["PT", "Female"] 		= "Mulher ♀"
+uiMessage$ ["PT", "Continue"]		= "Continuar"
+uiMessage$ ["PT", "Done"]			= "Terminado"
+uiMessage$ ["PT", "Stop"]			= "Pare"
+uiMessage$ ["PT", "Open"]			= "Abrir"
+uiMessage$ ["PT", "Record"]			= "Gravar"
+
+# Italian
+uiMessage$ ["IT", "PauseRecord"]	= "Registra un discorso continuo"
+uiMessage$ ["IT", "Record1"]		= "Salva ##discorso continuo#"
+uiMessage$ ["IT", "Record2"]		= "Per favore, preparati a iniziare"
+uiMessage$ ["IT", "Record3"]		= "Seleziona il discorso che vuoi analizzare"
+uiMessage$ ["IT", "Open1"]			= "Apri la registrazione che contiene il discorso"
+uiMessage$ ["IT", "Open2"]			= "Seleziona il discorso che vuoi analizzare"
+uiMessage$ ["IT", "Corneri"]		= "s##ì#"
+uiMessage$ ["IT", "Corneru"]		= "##u#si"
+uiMessage$ ["IT", "Cornera"]		= "sar##à#"
+uiMessage$ ["IT", "DistanceTitle"]	= "Lunghezza relativa (N)"
+uiMessage$ ["IT", "AreaTitle"]		= "Superficie relativa"
+uiMessage$ ["IT", "Area1"]			= "1"
+uiMessage$ ["IT", "Area2"]			= "2"
+uiMessage$ ["IT", "AreaN"]			= "N"
+                                                                            
+uiMessage$ ["IT", "LogFile"]		= "Scrivi un file di registrazione in una tabella (""-"" scrivi nella finestra delle informazioni)"
+uiMessage$ ["IT", "CommentContinue"]= "Clicca su ""Continua"" se vuoi analizzare più campioni vocali"
+uiMessage$ ["IT", "CommentOpen"]	= "Fare clic su ""Apri"" e selezionare un record"
+uiMessage$ ["IT", "CommentRecord"]	= "Fai clic su ""Registra"" e inizia a parlare"
+uiMessage$ ["IT", "CommentList"]	= "Registra suono, ""Save to list & Close"", quindi fai clic su ""Continua"""
+uiMessage$ ["IT", "SavePicture"]	= "Salva immagine"
+uiMessage$ ["IT", "DoContinue"]		= "Vuoi continuare?"
+uiMessage$ ["IT", "SelectSound1"]	= "Seleziona il suono e continua"
+uiMessage$ ["IT", "SelectSound2"]	= "È possibile rimuovere i suoni indesiderati dalla selezione"
+uiMessage$ ["IT", "SelectSound3"]	= "Seleziona la parte indesiderata, quindi scegli ""Cut"" dal menu ""Edit"""
+uiMessage$ ["IT", "Stopped"]		= "VowelTriangle si è fermato"
+uiMessage$ ["IT", "ErrorSound"]		= "Errore: non c'è suono"
+uiMessage$ ["IT", "Nothing to do"] 	= "Niente da fare"
+uiMessage$ ["IT", "No readable recording selected "] = "Nessun record utilizzabile è stato selezionato "
+
+uiMessage$ ["IT", "Interface Language"] = "Lingua (Language)"
+uiMessage$ ["IT", "Speaker is a"]	= "L‘oratore è un(a)"
+uiMessage$ ["IT", "Male"] 			= "Uomo ♂"
+uiMessage$ ["IT", "Female"] 		= "Donna ♀"
+uiMessage$ ["IT", "Continue"]		= "Continua"
+uiMessage$ ["IT", "Done"]			= "Finito"
+uiMessage$ ["IT", "Stop"]			= "Fermare"
+uiMessage$ ["IT", "Open"]			= "Apri"
+uiMessage$ ["IT", "Record"]			= "Registra"
 
 #############################################################
 #
@@ -294,20 +501,20 @@ uiMessage$ ["ZH", "Record"] = "录制演讲"
 # and the code following the endPause below.
 #
 # "Record continuous speech"
-# "Record the %%continuous speech%"
+# "Record the ##continuous speech#"
 # "Please be ready to start"
 # "Select the speech you want to analyse"
 # "Open the recording containing the speech"
 # "Select the speech you want to analyse"
-# "h%%ea%t"
-# "h%%oo%t"
-# "h%%a%t"
+# "h##ea#t"
+# "h##oo#t"
+# "h##a#t"
 # "Rel. Distance (N)"
 # "Rel. Area"
 # "1"
 # "2"
 # "N"
-#
+
 # "Write log to table (""-"" write to the info window)"
 # "Click on ""Continue"" if you want to analyze more speech samples"
 # "Click on ""Open"" and select a recording"
@@ -320,7 +527,13 @@ uiMessage$ ["ZH", "Record"] = "录制演讲"
 # "Select the unwanted part and then chose ""Cut"" from the ""Edit"" menu"
 # "Vowel Triangle stopped"
 # "Error: Not a sound "
-#
+# "Nothing to do"
+# "No readable recording selected "
+
+# "Language"
+# "Speaker is a"
+# "Male"
+# "Female"
 # "Continue"
 # "Done"
 # "Stop"
@@ -331,101 +544,101 @@ uiMessage$ ["ZH", "Record"] = "录制演讲"
 
 # Formant values
 
-# Male
-phonemes ["NL", "M", "i_corner", "F1"] = 250
-phonemes ["NL", "M", "i_corner", "F2"] = 2100
-phonemes ["NL", "M", "a_corner", "F1"] = 850
-phonemes ["NL", "M", "a_corner", "F2"] = 1290
-phonemes ["NL", "M", "u_corner", "F1"] = 285
-phonemes ["NL", "M", "u_corner", "F2"] = 650
+# Male 
+phonemes [phonLanguage$, "M", "i_corner", "F1"] = 250
+phonemes [phonLanguage$, "M", "i_corner", "F2"] = 2100
+phonemes [phonLanguage$, "M", "a_corner", "F1"] = 850
+phonemes [phonLanguage$, "M", "a_corner", "F2"] = 1290
+phonemes [phonLanguage$, "M", "u_corner", "F1"] = 285
+phonemes [phonLanguage$, "M", "u_corner", "F2"] = 650
 # @_center is not fixed but derived from current corners
-phonemes ["NL", "M", "@_center", "F1"] =(phonemes ["NL", "M", "i_corner", "F1"]*phonemes ["NL", "M", "u_corner", "F1"]*phonemes ["NL", "M", "a_corner", "F1"])^(1/3)
-phonemes ["NL", "M", "@_center", "F2"] = (phonemes ["NL", "M", "i_corner", "F2"]*phonemes ["NL", "M", "u_corner", "F2"]*phonemes ["NL", "M", "a_corner", "F2"])^(1/3)
+phonemes [phonLanguage$, "M", "@_center", "F1"] =(phonemes [phonLanguage$, "M", "i_corner", "F1"]*phonemes [phonLanguage$, "M", "u_corner", "F1"]*phonemes [phonLanguage$, "M", "a_corner", "F1"])^(1/3)
+phonemes [phonLanguage$, "M", "@_center", "F2"] = (phonemes [phonLanguage$, "M", "i_corner", "F2"]*phonemes [phonLanguage$, "M", "u_corner", "F2"]*phonemes [phonLanguage$, "M", "a_corner", "F2"])^(1/3)
 
 # Formant values according to 
 # IFA corpus averages from FPA isolated vowels
 # Using Split-Levinson algorithm
-phonemes ["NL", "M", "A", "F1"] = 695.6000
-phonemes ["NL", "M", "A", "F2"] = 1065.500
-phonemes ["NL", "M", "E", "F1"] = 552.5000
-phonemes ["NL", "M", "E", "F2"] = 1659.200
-phonemes ["NL", "M", "I", "F1"] = 378.0909
-phonemes ["NL", "M", "I", "F2"] = 1868.545
-phonemes ["NL", "M", "O", "F1"] = 482.9000
-phonemes ["NL", "M", "O", "F2"] = 725.800
-phonemes ["NL", "M", "Y", "F1"] = 417.7000
-phonemes ["NL", "M", "Y", "F2"] = 1455.100
-phonemes ["NL", "M", "Y:", "F1"] = 386.3000
-phonemes ["NL", "M", "Y:", "F2"] = 1492.400
-phonemes ["NL", "M", "a", "F1"] = 788.6000
-phonemes ["NL", "M", "a", "F2"] = 1290.600
-phonemes ["NL", "M", "au", "F1"] = 583.8000
-phonemes ["NL", "M", "au", "F2"] = 959.300
-phonemes ["NL", "M", "e", "F1"] = 372.3000
-phonemes ["NL", "M", "e", "F2"] = 1959.700
-phonemes ["NL", "M", "ei", "F1"] = 499.5000
-phonemes ["NL", "M", "ei", "F2"] = 1733.000
-phonemes ["NL", "M", "i", "F1"] = 259.5556
-phonemes ["NL", "M", "i", "F2"] = 1971.889
-phonemes ["NL", "M", "o", "F1"] = 426.7000
-phonemes ["NL", "M", "o", "F2"] = 743.600
-phonemes ["NL", "M", "u", "F1"] = 287.5000
-phonemes ["NL", "M", "u", "F2"] = 666.500
-phonemes ["NL", "M", "ui", "F1"] = 495.3000
-phonemes ["NL", "M", "ui", "F2"] = 1468.600
-phonemes ["NL", "M", "y", "F1"] = 268.4000
-phonemes ["NL", "M", "y", "F2"] = 1581.400
+phonemes [phonLanguage$, "M", "A", "F1"] = 695.6000
+phonemes [phonLanguage$, "M", "A", "F2"] = 1065.500
+phonemes [phonLanguage$, "M", "E", "F1"] = 552.5000
+phonemes [phonLanguage$, "M", "E", "F2"] = 1659.200
+phonemes [phonLanguage$, "M", "I", "F1"] = 378.0909
+phonemes [phonLanguage$, "M", "I", "F2"] = 1868.545
+phonemes [phonLanguage$, "M", "O", "F1"] = 482.9000
+phonemes [phonLanguage$, "M", "O", "F2"] = 725.800
+phonemes [phonLanguage$, "M", "Y", "F1"] = 417.7000
+phonemes [phonLanguage$, "M", "Y", "F2"] = 1455.100
+phonemes [phonLanguage$, "M", "Y:", "F1"] = 386.3000
+phonemes [phonLanguage$, "M", "Y:", "F2"] = 1492.400
+phonemes [phonLanguage$, "M", "a", "F1"] = 788.6000
+phonemes [phonLanguage$, "M", "a", "F2"] = 1290.600
+phonemes [phonLanguage$, "M", "au", "F1"] = 583.8000
+phonemes [phonLanguage$, "M", "au", "F2"] = 959.300
+phonemes [phonLanguage$, "M", "e", "F1"] = 372.3000
+phonemes [phonLanguage$, "M", "e", "F2"] = 1959.700
+phonemes [phonLanguage$, "M", "ei", "F1"] = 499.5000
+phonemes [phonLanguage$, "M", "ei", "F2"] = 1733.000
+phonemes [phonLanguage$, "M", "i", "F1"] = 259.5556
+phonemes [phonLanguage$, "M", "i", "F2"] = 1971.889
+phonemes [phonLanguage$, "M", "o", "F1"] = 426.7000
+phonemes [phonLanguage$, "M", "o", "F2"] = 743.600
+phonemes [phonLanguage$, "M", "u", "F1"] = 287.5000
+phonemes [phonLanguage$, "M", "u", "F2"] = 666.500
+phonemes [phonLanguage$, "M", "ui", "F1"] = 495.3000
+phonemes [phonLanguage$, "M", "ui", "F2"] = 1468.600
+phonemes [phonLanguage$, "M", "y", "F1"] = 268.4000
+phonemes [phonLanguage$, "M", "y", "F2"] = 1581.400
 # Guessed
-phonemes ["NL", "M", "@", "F1"] = 417.7000
-phonemes ["NL", "M", "@", "F2"] = 1455.100
+phonemes [phonLanguage$, "M", "@", "F1"] = 417.7000
+phonemes [phonLanguage$, "M", "@", "F2"] = 1455.100
 
 # Female
-phonemes ["NL", "F", "i_corner", "F1"] = 280
-phonemes ["NL", "F", "i_corner", "F2"] = 2200
-phonemes ["NL", "F", "a_corner", "F1"] = 900
-phonemes ["NL", "F", "a_corner", "F2"] = 1435
-phonemes ["NL", "F", "u_corner", "F1"] = 370
-phonemes ["NL", "F", "u_corner", "F2"] = 700
+phonemes [phonLanguage$, "F", "i_corner", "F1"] = 280
+phonemes [phonLanguage$, "F", "i_corner", "F2"] = 2200
+phonemes [phonLanguage$, "F", "a_corner", "F1"] = 900
+phonemes [phonLanguage$, "F", "a_corner", "F2"] = 1435
+phonemes [phonLanguage$, "F", "u_corner", "F1"] = 370
+phonemes [phonLanguage$, "F", "u_corner", "F2"] = 700
 # @_center is not fixed but derived from current corners
-phonemes ["NL", "F", "@_center", "F1"] =(phonemes ["NL", "F", "i_corner", "F1"]*phonemes ["NL", "F", "u_corner", "F1"]*phonemes ["NL", "F", "a_corner", "F1"])^(1/3)
-phonemes ["NL", "F", "@_center", "F2"] = (phonemes ["NL", "F", "i_corner", "F2"]*phonemes ["NL", "F", "u_corner", "F2"]*phonemes ["NL", "F", "a_corner", "F2"])^(1/3)
+phonemes [phonLanguage$, "F", "@_center", "F1"] =(phonemes [phonLanguage$, "F", "i_corner", "F1"]*phonemes [phonLanguage$, "F", "u_corner", "F1"]*phonemes [phonLanguage$, "F", "a_corner", "F1"])^(1/3)
+phonemes [phonLanguage$, "F", "@_center", "F2"] = (phonemes [phonLanguage$, "F", "i_corner", "F2"]*phonemes [phonLanguage$, "F", "u_corner", "F2"]*phonemes [phonLanguage$, "F", "a_corner", "F2"])^(1/3)
 
 # Formant values according to 
 # IFA corpus average from FPA isolated vowels
 # Using Split-Levinson algorithm
-phonemes ["NL", "F", "A", "F1"] = 817.7000
-phonemes ["NL", "F", "A", "F2"] = 1197.300
-phonemes ["NL", "F", "E", "F1"] = 667.9000
-phonemes ["NL", "F", "E", "F2"] = 1748.500
-phonemes ["NL", "F", "I", "F1"] = 429.2222
-phonemes ["NL", "F", "I", "F2"] = 1937.333
-phonemes ["NL", "F", "O", "F1"] = 570.8000
-phonemes ["NL", "F", "O", "F2"] = 882.100
-phonemes ["NL", "F", "Y", "F1"] = 495.7000
-phonemes ["NL", "F", "Y", "F2"] = 1635.600
-phonemes ["NL", "F", "Y:", "F1"] = 431.1000
-phonemes ["NL", "F", "Y:", "F2"] = 1695.100
-phonemes ["NL", "F", "a", "F1"] = 853.6000
-phonemes ["NL", "F", "a", "F2"] = 1435.800
-phonemes ["NL", "F", "au", "F1"] = 647.6000
-phonemes ["NL", "F", "au", "F2"] = 1056.700
-phonemes ["NL", "F", "e", "F1"] = 429.9000
-phonemes ["NL", "F", "e", "F2"] = 1861.700
-phonemes ["NL", "F", "ei", "F1"] = 619.9000
-phonemes ["NL", "F", "ei", "F2"] = 1718.500
-phonemes ["NL", "F", "i", "F1"] = 294.3000
-phonemes ["NL", "F", "i", "F2"] = 1855.000
-phonemes ["NL", "F", "o", "F1"] = 527.5000
-phonemes ["NL", "F", "o", "F2"] = 894.100
-phonemes ["NL", "F", "u", "F1"] = 376.0000
-phonemes ["NL", "F", "u", "F2"] = 735.200
-phonemes ["NL", "F", "ui", "F1"] = 612.8000
-phonemes ["NL", "F", "ui", "F2"] = 1559.200
-phonemes ["NL", "F", "y", "F1"] = 321.2000
-phonemes ["NL", "F", "y", "F2"] = 1741.700
+phonemes [phonLanguage$, "F", "A", "F1"] = 817.7000
+phonemes [phonLanguage$, "F", "A", "F2"] = 1197.300
+phonemes [phonLanguage$, "F", "E", "F1"] = 667.9000
+phonemes [phonLanguage$, "F", "E", "F2"] = 1748.500
+phonemes [phonLanguage$, "F", "I", "F1"] = 429.2222
+phonemes [phonLanguage$, "F", "I", "F2"] = 1937.333
+phonemes [phonLanguage$, "F", "O", "F1"] = 570.8000
+phonemes [phonLanguage$, "F", "O", "F2"] = 882.100
+phonemes [phonLanguage$, "F", "Y", "F1"] = 495.7000
+phonemes [phonLanguage$, "F", "Y", "F2"] = 1635.600
+phonemes [phonLanguage$, "F", "Y:", "F1"] = 431.1000
+phonemes [phonLanguage$, "F", "Y:", "F2"] = 1695.100
+phonemes [phonLanguage$, "F", "a", "F1"] = 853.6000
+phonemes [phonLanguage$, "F", "a", "F2"] = 1435.800
+phonemes [phonLanguage$, "F", "au", "F1"] = 647.6000
+phonemes [phonLanguage$, "F", "au", "F2"] = 1056.700
+phonemes [phonLanguage$, "F", "e", "F1"] = 429.9000
+phonemes [phonLanguage$, "F", "e", "F2"] = 1861.700
+phonemes [phonLanguage$, "F", "ei", "F1"] = 619.9000
+phonemes [phonLanguage$, "F", "ei", "F2"] = 1718.500
+phonemes [phonLanguage$, "F", "i", "F1"] = 294.3000
+phonemes [phonLanguage$, "F", "i", "F2"] = 1855.000
+phonemes [phonLanguage$, "F", "o", "F1"] = 527.5000
+phonemes [phonLanguage$, "F", "o", "F2"] = 894.100
+phonemes [phonLanguage$, "F", "u", "F1"] = 376.0000
+phonemes [phonLanguage$, "F", "u", "F2"] = 735.200
+phonemes [phonLanguage$, "F", "ui", "F1"] = 612.8000
+phonemes [phonLanguage$, "F", "ui", "F2"] = 1559.200
+phonemes [phonLanguage$, "F", "y", "F1"] = 321.2000
+phonemes [phonLanguage$, "F", "y", "F2"] = 1741.700
 # Guessed
-phonemes ["NL", "F", "@", "F1"] = 500.5
-phonemes ["NL", "F", "@", "F2"] = 1706.6
+phonemes [phonLanguage$, "F", "@", "F1"] = 500.5
+phonemes [phonLanguage$, "F", "@", "F2"] = 1706.6
 
 # Run as a non interactive program
 if input_table > 0
@@ -521,7 +734,7 @@ if input_table > 0
 			Erase all
 			call set_up_Canvas
 			call plot_vowel_triangle '.sp$'
-			Text special... 0.5 Centre 1.05 bottom Helvetica 18 0 %%'title$'%
+			Text special... 0.5 Centre 1.05 bottom Helvetica 18 0 ##'title$'#
 		endif
 		@plot_vowels: .plotVowels, .sp$, .sound
 		@print_output_line: title$, .sp$, plot_vowels.numVowelIntervals, plot_vowels.area2perc, plot_vowels.area1perc, plot_vowels.relDist_i, plot_vowels.relDist_u, plot_vowels.relDist_a, .duration, .intensity
@@ -544,56 +757,85 @@ endif
 # Run master loop
 while .continue
 	
+	.speakerIsA$ = uiMessage$ [uiLanguage$, "Speaker is a"]
+	.speakerIsAVar$ = replace_regex$(.speakerIsA$, "^([A-Z])", "\l\1", 0)
+	.speakerIsAVar$ = replace_regex$(.speakerIsAVar$, "\s*\(.*$", "", 0)
+	.speakerIsAVar$ = replace_regex$(.speakerIsAVar$, "[\s.?!()/\\\\]", "_", 0)
+	.languageInput$ = uiMessage$ [uiLanguage$, "Interface Language"]
+	.languageInputVar$ = replace_regex$(.languageInput$, "^([A-Z])", "\l\1", 0)
+	.languageInputVar$ = replace_regex$(.languageInputVar$, "\s*\(.*$", "", 0)
+	.languageInputVar$ = replace_regex$(.languageInputVar$, "[\s.?!()/\\\\]", "_", 0)
+
 	.recording = 0
 	beginPause: "Select a recording"
 		sentence: "Title", "untitled"
 		comment: uiMessage$ [uiLanguage$, "CommentOpen"]
 		comment: uiMessage$ [uiLanguage$, "CommentRecord"]
-		choice: "Speaker is a", .sp_default
+		choice: .speakerIsA$, .sp_default
 			option: uiMessage$ [uiLanguage$, "Female"]
 			option: uiMessage$ [uiLanguage$, "Male"]
-		optionMenu: "Display language", .defaultLanguage
+		optionMenu: .languageInput$, .defaultLanguage
 			option: "English"
 			option: "Nederlands"
 			option: "Deutsch"
 			option: "Français"
 			option: "汉语"
+			option: "Español"
+			option: "Português"
+			option: "Italiano"
 		#   option: "MyLanguage"
 		boolean: "Log", (output_table$ <> "")
-	.clicked = endPause: (uiMessage$ [uiLanguage$, "Stop"]), (uiMessage$ [uiLanguage$, "Record"]), (uiMessage$ [uiLanguage$, "Open"]), 3, 1
+	.clicked = endPause: (uiMessage$ [uiLanguage$, "Stop"]), (uiMessage$ [uiLanguage$, "Record"]), (uiMessage$ [uiLanguage$, "Open"]), 3, 1	
 	if .clicked = 1
 		.continue = 0
-		@exitVowelTriangle: "Nothing to do"
+		.message$ = uiMessage$ [uiLanguage$, "Nothing to do"]
+		@exitVowelTriangle: .message$
 	elsif .clicked = 2
 		.recording = 1
 	endif
+
 	.sp$ = "M"
 	.sp_default = 2
-	if speaker_is_a$ = uiMessage$ [uiLanguage$, "Female"]
+	if uiMessage$ [uiLanguage$, "Female"] = '.speakerIsAVar$'$
 		.sp$ = "F"
 		.sp_default = 1
 	endif
+	
 	uiLanguage$ = "EN"
 	.defaultLanguage = 1
-	if display_language$ = "Nederlands"
+	.display_language$ = '.languageInputVar$'$
+	if .display_language$ = "Nederlands"
 		uiLanguage$ = "NL"
 		.defaultLanguage = 2
-	elsif display_language$ = "Deutsch"
+	elsif .display_language$ = "Deutsch"
 		uiLanguage$ = "DE"
 		.defaultLanguage = 3
-	elsif display_language$ = "Français"
+	elsif .display_language$ = "Français"
 		uiLanguage$ = "FR"
 		.defaultLanguage = 4
-	elsif display_language$ = "汉语"
+	elsif .display_language$ = "汉语"
 		uiLanguage$ = "ZH"
 		.defaultLanguage = 5
+	elsif .display_language$ = "Español"
+		uiLanguage$ = "ES"
+		.defaultLanguage = 6
+	elsif .display_language$ = "Português"
+		uiLanguage$ = "PT"
+		.defaultLanguage = 7
+	elsif .display_language$ = "Italiano"
+		uiLanguage$ = "IT"
+		.defaultLanguage = 8
 	#
 	# Add a new language
-	# elsif display_language$ = "MyLanguage"
+	# elsif .display_language$ = "MyLanguage"
 	#	uiLanguage$ = "MyCode"
-	#	.defaultLanguage = 6
+	#	.defaultLanguage = 9
 	endif
 	
+	# Store preferences
+	writeFileLine: .preferencesLanguageFile$, "Language=",uiLanguage$
+	
+	# Start
 	if log and output_table$ = ""
 		Erase all
 		Select inner viewport: 0.5, 7.5, 0.5, 4.5
@@ -642,7 +884,7 @@ while .continue
 	Erase all
 	call set_up_Canvas
 	call plot_vowel_triangle '.sp$'
-	Text special... 0.5 Centre 1.05 bottom Helvetica 18 0 %%'title$'%
+	Text special... 0.5 Centre 1.05 bottom Helvetica 18 0 ##'title$'#
 	
 	selectObject: .sound
 	.duration = Get total duration
@@ -679,7 +921,7 @@ procedure read_and_select_audio .type .message1$ .message2$
 			comment: uiMessage$ [uiLanguage$, "CommentList"]
 		.clicked = endPause: (uiMessage$ [uiLanguage$, "Stop"]), (uiMessage$ [uiLanguage$, "Continue"]), 2, 1
 		if .clicked = 1
-			@exitVowelTriangle: "Vowel Triangle stopped"
+			@exitVowelTriangle: (uiMessage$ [uiLanguage$, "Stopped"])
 		endif
 		if numberOfSelected("Sound") <= 0
 			@exitVowelTriangle: (uiMessage$ [uiLanguage$, "ErrorSound"])
@@ -689,7 +931,7 @@ procedure read_and_select_audio .type .message1$ .message2$
 	else
 		.filename$ = chooseReadFile$: .message1$
 		if .filename$ = "" or not fileReadable(.filename$) or not index_regex(.filename$, "(?i\.(wav|mp3|aif[fc]))")
-			@exitVowelTriangle: "No readable recording selected "+.filename$
+			@exitVowelTriangle: (uiMessage$ [uiLanguage$, "No readable recording selected "])+.filename$
 		endif
 		
 		.source = Open long sound file: .filename$
@@ -788,11 +1030,11 @@ procedure plot_vowels .plot .sp$ .sound
 
 	
 	# Set new @_center
-	phonemes [language$, .sp$, "@_center", "F1"] = (phonemes [language$, .sp$, "a", "F1"] * phonemes [language$, .sp$, "i", "F1"] * phonemes [language$, .sp$, "u", "F1"]) ** (1/3) 
-	phonemes [language$, .sp$, "@_center", "F2"] = (phonemes [language$, .sp$, "a", "F2"] * phonemes [language$, .sp$, "i", "F2"] * phonemes [language$, .sp$, "u", "F2"]) ** (1/3) 
+	phonemes [phonLanguage$, .sp$, "@_center", "F1"] = (phonemes [phonLanguage$, .sp$, "a", "F1"] * phonemes [phonLanguage$, .sp$, "i", "F1"] * phonemes [phonLanguage$, .sp$, "u", "F1"]) ** (1/3) 
+	phonemes [phonLanguage$, .sp$, "@_center", "F2"] = (phonemes [phonLanguage$, .sp$, "a", "F2"] * phonemes [phonLanguage$, .sp$, "i", "F2"] * phonemes [phonLanguage$, .sp$, "u", "F2"]) ** (1/3) 
 	
-	.f1_c = phonemes [language$, .sp$, "@_center", "F1"]
-	.f2_c = phonemes [language$, .sp$, "@_center", "F2"]
+	.f1_c = phonemes [phonLanguage$, .sp$, "@_center", "F1"]
+	.f2_c = phonemes [phonLanguage$, .sp$, "@_center", "F2"]
 	
 	# Plot center
 	@vowel2point: .sp$, .f1_c, .f2_c
@@ -800,8 +1042,8 @@ procedure plot_vowels .plot .sp$ .sound
 	.st_c2 = vowel2point.y
 	
 	# Near /@/
-	.f1_c = phonemes [language$, .sp$, "@_center", "F1"]
-	.f2_c = phonemes [language$, .sp$, "@_center", "F2"]
+	.f1_c = phonemes [phonLanguage$, .sp$, "@_center", "F1"]
+	.f2_c = phonemes [phonLanguage$, .sp$, "@_center", "F2"]
 	@get_closest_vowels: 0, .sp$, .formants, .syllableKernels, .f1_c, .f2_c
 	.numVowelIntervals = get_closest_vowels.vowelNum
 	# Actually plot the vowels
@@ -817,8 +1059,8 @@ procedure plot_vowels .plot .sp$ .sound
 	endif
 	
 	# Near /i/
-	.f1_i = phonemes [language$, .sp$, "i", "F1"]
-	.f2_i = phonemes [language$, .sp$, "i", "F2"]
+	.f1_i = phonemes [phonLanguage$, .sp$, "i", "F1"]
+	.f2_i = phonemes [phonLanguage$, .sp$, "i", "F2"]
 	@get_closest_vowels: 0, .sp$, .formants, .syllableKernels, .f1_i, .f2_i
 	.meanDistToCenter ["i"] = get_closest_vowels.meanDistance
 	.stdevDistToCenter ["i"] = get_closest_vowels.stdevDistance
@@ -836,8 +1078,8 @@ procedure plot_vowels .plot .sp$ .sound
 	endif
 	
 	# Near /u/
-	.f1_u = phonemes [language$, .sp$, "u", "F1"]
-	.f2_u = phonemes [language$, .sp$, "u", "F2"]
+	.f1_u = phonemes [phonLanguage$, .sp$, "u", "F1"]
+	.f2_u = phonemes [phonLanguage$, .sp$, "u", "F2"]
 	@get_closest_vowels: 0, .sp$, .formants, .syllableKernels, .f1_u, .f2_u
 	.meanDistToCenter ["u"] = get_closest_vowels.meanDistance
 	.stdevDistToCenter ["u"] = get_closest_vowels.stdevDistance
@@ -855,8 +1097,8 @@ procedure plot_vowels .plot .sp$ .sound
 	endif
 	
 	# Near /a/
-	.f1_a = phonemes [language$, .sp$, "a", "F1"]
-	.f2_a = phonemes [language$, .sp$, "a", "F2"]
+	.f1_a = phonemes [phonLanguage$, .sp$, "a", "F1"]
+	.f2_a = phonemes [phonLanguage$, .sp$, "a", "F2"]
 	@get_closest_vowels: 0, .sp$, .formants, .syllableKernels, .f1_a, .f2_a
 	.meanDistToCenter ["a"] = get_closest_vowels.meanDistance
 	.stdevDistToCenter ["a"] = get_closest_vowels.stdevDistance
@@ -1034,12 +1276,12 @@ procedure plot_standard_vowel .color$ .sp$ .vowel$ .reduction
 	while .vowel$ <> ""
 		.i += 1
 		.v$ = replace_regex$(.vowel$, "^\s*(\S[`]?).*$", "\1", 0)
-		.f1 = phonemes [language$, .sp$, .v$, "F1"]
-		.f2 = phonemes [language$, .sp$, .v$, "F2"]
+		.f1 = phonemes [phonLanguage$, .sp$, .v$, "F1"]
+		.f2 = phonemes [phonLanguage$, .sp$, .v$, "F2"]
 		if .reduction
 			.factor = 0.9^.reduction
-			.f1 = .factor * (.f1 - phonemes [language$, .sp$, "@", "F1"]) + phonemes [language$, .sp$, "@", "F1"]
-			.f2 = .factor * (.f2 - phonemes [language$, .sp$, "@", "F2"]) + phonemes [language$, .sp$, "@", "F2"]
+			.f1 = .factor * (.f1 - phonemes [phonLanguage$, .sp$, "@", "F1"]) + phonemes [phonLanguage$, .sp$, "@", "F1"]
+			.f2 = .factor * (.f2 - phonemes [phonLanguage$, .sp$, "@", "F2"]) + phonemes [phonLanguage$, .sp$, "@", "F2"]
 		endif
 		@vowel2point: .sp$, .f1, .f2
 		.x [.i] = vowel2point.x
@@ -1060,14 +1302,14 @@ endproc
 # Plot the vowel triangle
 procedure plot_vowel_triangle .sp$
 	# Draw vowel triangle
-	.a_F1 = phonemes [language$, .sp$, "a_corner", "F1"]
-	.a_F2 = phonemes [language$, .sp$, "a_corner", "F2"]
+	.a_F1 = phonemes [phonLanguage$, .sp$, "a_corner", "F1"]
+	.a_F2 = phonemes [phonLanguage$, .sp$, "a_corner", "F2"]
 
-	.i_F1 = phonemes [language$, .sp$, "i_corner", "F1"]
-	.i_F2 = phonemes [language$, .sp$, "i_corner", "F2"]
+	.i_F1 = phonemes [phonLanguage$, .sp$, "i_corner", "F1"]
+	.i_F2 = phonemes [phonLanguage$, .sp$, "i_corner", "F2"]
 
-	.u_F1 = phonemes [language$, .sp$, "u_corner", "F1"]
-	.u_F2 = phonemes [language$, .sp$, "u_corner", "F2"]
+	.u_F1 = phonemes [phonLanguage$, .sp$, "u_corner", "F1"]
+	.u_F2 = phonemes [phonLanguage$, .sp$, "u_corner", "F2"]
 	
 	Dashed line
 	# u - i
@@ -1113,14 +1355,14 @@ procedure vowel2point .sp$ .f1 .f2
 	.spt1 = 12*log2(.f1)
 	.spt2 = 12*log2(.f2)
 	
-	.a_St1 = 12*log2(phonemes [language$, .sp$, "a_corner", "F1"])
-	.a_St2 = 12*log2(phonemes [language$, .sp$, "a_corner", "F2"])
+	.a_St1 = 12*log2(phonemes [phonLanguage$, .sp$, "a_corner", "F1"])
+	.a_St2 = 12*log2(phonemes [phonLanguage$, .sp$, "a_corner", "F2"])
 
-	.i_St1 = 12*log2(phonemes [language$, .sp$, "i_corner", "F1"])
-	.i_St2 = 12*log2(phonemes [language$, .sp$, "i_corner", "F2"])
+	.i_St1 = 12*log2(phonemes [phonLanguage$, .sp$, "i_corner", "F1"])
+	.i_St2 = 12*log2(phonemes [phonLanguage$, .sp$, "i_corner", "F2"])
 
-	.u_St1 = 12*log2(phonemes [language$, .sp$, "u_corner", "F1"])
-	.u_St2 = 12*log2(phonemes [language$, .sp$, "u_corner", "F2"])
+	.u_St1 = 12*log2(phonemes [phonLanguage$, .sp$, "u_corner", "F1"])
+	.u_St2 = 12*log2(phonemes [phonLanguage$, .sp$, "u_corner", "F2"])
 	
 	.dist_iu = sqrt((.i_St1 - .u_St1)^2 + (.i_St2 - .u_St2)^2)
 	.theta = arcsin((.u_St1 - .i_St1)/.dist_iu)
@@ -1159,8 +1401,8 @@ procedure get_closest_vowels .cutoff .sp$ .formants .textgrid .f1_o .f2_o
 	.st_o2 = vowel2point.y
 	
 	# Get center coordinates
-	.fc1 = phonemes ["NL", .sp$, "@_center", "F1"]
-	.fc2 = phonemes ["NL", .sp$, "@_center", "F2"]
+	.fc1 = phonemes [phonLanguage$, .sp$, "@_center", "F1"]
+	.fc2 = phonemes [phonLanguage$, .sp$, "@_center", "F2"]
 	@vowel2point: .sp$, .fc1, .fc2
 	.st_c1 = vowel2point.x
 	.st_c2 = vowel2point.y

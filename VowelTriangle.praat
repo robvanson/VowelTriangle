@@ -1540,10 +1540,16 @@ procedure select_vowel_target .sound .formants .textgrid
 	.f1_Lowest = 250
 	.f1_Highest = 1050
 	
+	# Get basic info
+	selectObject: .sound
+	.samplingFrequency = Get sampling frequency
+	.intensityValue = Get intensity (dB)
+	.duration = Get total duration
+
 	# Add tiers to the TextGrid
 	selectObject: .textgrid
-	.duration = Get total duration
 	.firstTier$ = Get tier name: 1
+	# If this is a standard syllable nuclei output
 	if .firstTier$ <> "Vowel"
 		Insert point tier: 1, "Valleys"
 		Insert point tier: 1, "Peaks"
@@ -1560,6 +1566,16 @@ procedure select_vowel_target .sound .formants .textgrid
 		# Is redundant, will probably be simplified later
 		selectObject: .textgrid
 		.numSyllables = Get number of points: 5
+		
+		# If there is no syllable, but there is sound, find one
+		if .numSyllables <= 0 and .intensityValue >= 45
+			selectObject: .intensity
+			.t_max = Get time of maximum: 0, 0, "Parabolic"
+			selectObject: .textgrid
+			Insert point: 5, .t_max, "S"	
+		endif
+		
+		# Create the other tiers
 		.t_valley_next = -1
 		for .i to .numSyllables
 			selectObject: .textgrid
@@ -1632,14 +1648,23 @@ procedure select_vowel_target .sound .formants .textgrid
 	.silencesTier = 6
 	.vuvTier = 7
 
-	selectObject: .sound
-	.samplingFrequency = Get sampling frequency
-	.intensity = Get intensity (dB)
-
 	selectObject: .formants
 	.totalNumFrames = Get number of frames
 	
-	
+	# Create a semitones F2 * F1 signal
+	.dT = Get time step
+	.vowelness = Create Sound from formula: "Vowelness", 1, 0, .duration, 1/.dT, "0"
+	for .i to .totalNumFrames
+		selectObject: .formants
+		.t = Get time from frame number: .i
+		.f1 = Get value at time: 1, .t, "hertz", "linear"
+		.f2 = Get value at time: 2, .t, "hertz", "linear"
+		.st1 = 12*log2(.f1)
+		.st2 = 12*log2(.f2)
+		selectObject: .vowelness
+		Set value at sample number: 0, .i, .st1*.st2
+	endfor
+
 	#################################################################
 	#
 	# The following is overly complicated and brittle
@@ -1652,28 +1677,7 @@ procedure select_vowel_target .sound .formants .textgrid
 	# Determining formant tracks based on the vowel frames.
 	#
 	#################################################################
-	
-	# Nothing found, but there is sound. Try to find at least 1 vowel
-	
-	selectObject: .textgrid
-	.numPeaks = Get number of points: .peakTier	
-	if .numPeaks <= 0 and .intensity >= 45
-		selectObject: .sound
-		.t_max = Get time of maximum: 0, 0, "Sinc70"
-		.pp = noprogress To PointProcess (periodic, cc): 75, 600
-		.textGrid = noprogress To TextGrid (vuv): 0.02, 0.01
-		.i = Get interval at time: 1, .t_max
-		.label$ = Get label of interval: 1, .i
-		.start = Get start time of interval: 1, .i
-		.end = Get end time of interval: 1, .i
-		if .label$ = "V"
-			selectObject: .syllableKernels
-			Insert point: .peakTier, .t_max, "P"
-			Insert point: .valleyTier, .start, "V"
-			Insert point: .valley, .end, "V"
-		endif
-	endif
-	
+		
 	selectObject: .sound
 	.voicePP = noprogress To PointProcess (periodic, cc): 75, 600
 	selectObject: .textgrid
@@ -1940,7 +1944,7 @@ procedure select_vowel_target .sound .formants .textgrid
 				selectObject: .sound
 				.sd = Get standard deviation: 1, .start, .end
 				# Is there enough sound to warrant a vowel? > -15dB
-				if 20*log10(.sd/(2*10^-5)) - .intensity > -15
+				if 20*log10(.sd/(2*10^-5)) - .intensityValue > -15
 					selectObject: .textgrid
 					Set interval text: .vowelTier, .index, "Vowel"
 				endif

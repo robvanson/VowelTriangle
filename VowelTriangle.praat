@@ -1002,21 +1002,19 @@ endproc
 procedure plot_vowels .plot .sp$ .sound
 	.startT = 0
 	.dot_Radius = default_Dot_Radius
-	#call syllable_nuclei -25 4 0.3 1 .sound
-	#.syllableKernels = syllable_nuclei.textgridid
-	call segment_syllables -25 4 0.3 1 .sound
-	.syllableKernels = segment_syllables.textgridid
+	call syllable_nuclei -25 4 0.3 1 .sound
+	.syllableKernels = syllable_nuclei.textgridid
+	#call segment_syllables -25 4 0.3 1 .sound
+	#.syllableKernels = segment_syllables.textgridid
 	
 	# Calculate the formants
 	selectObject: .sound
 	.duration = Get total duration
 	.soundname$ = selected$("Sound")
 	if .sp$ = "M"
-		.downSampled = Resample: 10000, 50
-		.formants = noprogress To Formant (sl): 0, 5, 5000, 0.025, 50
+		.formants = noprogress To Formant (robust): 0.01, 5, 5000, 0.025, 50, 1.5, 5, 1e-06
 	else
-		.downSampled = Resample: 11000, 50
-		.formants = noprogress To Formant (sl): 0, 5, 5500, 0.025, 50
+		.formants = noprogress To Formant (robust): 0.01, 5, 5500, 0.025, 50, 1.5, 5, 1e-06
 	endif
 
 	call select_vowel_target .sound .formants .syllableKernels
@@ -1255,7 +1253,7 @@ procedure plot_vowels .plot .sp$ .sound
 		Text special: 0.16, "right", -0.08, "bottom", "Helvetica", 14, "0", " '.relDist_a:0'\%  ('.num_a_Intervals')"
 	endif
 	
-	selectObject: .downSampled, .formants, .syllableKernels
+	selectObject: .formants, .syllableKernels
 	Remove
 endproc
 
@@ -1485,7 +1483,7 @@ procedure get_closest_vowels .cutoff .sp$ .formants .textgrid .f1_o .f2_o
 	endif
 endproc
 
-# Collect all the most distant vowles
+# Collect all the most distant vowels
 procedure get_most_distant_vowels .sp$ .formants .textgrid .f1_o .f2_o
 	.f1 = 0
 	.f2 = 0
@@ -1541,30 +1539,120 @@ endproc
 procedure select_vowel_target .sound .formants .textgrid
 	.f1_Lowest = 250
 	.f1_Highest = 1050
+	
+	# Add tiers to the TextGrid
 	selectObject: .textgrid
 	.duration = Get total duration
 	.firstTier$ = Get tier name: 1
 	if .firstTier$ <> "Vowel"
+		Insert point tier: 1, "Valleys"
+		Insert point tier: 1, "Peaks"
 		Insert point tier: 1, "VowelTarget"
 		Insert interval tier: 1, "Vowel"
+		
+		# Fill the Peaks and Valleys
+		selectObject: .sound
+		.intensity = noprogress To Intensity: 70, 0, "yes"
+		.dt = Get time step
+		.maxFrame = Get number of frames
+		
+		# Determine Peaks and valleys
+		# Is redundant, will probably be simplified later
+		selectObject: .textgrid
+		.numSyllables = Get number of points: 5
+		.t_valley_next = -1
+		for .i to .numSyllables
+			selectObject: .textgrid
+			.t_prev = 0
+			if .i > 1
+				.t_prev = Get time of point: 5, .i-1
+			endif
+			.t = Get time of point: 5, .i
+			# t_peak == syllable nucleus
+			.t_peak = .t
+			.t_next = .duration
+			if .i < .numSyllables
+				.t_next = Get time of point: 5, .i+1
+			endif
+			
+			# Maximal intervcal
+			if .t - .t_prev > 0.1
+				.t_prev = .t - 0.1
+			endif
+			
+			selectObject: .intensity
+			.t_valley_prev = Get time of minimum: .t_prev, .t, "Parabolic"
+			.t_valley_next = Get time of minimum: .t, .t_next, "Parabolic"
+			
+			# Add the previous valley and the current peak
+			selectObject: .textgrid
+			Insert point: 3, .t_peak, "P"
+			Insert point: 4, .t_valley_prev, "V"
+		endfor
+		# Last valley
+		if .t_valley_next > 0
+			selectObject: .textgrid
+			Insert point: 4, .t_valley_next, "V"
+		endif
+		
+		# Determine voiced parts
+		selectObject: .sound
+		.voicePP = noprogress To PointProcess (periodic, cc): 75, 600
+		.vuvTextGrid = noprogress To TextGrid (vuv): 0.02, 0.01
+		
+		# Copy VUV to textgrid (cannot be simply merged and deleted)
+		selectObject: .textgrid
+		.numTiers = Get number of tiers
+		.vuvTier = .numTiers + 1
+		Insert interval tier: .vuvTier, "vuv"
+		selectObject: .vuvTextGrid
+		.numIntervals = Get number of intervals: 1
+		for .i to .numIntervals
+			selectObject: .vuvTextGrid
+			.startTime = Get start time of interval: 1, .i
+			.endTime = Get end time of interval: 1, .i
+			.label$ = Get label of interval: 1, .i
+			
+			selectObject: .textgrid
+			if .endTime > 0 and .endTime < .duration
+				Insert boundary: .vuvTier, .endTime
+			endif
+			Set interval text: .vuvTier, .i, .label$
+		endfor
+		selectObject: .vuvTextGrid, .voicePP, .intensity
+		Remove
 	endif
+	
+	# Set tier numbers
 	.vowelTier = 1
 	.targetTier = 2
 	.peakTier = 3
 	.valleyTier = 4
-	.silencesTier = 5
-	.vuvTier = 6
+	.syllablesTier = 5
+	.silencesTier = 6
+	.vuvTier = 7
 
 	selectObject: .sound
 	.samplingFrequency = Get sampling frequency
 	.intensity = Get intensity (dB)
-	if .samplingFrequency = 10000
-		.formantsBurg = noprogress To Formant (burg): 0, 5, 5000, 0.025, 50
-	else
-		.formantsBurg = noprogress To Formant (burg): 0, 5, 5500, 0.025, 50
-	endif
+
+	selectObject: .formants
 	.totalNumFrames = Get number of frames
-		
+	
+	
+	#################################################################
+	#
+	# The following is overly complicated and brittle
+	# Will be rewritten into a simple scheme where vowel
+	# frames are selected on:
+	# 1) Voiced
+	# 2) st1 = 12*log2(F1), st2 = 12*log2(F2)
+	# 3) Vowel: st1 * st2 >= 12751.5 (based on CART on IFAcorpus)
+	# 
+	# Determining formant tracks based on the vowel frames.
+	#
+	#################################################################
+	
 	# Nothing found, but there is sound. Try to find at least 1 vowel
 	
 	selectObject: .textgrid
@@ -1653,7 +1741,6 @@ procedure select_vowel_target .sound .formants .textgrid
 
 		selectObject: .formants
 		.f = Get value at time: 1, .tl, "Hertz", "Linear"
-		selectObject: .formantsBurg
 		.b = Get bandwidth at time: 1, .tl, "Hertz", "Linear"
 		.iframe = Get frame number from time: .tl
 		if .iframe > .totalNumFrames
@@ -1666,7 +1753,6 @@ procedure select_vowel_target .sound .formants .textgrid
 			.tl += .dt
 			selectObject: .formants
 			.f = Get value at time: 1, .tl, "Hertz", "Linear"
-			selectObject: .formantsBurg
 			.b = Get bandwidth at time: 1, .tl, "Hertz", "Linear"
 			.iframe = Get frame number from time: .tl	
 			if .iframe > .totalNumFrames
@@ -1679,7 +1765,6 @@ procedure select_vowel_target .sound .formants .textgrid
 
 		selectObject: .formants
 		.f = Get value at time: 1, .th, "Hertz", "Linear"
-		selectObject: .formantsBurg
 		.b = Get bandwidth at time: 1, .th, "Hertz", "Linear"
 		.iframe = Get frame number from time: .th
 		if .iframe > .totalNumFrames
@@ -1692,7 +1777,6 @@ procedure select_vowel_target .sound .formants .textgrid
 			.th -= .dt
 			selectObject: .formants
 			.f = Get value at time: 1, .th, "Hertz", "Linear"
-			selectObject: .formantsBurg
 			.b = Get bandwidth at time: 1, .th, "Hertz", "Linear"
 			.iframe = Get frame number from time: .th
 			if .iframe > .totalNumFrames
@@ -1755,7 +1839,6 @@ procedure select_vowel_target .sound .formants .textgrid
 			# Lower end
 			selectObject: .formants
 			.f = Get value at time: 1, .ttl, "Hertz", "Linear"
-			selectObject: .formantsBurg
 			.b = Get bandwidth at time: 1, .ttl, "Hertz", "Linear"
 			.iframe = Get frame number from time: .th
 			if .iframe > .totalNumFrames
@@ -1774,7 +1857,6 @@ procedure select_vowel_target .sound .formants .textgrid
 				.ttl -= .dt
 				selectObject: .formants
 				.f = Get value at time: 1, .ttl, "Hertz", "Linear"
-				selectObject: .formantsBurg
 				.b = Get bandwidth at time: 1, .ttl, "Hertz", "Linear"
 				.iframe = Get frame number from time: .ttl
 				if .iframe > .totalNumFrames
@@ -1797,7 +1879,6 @@ procedure select_vowel_target .sound .formants .textgrid
 			.tth = .tp
 			selectObject: .formants
 			.f = Get value at time: 1, .tth, "Hertz", "Linear"
-			selectObject: .formantsBurg
 			.b = Get bandwidth at time: 1, .tth, "Hertz", "Linear"
 			.iframe = Get frame number from time: .th
 			if .iframe > .totalNumFrames
@@ -1816,7 +1897,6 @@ procedure select_vowel_target .sound .formants .textgrid
 				.tth += .dt
 				selectObject: .formants
 				.f = Get value at time: 1, .tth, "Hertz", "Linear"
-				selectObject: .formantsBurg
 				.b = Get bandwidth at time: 1, .tth, "Hertz", "Linear"
 				.iframe = Get frame number from time: .tth
 				if .iframe > .totalNumFrames
@@ -1868,7 +1948,7 @@ procedure select_vowel_target .sound .formants .textgrid
 		endif
 	endfor
 	
-	selectObject: .formantsBurg, .voicePP
+	selectObject: .voicePP
 	Remove
 	
 endproc
@@ -1901,7 +1981,7 @@ endproc
 # de Jong, N.H. & Wempe, T. Behavior Research Methods (2009) 41: 385.     #
 # https://doi.org/10.3758/BRM.41.2.385                                    #
 # 
-procedure segment_syllables .silence_threshold .minimum_dip_between_peaks .minimum_pause_duration .keep_Soundfiles_and_Textgrids .soundid
+procedure segment_syllablesOLD .silence_threshold .minimum_dip_between_peaks .minimum_pause_duration .keep_Soundfiles_and_Textgrids .soundid
 	# Get intensity
 	selectObject: .soundid
 	.intensity = noprogress To Intensity: 70, 0, "yes"
@@ -2151,4 +2231,258 @@ procedure initialize_table_collumns .table, .columns$, .initial_value$
 			endfor
 		endif
 	endwhile
+endproc
+
+
+###########################################################################
+#                                                                         #
+#  Praat Script Syllable Nuclei                                           #
+#  Copyright (C) 2008  Nivja de Jong and Ton Wempe                        #
+#                                                                         #
+#    This program is free software: you can redistribute it and/or modify #
+#    it under the terms of the GNU General Public License as published by #
+#    the Free Software Foundation, either version 3 of the License, or    #
+#    (at your option) any later version.                                  #
+#                                                                         #
+#    This program is distributed in the hope that it will be useful,      #
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of       #
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        #
+#    GNU General Public License for more details.                         #
+#                                                                         #
+#    You should have received a copy of the GNU General Public License    #
+#    along with this program.  If not, see http://www.gnu.org/licenses/   #
+#                                                                         #
+###########################################################################
+#
+# modified 2010.09.17 by Hugo Quené, Ingrid Persoon, & Nivja de Jong
+# Overview of changes:
+# + change threshold-calculator: rather than using median, use the almost maximum
+#     minus 25dB. (25 dB is in line with the standard setting to detect silence
+#     in the "To TextGrid (silences)" function.
+#     Almost maximum (.99 quantile) is used rather than maximum to avoid using
+#     irrelevant non-speech sound-bursts.
+# + add silence-information to calculate articulation rate and ASD (average syllable
+#     duration.
+#     NB: speech rate = number of syllables / total time
+#         articulation rate = number of syllables / phonation time
+# + remove max number of syllable nuclei
+# + refer to objects by unique identifier, not by name
+# + keep track of all created intermediate objects, select these explicitly,
+#     then Remove
+# + provide summary output in Info window
+# + do not save TextGrid-file but leave it in Object-window for inspection
+#     (if requested in startup-form)
+# + allow Sound to have starting time different from zero
+#      for Sound objects created with Extract (preserve times)
+# + programming of checking loop for mindip adjusted
+#      in the orig version, precedingtime was not modified if the peak was rejected !!
+#      var precedingtime and precedingint renamed to .currenttime and .currentint
+#
+# + bug fixed concerning summing total pause, feb 28th 2011
+#
+# modified 2014.10.24 by Rob van Son
+# Overview of changes:
+# + Converted to a function form. Can be called as -
+# call syllable_nuclei -25 2 0.3 1 .soundFile
+#   where .soundFile is the ID of an open soundfile
+# + Added noprogress and cleaned up object id assignment
+# 
+###########################################################################
+
+# counts syllables of sound utterances
+# NB unstressed syllables are sometimes overlooked
+# NB filter sounds that are quite noisy beforehand
+# NB use Silence threshold (dB) = -25 (or -20?)
+# NB use Minimum .dip between peaks (dB) = between 2-4 (you can first try;
+#                                                      For clean and filtered: 4)
+# syllable_nuclei.soundname$	- Name of sound object
+# syllable_nuclei.voicedcount	- Count of vocied segments
+# syllable_nuclei.npause		- Count of pauses
+# syllable_nuclei.originaldur	- Original duration
+# syllable_nuclei.speakingtot	- Duration of speech
+# syllable_nuclei.speakingrate	- Syllable per second, gross
+# syllable_nuclei.articulationrate - Syllables per speaking time
+# syllable_nuclei.asd			- Average syllable duration
+# 
+# Arguments
+# real .silence_threshold -25 (dB)
+# real .minimum_dip_between_peaks 2 (dB)
+# real .minimum_pause_duration 0.3 (s)
+# boolean .keep_Soundfiles_and_Textgrids 1
+# fileID .soundFile
+#
+# Example 
+# call syllable_nuclei -25 2 0.3 1 .originalRecording
+
+procedure syllable_nuclei .silence_threshold .minimum_dip_between_peaks .minimum_pause_duration .keep_Soundfiles_and_Textgrids .soundid
+	minimum_Pitch = 70
+	maximum_Pitch = 600
+	
+	# Get object name
+	select .soundid
+	.soundname$ = selected$("Sound")
+
+	# shorten variables
+	.silencedb = .silence_threshold
+	.mindip = .minimum_dip_between_peaks
+	.showtext = .keep_Soundfiles_and_Textgrids
+	.minpause = .minimum_pause_duration
+
+	.originaldur = Get total duration
+	# allow non-zero starting time
+	.bt = Get starting time
+
+	# Use intensity to get .threshold
+	.intid = noprogress To Intensity... 50 0 yes
+	.start = Get time from frame number... 1
+	.nframes = Get number of frames
+	.end = Get time from frame number... '.nframes'
+
+	# estimate noise floor
+	select .intid
+	.minint = Get minimum... 0 0 Parabolic
+	# estimate noise max
+	.maxint = Get maximum... 0 0 Parabolic
+	#get .99 quantile to get maximum (without influence of non-speech sound bursts)
+	.max99int = Get quantile... 0 0 0.99
+
+	# estimate Intensity .threshold
+	.threshold = .max99int + .silencedb
+	.threshold2 = .maxint - .max99int
+	.threshold3 = .silencedb - .threshold2
+	if .threshold < .minint
+	    .threshold = .minint
+	endif
+
+	# get pauses (silences) and speakingtime
+	select .soundid
+	.textgridid = noprogress To TextGrid (silences)... 80 0 '.threshold3' '.minpause' 0.1 silent sounding
+	.silencetierid = Extract tier... 1
+	.silencetableid = Down to TableOfReal... sounding
+	nsounding = Get number of rows
+	.npauses = 'nsounding'
+	.speakingtot = 0
+	for ipause from 1 to .npauses
+	   beginsound = Get value... 'ipause' 1
+	   endsound = Get value... 'ipause' 2
+	   speakingdur = 'endsound' - 'beginsound'
+	   .speakingtot = 'speakingdur' + '.speakingtot'
+	endfor
+
+	select '.intid'
+	Down to Matrix
+	.matid = selected("Matrix")
+	# Convert intensity to sound
+	.sndintid = noprogress To Sound (slice)... 1
+
+	# use total duration, not .end time, to find out duration of .intdur
+	# in order to allow nonzero starting times.
+	.intdur = Get total duration
+	intmax = Get maximum... 0 0 Parabolic
+
+	# estimate peak positions (all peaks)
+	.ppid = noprogress To PointProcess (extrema)... Left yes no Sinc70
+
+	numpeaks = Get number of points
+
+	# fill array with time points
+	for .i from 1 to numpeaks
+	    t'.i' = Get time from index... '.i'
+	endfor
+
+
+	# fill array with intensity values
+	select '.sndintid'
+	.peakcount = 0
+	for .i from 1 to numpeaks
+	    value = Get value at time... t'.i' Cubic
+	    if value > .threshold
+	          .peakcount += 1
+	          int'.peakcount' = value
+	          .timepeaks'.peakcount' = t'.i'
+	    endif
+	endfor
+
+
+	# fill array with valid peaks: only intensity values if preceding
+	# .dip in intensity is greater than .mindip
+	select '.intid'
+	.validpeakcount = 0
+	.currenttime = .timepeaks1
+	.currentint = int1
+
+	for .p to .peakcount-1
+	   .following = .p + 1
+	   .followingtime = .timepeaks'.following'
+	   .dip = Get minimum... '.currenttime' '.followingtime' None
+	   .diffint = abs(.currentint - .dip)
+
+	   if .diffint > .mindip
+	      .validpeakcount += 1
+	      validtime'.validpeakcount' = .timepeaks'.p'
+	   endif
+	      .currenttime = .timepeaks'.following'
+	      .currentint = Get value at time... .timepeaks'.following' Cubic
+	endfor
+
+
+	# Look for only voiced parts
+	select '.soundid'
+	.pitchid = noprogress To Pitch (ac)... 0.02 'minimum_Pitch' 4 no 0.03 0.25 0.01 0.35 0.25 'maximum_Pitch'
+
+	.voicedcount = 0
+	for .i from 1 to .validpeakcount
+	   .querytime = validtime'.i'
+
+	   select '.textgridid'
+	   .whichinterval = Get interval at time... 1 '.querytime'
+	   .whichlabel$ = Get label of interval... 1 '.whichinterval'
+
+	   select '.pitchid'
+	   value = Get value at time... '.querytime' Hertz Linear
+
+	   if value <> undefined
+	      if .whichlabel$ = "sounding"
+	          .voicedcount = .voicedcount + 1
+	          voicedpeak'.voicedcount' = validtime'.i'
+	      endif
+	   endif
+	endfor
+
+	# calculate time correction due to shift in time for Sound object versus
+	# intensity object
+	.timecorrection = .originaldur/.intdur
+
+	# Insert voiced peaks in TextGrid
+	if .showtext > 0
+	   select '.textgridid'
+	   Insert point tier... 1 syllables
+	  
+	   for .i from 1 to .voicedcount
+	       position = voicedpeak'.i' * .timecorrection
+	       Insert point... 1 position '.i'
+	   endfor
+	endif
+
+	# clean up before next sound file is opened
+	select .intid
+	plus .matid
+	plus .sndintid
+	plus .ppid
+	plus .pitchid
+	plus .silencetierid
+	plus .silencetableid
+	#plus .textgridid
+	Remove
+	if .showtext < 1
+	   select '.soundid'
+	   plus '.textgridid'
+	   Remove
+	endif
+
+	# summarize results in Info window
+	.speakingrate = '.voicedcount'/'.originaldur'
+	.articulationrate = '.voicedcount'/'.speakingtot'
+	.npause = '.npauses'-1
+	.asd = '.speakingtot'/'.voicedcount'
 endproc

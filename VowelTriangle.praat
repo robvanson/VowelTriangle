@@ -1556,61 +1556,7 @@ procedure select_vowel_target .sound .formants .textgrid
 		Insert point tier: 1, "VowelTarget"
 		Insert interval tier: 1, "Vowel"
 		
-		# Fill the Peaks and Valleys
-		selectObject: .sound
-		.intensity = noprogress To Intensity: 70, 0, "yes"
-		.dt = Get time step
-		.maxFrame = Get number of frames
-		
-		# Determine Peaks and valleys
-		# Is redundant, will probably be simplified later
-		selectObject: .textgrid
-		.numSyllables = Get number of points: 5
-		
-		# If there is no syllable, but there is sound, find one
-		if .numSyllables <= 0 and .intensityValue >= 45
-			selectObject: .intensity
-			.t_max = Get time of maximum: 0, 0, "Parabolic"
-			selectObject: .textgrid
-			Insert point: 5, .t_max, "S"	
-		endif
-		
-		# Create the other tiers
-		.t_valley_next = -1
-		for .i to .numSyllables
-			selectObject: .textgrid
-			.t_prev = 0
-			if .i > 1
-				.t_prev = Get time of point: 5, .i-1
-			endif
-			.t = Get time of point: 5, .i
-			# t_peak == syllable nucleus
-			.t_peak = .t
-			.t_next = .duration
-			if .i < .numSyllables
-				.t_next = Get time of point: 5, .i+1
-			endif
-			
-			# Maximal intervcal
-			if .t - .t_prev > 0.1
-				.t_prev = .t - 0.1
-			endif
-			
-			selectObject: .intensity
-			.t_valley_prev = Get time of minimum: .t_prev, .t, "Parabolic"
-			.t_valley_next = Get time of minimum: .t, .t_next, "Parabolic"
-			
-			# Add the previous valley and the current peak
-			selectObject: .textgrid
-			Insert point: 3, .t_peak, "P"
-			Insert point: 4, .t_valley_prev, "V"
-		endfor
-		# Last valley
-		if .t_valley_next > 0
-			selectObject: .textgrid
-			Insert point: 4, .t_valley_next, "V"
-		endif
-		
+		# VUV tier
 		# Determine voiced parts
 		selectObject: .sound
 		.voicePP = noprogress To PointProcess (periodic, cc): 75, 600
@@ -1635,6 +1581,143 @@ procedure select_vowel_target .sound .formants .textgrid
 			endif
 			Set interval text: .vuvTier, .i, .label$
 		endfor
+		
+		# CoG
+		call calculateCOG 0.01 .sound
+		.cogSignal = calculateCOG.cog_tier
+		selectObject: .cogSignal
+		.cogTextGrid = To TextGrid (silences): -55, 0.1, 0.05, "N", "V", 0.001
+		
+		# Copy CoG to textgrid (cannot be simply merged and deleted)
+		selectObject: .textgrid
+		.numTiers = Get number of tiers
+		.cogTier = .numTiers + 1
+		Insert interval tier: .cogTier, "CoG"
+		selectObject: .cogTextGrid
+		.numIntervals = Get number of intervals: 1
+		for .i to .numIntervals
+			selectObject: .cogTextGrid
+			.startTime = Get start time of interval: 1, .i
+			.endTime = Get end time of interval: 1, .i
+			.label$ = Get label of interval: 1, .i
+			
+			selectObject: .textgrid
+			if .endTime > 0 and .endTime < .duration
+				Insert boundary: .cogTier, .endTime
+			endif
+			Set interval text: .cogTier, .i, .label$
+		endfor
+
+		# Fill the Peaks and Valleys
+		selectObject: .sound
+		.intensity = noprogress To Intensity: 70, 0, "yes"
+		.dt = Get time step
+		.maxFrame = Get number of frames
+
+		# Determine Peaks and valleys
+		# Is redundant, will probably be simplified later
+		selectObject: .textgrid
+		.numSyllables = Get number of points: 5
+		
+		# If there is no syllable, but there is sound, find one
+		if .numSyllables <= 0 and .intensityValue >= 45
+			selectObject: .intensity
+			.t_max = Get time of maximum: 0, 0, "Parabolic"
+			selectObject: .textgrid
+			Insert point: 5, .t_max, "1"	
+		endif
+		
+		# Create the other tiers
+		.t_valley_next = -1
+		for .i to .numSyllables
+			selectObject: .textgrid
+			.t_prev = 0
+			if .i > 1
+				.t_prev = Get time of point: 5, .i-1
+			endif
+			.t = Get time of point: 5, .i
+			# t_peak == syllable nucleus
+			.t_peak = .t
+			.t_next = .duration
+			if .i < .numSyllables
+				.t_next = Get time of point: 5, .i+1
+			endif
+			
+			# Maximal interval
+			if .t - .t_prev > 0.4
+				.t_prev = .t - 0.4
+			endif
+			if .t_next - .t > 0.4
+				.t_next = .t + 0.4
+			endif
+			
+			selectObject: .intensity
+			if .t - .t_prev > 0.05
+				.t_valley_prev = Get time of minimum: .t_prev+0.025, .t-0.025, "Parabolic"
+			else
+				.t_valley_prev = (.t + .t_prev)/2
+			endif
+			if .t_next - .t > 0.05
+				.t_valley_next = Get time of minimum: .t+0.025, .t_next-0.025, "Parabolic"
+			else
+				.t_valley_next = (.t_next + .t)/2
+			endif
+			
+			# Set .t_prev and .t_next to the voicing boundaries if they are "inside"
+			selectObject: .textgrid
+			.voicingInt = Get interval at time: .vuvTier, .t_peak
+			.vuvLabel$ = Get label of interval: .vuvTier, .voicingInt
+			if .vuvLabel$ = "V"
+				.startVoicing = Get start time of interval: .vuvTier, .voicingInt
+				.endVoicing = Get end time of interval: .vuvTier, .voicingInt
+			else
+				.startVoicing = Get start time of interval: .vuvTier, .voicingInt - 1
+				.endVoicing = Get end time of interval: .vuvTier, .voicingInt + 1
+			endif
+			if .t_valley_prev < .startVoicing
+				.t_valley_prev = .startVoicing
+			endif
+			if .t_valley_next > .endVoicing
+				.t_valley_next = .endVoicing
+			endif
+			
+			# Set .t_prev and .t_next to the CoG boundaries if they are "inside"
+			selectObject: .textgrid
+			.numCoGInt = Get number of intervals: .cogTier
+			.cogInt = Get interval at time: .cogTier, .t_peak
+			.cogLabel$ = Get label of interval: .cogTier, .cogInt
+			if .cogLabel$ = "V" or .cogInt <= 1
+				.startCoG = Get start time of interval: .cogTier, .cogInt
+			else
+				.startCoG = Get start time of interval: .cogTier, .cogInt - 1
+			endif
+			if .cogLabel$ = "V" or .cogInt >= .numCoGInt
+				.endCoG = Get end time of interval: .cogTier, .cogInt
+			else
+				.endCoG = Get end time of interval: .cogTier, .cogInt + 1
+			endif
+			if .t_valley_prev < .startCoG
+				.t_valley_prev = .startCoG
+			endif
+			if .t_valley_next > .endCoG
+				.t_valley_next = .endCoG
+			endif
+			
+			# Add the previous valley and the current peak
+			selectObject: .textgrid
+			Insert point: 3, .t_peak, "P"
+			.nearestPoint = Get nearest index from time: 4, .t_valley_prev
+			.nearest_t = 0
+			if .nearestPoint > 0
+				.nearest_t = Get time of point: 4, .nearestPoint
+			endif
+			# Avoid collisions
+			if abs(.nearest_t - .t_valley_prev) > 0.001
+				Insert point: 4, .t_valley_prev, "V"
+			endif
+			Insert point: 4, .t_valley_next, "V"
+		endfor
+		
 		selectObject: .vuvTextGrid, .voicePP, .intensity
 		Remove
 	endif
@@ -1647,36 +1730,22 @@ procedure select_vowel_target .sound .formants .textgrid
 	.syllablesTier = 5
 	.silencesTier = 6
 	.vuvTier = 7
-
-	selectObject: .formants
-	.totalNumFrames = Get number of frames
-	
-	# Create a semitones F2 * F1 signal
-	.dT = Get time step
-	.vowelness = Create Sound from formula: "Vowelness", 1, 0, .duration, 1/.dT, "0"
-	for .i to .totalNumFrames
-		selectObject: .formants
-		.t = Get time from frame number: .i
-		.f1 = Get value at time: 1, .t, "hertz", "linear"
-		.f2 = Get value at time: 2, .t, "hertz", "linear"
-		.st1 = 12*log2(.f1)
-		.st2 = 12*log2(.f2)
-		selectObject: .vowelness
-		Set value at sample number: 0, .i, .st1*.st2
-	endfor
+	.cogTier = 8
 
 	#################################################################
 	#
 	# The following is overly complicated and brittle
 	# Will be rewritten into a simple scheme where vowel
-	# frames are selected on:
+	# frames are differentiated from nasals (the most problematic 
+	# confusion):
 	# 1) Voiced
-	# 2) st1 = 12*log2(F1), st2 = 12*log2(F2)
-	# 3) Vowel: st1 * st2 >= 12751.5 (based on CART on IFAcorpus)
+	# 2) Vowels: CoG >= 96.5 
 	# 
-	# Determining formant tracks based on the vowel frames.
 	#
 	#################################################################
+
+	selectObject: .formants
+	.totalNumFrames = Get number of frames
 		
 	selectObject: .sound
 	.voicePP = noprogress To PointProcess (periodic, cc): 75, 600
@@ -2159,27 +2228,9 @@ procedure segment_syllablesOLD .silence_threshold .minimum_dip_between_peaks .mi
 endproc
 
 # 
-# Determine COG as an intensity
+# Determine COG as an intensity tier
+# Returns: calculateCOG.cog_tier
 #
-# .cog_Matrix = Down to Matrix
-# call calculateCOG .dt .soundid
-# .cog_Tier = calculateCOG.cog_tier
-# selectObject: .cog_Tier
-# .numPoints = Get number of points
-# for .i to .numPoints
-# 	selectObject: .cog_Tier
-# 	.cog = Get value at index: .i
-# 	.t = Get time from index: .i
-# 	selectObject: .intensity
-# 	.c = Get frame number from time: .t
-# 	if .c >= 0.5 and .c <= .maxFrame
-# 		selectObject: .cog_Matrix
-# 		Set value: 1, round(.c), .cog
-# 	endif
-# endfor
-# selectObject: .cog_Matrix
-# .cogIntensity = noprogress To Intensity
-
 procedure calculateCOG .dt .sound
 	selectObject: .sound
 	.duration = Get total duration
@@ -2189,7 +2240,7 @@ procedure calculateCOG .dt .sound
 	
 	# Create Spectrogram
 	selectObject: .sound
-	.spectrogram = noprogress To Spectrogram: 0.005, 8000, 0.002, 20, "Gaussian"
+	.spectrogram = noprogress To Spectrogram: .dt, 8000, 0.002, 20, "Gaussian"
 	.cog_tier = Create IntensityTier: "COG", 0.0, .duration
 	
 	.t = .dt / 2
@@ -2197,6 +2248,7 @@ procedure calculateCOG .dt .sound
 		selectObject: .spectrogram
 		.spectrum = noprogress To Spectrum (slice): .t
 		.cog_t = Get centre of gravity: 2
+		.cog_t = 12*log2(.cog_t)
 		selectObject: .cog_tier
 		Add point: .t, .cog_t
 		
@@ -2489,4 +2541,33 @@ procedure syllable_nuclei .silence_threshold .minimum_dip_between_peaks .minimum
 	.articulationrate = '.voicedcount'/'.speakingtot'
 	.npause = '.npauses'-1
 	.asd = '.speakingtot'/'.voicedcount'
+endproc
+
+
+# Create st(F2)*st(F2)
+# 
+# Suggested cut_off for vowel: 12751.5
+# (only for voiced segments)
+# Return: st2x1_sound.signal
+procedure st2x1_sound .formants cut_off
+	selectObject: .formants
+	.totalNumFrames = Get number of frames
+	
+	# Create a semitones F2 * F1 signal
+	.dT = Get time step
+	.signal = Create Sound from formula: "Signal", 1, 0, .duration, 1/.dT, "0"
+	for .i to .totalNumFrames
+		selectObject: .formants
+		.t = Get time from frame number: .i
+		.f1 = Get value at time: 1, .t, "hertz", "linear"
+		.f2 = Get value at time: 2, .t, "hertz", "linear"
+		.st1 = 12*log2(.f1)
+		.st2 = 12*log2(.f2)
+		selectObject: .signal
+		.stValue = .st1*.st2 - cut_off
+		if .stValue <= 0
+			.stValue = 0
+		endif
+		Set value at sample number: 0, .i, .stValue
+	endfor
 endproc

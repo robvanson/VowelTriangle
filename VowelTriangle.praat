@@ -1002,10 +1002,10 @@ endproc
 procedure plot_vowels .plot .sp$ .sound
 	.startT = 0
 	.dot_Radius = default_Dot_Radius
-	#call syllable_nuclei -25 4 0.3 1 .sound
-	#.syllableKernels = syllable_nuclei.textgridid
-	call segment_syllables -25 4 0.3 1 .sound
-	.syllableKernels = segment_syllables.textgridid
+	call syllable_nuclei -25 4 0.3 1 .sound
+	.syllableKernels = syllable_nuclei.textgridid
+	#call segment_syllables -25 4 0.3 1 .sound
+	#.syllableKernels = segment_syllables.textgridid
 	
 	# Calculate the formants
 	selectObject: .sound
@@ -1544,16 +1544,188 @@ procedure select_vowel_target .sound .formants .textgrid
 	selectObject: .textgrid
 	.duration = Get total duration
 	.firstTier$ = Get tier name: 1
+
+	# If this is a standard syllable nuclei output
 	if .firstTier$ <> "Vowel"
+		Insert point tier: 1, "Valleys"
+		Insert point tier: 1, "Peaks"
 		Insert point tier: 1, "VowelTarget"
 		Insert interval tier: 1, "Vowel"
+		
+		# VUV tier
+		# Determine voiced parts
+		selectObject: .sound
+		.intensityValue = Get intensity (dB)
+		.voicePP = noprogress To PointProcess (periodic, cc): 75, 600
+		.vuvTextGrid = noprogress To TextGrid (vuv): 0.02, 0.01
+		
+		# Copy VUV to textgrid (cannot be simply merged and deleted)
+		selectObject: .textgrid
+		.numTiers = Get number of tiers
+		.vuvTier = .numTiers + 1
+		Insert interval tier: .vuvTier, "vuv"
+		selectObject: .vuvTextGrid
+		.numIntervals = Get number of intervals: 1
+		for .i to .numIntervals
+			selectObject: .vuvTextGrid
+			.startTime = Get start time of interval: 1, .i
+			.endTime = Get end time of interval: 1, .i
+			.label$ = Get label of interval: 1, .i
+			
+			selectObject: .textgrid
+			if .endTime > 0 and .endTime < .duration
+				Insert boundary: .vuvTier, .endTime
+			endif
+			Set interval text: .vuvTier, .i, .label$
+		endfor
+		selectObject: .vuvTextGrid
+		Remove
+		
+		# CoG
+		call calculateCOG 0.01 .sound
+		.cogSignal = calculateCOG.cog_tier
+		selectObject: .cogSignal
+		.cogTextGrid = To TextGrid (silences): -55, 0.1, 0.05, "N", "V", 0.001
+		selectObject: .cogSignal
+		Remove
+		
+		# Copy CoG to textgrid (cannot be simply merged and deleted)
+		selectObject: .textgrid
+		.numTiers = Get number of tiers
+		.cogTier = .numTiers + 1
+		Insert interval tier: .cogTier, "CoG"
+		selectObject: .cogTextGrid
+		.numIntervals = Get number of intervals: 1
+		for .i to .numIntervals
+			selectObject: .cogTextGrid
+			.startTime = Get start time of interval: 1, .i
+			.endTime = Get end time of interval: 1, .i
+			.label$ = Get label of interval: 1, .i
+			
+			selectObject: .textgrid
+			if .endTime > 0 and .endTime < .duration
+				Insert boundary: .cogTier, .endTime
+			endif
+			Set interval text: .cogTier, .i, .label$
+		endfor
+		selectObject: .cogTextGrid
+		Remove
+		
+		# Fill the Peaks and Valleys
+		selectObject: .sound
+		.intensity = noprogress To Intensity: 70, 0, "yes"
+		.dt = Get time step
+		.maxFrame = Get number of frames
+
+		# Determine Peaks and valleys
+		# Is redundant, will probably be simplified later
+		selectObject: .textgrid
+		.numSyllables = Get number of points: 5
+		
+		# If there is no syllable, but there is sound, find one
+		if .numSyllables <= 0 and .intensityValue >= 45
+			selectObject: .intensity
+			.t_max = Get time of maximum: 0, 0, "Parabolic"
+			selectObject: .textgrid
+			Insert point: 5, .t_max, "1"	
+		endif
+		
+		# Create the other tiers
+		.t_valley_next = -1
+		for .i to .numSyllables
+			selectObject: .textgrid
+			.t_prev = 0
+			if .i > 1
+				.t_prev = Get time of point: 5, .i-1
+			endif
+			.t = Get time of point: 5, .i
+			# t_peak == syllable nucleus
+			.t_peak = .t
+			.t_next = .duration
+			if .i < .numSyllables
+				.t_next = Get time of point: 5, .i+1
+			endif
+			
+			# Maximal interval
+			if .t - .t_prev > 0.4
+				.t_prev = .t - 0.4
+			endif
+			if .t_next - .t > 0.4
+				.t_next = .t + 0.4
+			endif
+			
+			selectObject: .intensity
+			if .t - .t_prev > 0.05
+				.t_valley_prev = Get time of minimum: .t_prev+0.025, .t-0.025, "Parabolic"
+			else
+				.t_valley_prev = (.t + .t_prev)/2
+			endif
+			if .t_next - .t > 0.05
+				.t_valley_next = Get time of minimum: .t+0.025, .t_next-0.025, "Parabolic"
+			else
+				.t_valley_next = (.t_next + .t)/2
+			endif
+			
+			# Set .t_prev and .t_next to the voicing boundaries if they are "inside"
+			selectObject: .textgrid
+			.numVoicingInt = Get number of intervals: .vuvTier
+			.voicingInt = Get interval at time: .vuvTier, .t_peak
+			.vuvLabel$ = Get label of interval: .vuvTier, .voicingInt
+			if .vuvLabel$ = "V"
+				.startVoicing = Get start time of interval: .vuvTier, .voicingInt
+				.endVoicing = Get end time of interval: .vuvTier, .voicingInt
+				if .t_valley_prev < .startVoicing
+					.t_valley_prev = .startVoicing
+				endif
+				if .t_valley_next > .endVoicing
+					.t_valley_next = .endVoicing
+				endif
+			endif
+			
+			# Set .t_prev and .t_next to the CoG boundaries if they are "inside"
+			selectObject: .textgrid
+			.numCoGInt = Get number of intervals: .cogTier
+			.cogInt = Get interval at time: .cogTier, .t_peak
+			.cogLabel$ = Get label of interval: .cogTier, .cogInt
+			if .cogLabel$ = "V"
+				.startCoG = Get start time of interval: .cogTier, .cogInt
+				.endCoG = Get end time of interval: .cogTier, .cogInt
+				if .t_valley_prev < .startCoG
+					.t_valley_prev = .startCoG
+				endif
+				if .t_valley_next > .endCoG
+					.t_valley_next = .endCoG
+				endif
+			endif
+			
+			# Add the previous valley and the current peak
+			selectObject: .textgrid
+			Insert point: 3, .t_peak, "P"
+			.nearestPoint = Get nearest index from time: 4, .t_valley_prev
+			.nearest_t = 0
+			if .nearestPoint > 0
+				.nearest_t = Get time of point: 4, .nearestPoint
+			endif
+			# Avoid collisions
+			if abs(.nearest_t - .t_valley_prev) > 0.001
+				Insert point: 4, .t_valley_prev, "V"
+			endif
+			Insert point: 4, .t_valley_next, "V"
+		endfor
+		
+		selectObject: .voicePP, .intensity
+		Remove
 	endif
+	
+	# Set tier numbers
 	.vowelTier = 1
 	.targetTier = 2
 	.peakTier = 3
 	.valleyTier = 4
-	.silencesTier = 5
-	.vuvTier = 6
+	.syllablesTier = 5
+	.silencesTier = 6
+	.vuvTier = 7
+	.cogTier = 8
 
 	selectObject: .sound
 	.samplingFrequency = Get sampling frequency
@@ -1624,26 +1796,6 @@ procedure select_vowel_target .sound .formants .textgrid
 		endif
 		if .tsh < .th and .tsh > .tp
 			.th = .tsh
-		endif
-		
-		# From vuv
-		.vuvl = Get interval at time: .vuvTier, .tl
-		.label$ = Get label of interval: .vuvTier, .vuvl
-		.tvuvl = .tl
-		if .label$ = "U"
-			.tvuvl = Get end time of interval: .vuvTier, .vuvl
-		endif
-		if .tvuvl > .tl and .tvuvl < .tp
-			.tl = .tvuvl
-		endif
-		.vuvh = Get interval at time: .vuvTier, .th
-		.label$ = Get label of interval: .vuvTier, .vuvh
-		.tvuvh = .th
-		if .label$ = "U"
-			.tvuvh = Get start time of interval: .vuvTier, .vuvh
-		endif
-		if .tvuvh < .th and .tvuvh > .tp
-			.th = .tvuvh
 		endif
 		
 		# From formants: 300 <= F1 <= 1000
@@ -2075,27 +2227,9 @@ procedure segment_syllables .silence_threshold .minimum_dip_between_peaks .minim
 endproc
 
 # 
-# Determine COG as an intensity
+# Determine COG as an intensity tier
+# Returns: calculateCOG.cog_tier
 #
-# .cog_Matrix = Down to Matrix
-# call calculateCOG .dt .soundid
-# .cog_Tier = calculateCOG.cog_tier
-# selectObject: .cog_Tier
-# .numPoints = Get number of points
-# for .i to .numPoints
-# 	selectObject: .cog_Tier
-# 	.cog = Get value at index: .i
-# 	.t = Get time from index: .i
-# 	selectObject: .intensity
-# 	.c = Get frame number from time: .t
-# 	if .c >= 0.5 and .c <= .maxFrame
-# 		selectObject: .cog_Matrix
-# 		Set value: 1, round(.c), .cog
-# 	endif
-# endfor
-# selectObject: .cog_Matrix
-# .cogIntensity = noprogress To Intensity
-
 procedure calculateCOG .dt .sound
 	selectObject: .sound
 	.duration = Get total duration
@@ -2105,7 +2239,7 @@ procedure calculateCOG .dt .sound
 	
 	# Create Spectrogram
 	selectObject: .sound
-	.spectrogram = noprogress To Spectrogram: 0.005, 8000, 0.002, 20, "Gaussian"
+	.spectrogram = noprogress To Spectrogram: .dt, 8000, 0.002, 20, "Gaussian"
 	.cog_tier = Create IntensityTier: "COG", 0.0, .duration
 	
 	.t = .dt / 2
@@ -2113,6 +2247,7 @@ procedure calculateCOG .dt .sound
 		selectObject: .spectrogram
 		.spectrum = noprogress To Spectrum (slice): .t
 		.cog_t = Get centre of gravity: 2
+		.cog_t = 12*log2(.cog_t)
 		selectObject: .cog_tier
 		Add point: .t, .cog_t
 		
@@ -2152,3 +2287,259 @@ procedure initialize_table_collumns .table, .columns$, .initial_value$
 		endif
 	endwhile
 endproc
+
+
+###########################################################################
+#                                                                         #
+#  Praat Script Syllable Nuclei                                           #
+#  Copyright (C) 2008  Nivja de Jong and Ton Wempe                        #
+#                                                                         #
+#    This program is free software: you can redistribute it and/or modify #
+#    it under the terms of the GNU General Public License as published by #
+#    the Free Software Foundation, either version 3 of the License, or    #
+#    (at your option) any later version.                                  #
+#                                                                         #
+#    This program is distributed in the hope that it will be useful,      #
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of       #
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        #
+#    GNU General Public License for more details.                         #
+#                                                                         #
+#    You should have received a copy of the GNU General Public License    #
+#    along with this program.  If not, see http://www.gnu.org/licenses/   #
+#                                                                         #
+###########################################################################
+#
+# modified 2010.09.17 by Hugo Quené, Ingrid Persoon, & Nivja de Jong
+# Overview of changes:
+# + change threshold-calculator: rather than using median, use the almost maximum
+#     minus 25dB. (25 dB is in line with the standard setting to detect silence
+#     in the "To TextGrid (silences)" function.
+#     Almost maximum (.99 quantile) is used rather than maximum to avoid using
+#     irrelevant non-speech sound-bursts.
+# + add silence-information to calculate articulation rate and ASD (average syllable
+#     duration.
+#     NB: speech rate = number of syllables / total time
+#         articulation rate = number of syllables / phonation time
+# + remove max number of syllable nuclei
+# + refer to objects by unique identifier, not by name
+# + keep track of all created intermediate objects, select these explicitly,
+#     then Remove
+# + provide summary output in Info window
+# + do not save TextGrid-file but leave it in Object-window for inspection
+#     (if requested in startup-form)
+# + allow Sound to have starting time different from zero
+#      for Sound objects created with Extract (preserve times)
+# + programming of checking loop for mindip adjusted
+#      in the orig version, precedingtime was not modified if the peak was rejected !!
+#      var precedingtime and precedingint renamed to .currenttime and .currentint
+#
+# + bug fixed concerning summing total pause, feb 28th 2011
+#
+# modified 2014.10.24 by Rob van Son
+# Overview of changes:
+# + Converted to a function form. Can be called as -
+# call syllable_nuclei -25 2 0.3 1 .soundFile
+#   where .soundFile is the ID of an open soundfile
+# + Added noprogress and cleaned up object id assignment
+# 
+###########################################################################
+
+# counts syllables of sound utterances
+# NB unstressed syllables are sometimes overlooked
+# NB filter sounds that are quite noisy beforehand
+# NB use Silence threshold (dB) = -25 (or -20?)
+# NB use Minimum .dip between peaks (dB) = between 2-4 (you can first try;
+#                                                      For clean and filtered: 4)
+# syllable_nuclei.soundname$	- Name of sound object
+# syllable_nuclei.voicedcount	- Count of vocied segments
+# syllable_nuclei.npause		- Count of pauses
+# syllable_nuclei.originaldur	- Original duration
+# syllable_nuclei.speakingtot	- Duration of speech
+# syllable_nuclei.speakingrate	- Syllable per second, gross
+# syllable_nuclei.articulationrate - Syllables per speaking time
+# syllable_nuclei.asd			- Average syllable duration
+# 
+# Arguments
+# real .silence_threshold -25 (dB)
+# real .minimum_dip_between_peaks 2 (dB)
+# real .minimum_pause_duration 0.3 (s)
+# boolean .keep_Soundfiles_and_Textgrids 1
+# fileID .soundFile
+#
+# Example 
+# call syllable_nuclei -25 2 0.3 1 .originalRecording
+
+procedure syllable_nuclei .silence_threshold .minimum_dip_between_peaks .minimum_pause_duration .keep_Soundfiles_and_Textgrids .soundid
+	minimum_Pitch = 70
+	maximum_Pitch = 600
+	
+	# Get object name
+	select .soundid
+	.soundname$ = selected$("Sound")
+
+	# shorten variables
+	.silencedb = .silence_threshold
+	.mindip = .minimum_dip_between_peaks
+	.showtext = .keep_Soundfiles_and_Textgrids
+	.minpause = .minimum_pause_duration
+
+	.originaldur = Get total duration
+	# allow non-zero starting time
+	.bt = Get starting time
+
+	# Use intensity to get .threshold
+	.intid = noprogress To Intensity... 50 0 yes
+	.start = Get time from frame number... 1
+	.nframes = Get number of frames
+	.end = Get time from frame number... '.nframes'
+
+	# estimate noise floor
+	select .intid
+	.minint = Get minimum... 0 0 Parabolic
+	# estimate noise max
+	.maxint = Get maximum... 0 0 Parabolic
+	#get .99 quantile to get maximum (without influence of non-speech sound bursts)
+	.max99int = Get quantile... 0 0 0.99
+
+	# estimate Intensity .threshold
+	.threshold = .max99int + .silencedb
+	.threshold2 = .maxint - .max99int
+	.threshold3 = .silencedb - .threshold2
+	if .threshold < .minint
+	    .threshold = .minint
+	endif
+
+	# get pauses (silences) and speakingtime
+	select .soundid
+	.textgridid = noprogress To TextGrid (silences)... 80 0 '.threshold3' '.minpause' 0.1 silent sounding
+	.silencetierid = Extract tier... 1
+	.silencetableid = Down to TableOfReal... sounding
+	nsounding = Get number of rows
+	.npauses = 'nsounding'
+	.speakingtot = 0
+	for ipause from 1 to .npauses
+	   beginsound = Get value... 'ipause' 1
+	   endsound = Get value... 'ipause' 2
+	   speakingdur = 'endsound' - 'beginsound'
+	   .speakingtot = 'speakingdur' + '.speakingtot'
+	endfor
+
+	select '.intid'
+	Down to Matrix
+	.matid = selected("Matrix")
+	# Convert intensity to sound
+	.sndintid = noprogress To Sound (slice)... 1
+
+	# use total duration, not .end time, to find out duration of .intdur
+	# in order to allow nonzero starting times.
+	.intdur = Get total duration
+	intmax = Get maximum... 0 0 Parabolic
+
+	# estimate peak positions (all peaks)
+	.ppid = noprogress To PointProcess (extrema)... Left yes no Sinc70
+
+	numpeaks = Get number of points
+
+	# fill array with time points
+	for .i from 1 to numpeaks
+	    t'.i' = Get time from index... '.i'
+	endfor
+
+
+	# fill array with intensity values
+	select '.sndintid'
+	.peakcount = 0
+	for .i from 1 to numpeaks
+	    value = Get value at time... t'.i' Cubic
+	    if value > .threshold
+	          .peakcount += 1
+	          int'.peakcount' = value
+	          .timepeaks'.peakcount' = t'.i'
+	    endif
+	endfor
+
+
+	# fill array with valid peaks: only intensity values if preceding
+	# .dip in intensity is greater than .mindip
+	select '.intid'
+	.validpeakcount = 0
+	.currenttime = .timepeaks1
+	.currentint = int1
+
+	for .p to .peakcount-1
+	   .following = .p + 1
+	   .followingtime = .timepeaks'.following'
+	   .dip = Get minimum... '.currenttime' '.followingtime' None
+	   .diffint = abs(.currentint - .dip)
+
+	   if .diffint > .mindip
+	      .validpeakcount += 1
+	      validtime'.validpeakcount' = .timepeaks'.p'
+	   endif
+	      .currenttime = .timepeaks'.following'
+	      .currentint = Get value at time... .timepeaks'.following' Cubic
+	endfor
+
+
+	# Look for only voiced parts
+	select '.soundid'
+	.pitchid = noprogress To Pitch (ac)... 0.02 'minimum_Pitch' 4 no 0.03 0.25 0.01 0.35 0.25 'maximum_Pitch'
+
+	.voicedcount = 0
+	for .i from 1 to .validpeakcount
+	   .querytime = validtime'.i'
+
+	   select '.textgridid'
+	   .whichinterval = Get interval at time... 1 '.querytime'
+	   .whichlabel$ = Get label of interval... 1 '.whichinterval'
+
+	   select '.pitchid'
+	   value = Get value at time... '.querytime' Hertz Linear
+
+	   if value <> undefined
+	      if .whichlabel$ = "sounding"
+	          .voicedcount = .voicedcount + 1
+	          voicedpeak'.voicedcount' = validtime'.i'
+	      endif
+	   endif
+	endfor
+
+	# calculate time correction due to shift in time for Sound object versus
+	# intensity object
+	.timecorrection = .originaldur/.intdur
+
+	# Insert voiced peaks in TextGrid
+	if .showtext > 0
+	   select '.textgridid'
+	   Insert point tier... 1 syllables
+	  
+	   for .i from 1 to .voicedcount
+	       position = voicedpeak'.i' * .timecorrection
+	       Insert point... 1 position '.i'
+	   endfor
+	endif
+
+	# clean up before next sound file is opened
+	select .intid
+	plus .matid
+	plus .sndintid
+	plus .ppid
+	plus .pitchid
+	plus .silencetierid
+	plus .silencetableid
+	#plus .textgridid
+	Remove
+	if .showtext < 1
+	   select '.soundid'
+	   plus '.textgridid'
+	   Remove
+	endif
+
+	# summarize results in Info window
+	.speakingrate = '.voicedcount'/'.originaldur'
+	.articulationrate = '.voicedcount'/'.speakingtot'
+	.npause = '.npauses'-1
+	.asd = '.speakingtot'/'.voicedcount'
+endproc
+
+

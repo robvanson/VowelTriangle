@@ -1487,7 +1487,7 @@ procedure get_closest_vowels .cutoff .sp$ .formants .textgrid .f1_o .f2_o
 	endif
 endproc
 
-# Collect all the most distant vowels
+# Collect all the most distant vowles
 procedure get_most_distant_vowels .sp$ .formants .textgrid .f1_o .f2_o
 	.f1 = 0
 	.f2 = 0
@@ -1543,27 +1543,33 @@ endproc
 procedure select_vowel_target .sound .formants .textgrid
 	.f1_Lowest = 250
 	.f1_Highest = 1050
-	
-	# Get basic info
-	selectObject: .sound
-	.samplingFrequency = Get sampling frequency
-	.intensityValue = Get intensity (dB)
-	.duration = Get total duration
-
-	# Add tiers to the TextGrid
 	selectObject: .textgrid
+	.duration = Get total duration
 	.firstTier$ = Get tier name: 1
+
 	# If this is a standard syllable nuclei output
+	# Handles case where TextGrid has already been created
 	if .firstTier$ <> "Vowel"
 		Insert point tier: 1, "Valleys"
-		Insert point tier: 1, "Peaks"
 		Insert point tier: 1, "VowelTarget"
 		Insert interval tier: 1, "Vowel"
+		
+		# Set tier numbers
+		.vowelTier = 1
+		.targetTier = 2
+		.valleyTier = 3
+		.syllablesTier = 4
+		.silencesTier = 5
+		.vuvTier = 6
+		.cogTier = 7	
 		
 		# VUV tier
 		# Determine voiced parts
 		selectObject: .sound
+		.intensityValue = Get intensity (dB)
 		.voicePP = noprogress To PointProcess (periodic, cc): 75, 600
+		.meanPeriod = Get mean period: 0, 0, 0.0001, 0.02, 1.3
+		.f1_Lowest = 1.25 * (1/.meanPeriod)
 		.vuvTextGrid = noprogress To TextGrid (vuv): 0.02, 0.01
 		
 		# Copy VUV to textgrid (cannot be simply merged and deleted)
@@ -1585,12 +1591,16 @@ procedure select_vowel_target .sound .formants .textgrid
 			endif
 			Set interval text: .vuvTier, .i, .label$
 		endfor
+		selectObject: .vuvTextGrid
+		Remove
 		
 		# CoG
 		call calculateCOG 0.01 .sound
 		.cogSignal = calculateCOG.cog_tier
 		selectObject: .cogSignal
 		.cogTextGrid = To TextGrid (silences): -55, 0.1, 0.05, "N", "V", 0.001
+		selectObject: .cogSignal
+		Remove
 		
 		# Copy CoG to textgrid (cannot be simply merged and deleted)
 		selectObject: .textgrid
@@ -1611,7 +1621,9 @@ procedure select_vowel_target .sound .formants .textgrid
 			endif
 			Set interval text: .cogTier, .i, .label$
 		endfor
-
+		selectObject: .cogTextGrid
+		Remove
+		
 		# Fill the Peaks and Valleys
 		selectObject: .sound
 		.intensity = noprogress To Intensity: 70, 0, "yes"
@@ -1621,14 +1633,14 @@ procedure select_vowel_target .sound .formants .textgrid
 		# Determine Peaks and valleys
 		# Is redundant, will probably be simplified later
 		selectObject: .textgrid
-		.numSyllables = Get number of points: 5
+		.numSyllables = Get number of points: .syllablesTier
 		
 		# If there is no syllable, but there is sound, find one
 		if .numSyllables <= 0 and .intensityValue >= 45
 			selectObject: .intensity
 			.t_max = Get time of maximum: 0, 0, "Parabolic"
 			selectObject: .textgrid
-			Insert point: 5, .t_max, "1"	
+			Insert point: .syllablesTier, .t_max, "1"	
 		endif
 		
 		# Create the other tiers
@@ -1637,14 +1649,14 @@ procedure select_vowel_target .sound .formants .textgrid
 			selectObject: .textgrid
 			.t_prev = 0
 			if .i > 1
-				.t_prev = Get time of point: 5, .i-1
+				.t_prev = Get time of point: .syllablesTier, .i-1
 			endif
-			.t = Get time of point: 5, .i
+			.t = Get time of point: .syllablesTier, .i
 			# t_peak == syllable nucleus
 			.t_peak = .t
 			.t_next = .duration
 			if .i < .numSyllables
-				.t_next = Get time of point: 5, .i+1
+				.t_next = Get time of point: .syllablesTier, .i+1
 			endif
 			
 			# Maximal interval
@@ -1669,20 +1681,18 @@ procedure select_vowel_target .sound .formants .textgrid
 			
 			# Set .t_prev and .t_next to the voicing boundaries if they are "inside"
 			selectObject: .textgrid
+			.numVoicingInt = Get number of intervals: .vuvTier
 			.voicingInt = Get interval at time: .vuvTier, .t_peak
 			.vuvLabel$ = Get label of interval: .vuvTier, .voicingInt
 			if .vuvLabel$ = "V"
 				.startVoicing = Get start time of interval: .vuvTier, .voicingInt
 				.endVoicing = Get end time of interval: .vuvTier, .voicingInt
-			else
-				.startVoicing = Get start time of interval: .vuvTier, .voicingInt - 1
-				.endVoicing = Get end time of interval: .vuvTier, .voicingInt + 1
-			endif
-			if .t_valley_prev < .startVoicing
-				.t_valley_prev = .startVoicing
-			endif
-			if .t_valley_next > .endVoicing
-				.t_valley_next = .endVoicing
+				if .t_valley_prev < .startVoicing
+					.t_valley_prev = .startVoicing
+				endif
+				if .t_valley_next > .endVoicing
+					.t_valley_next = .endVoicing
+				endif
 			endif
 			
 			# Set .t_prev and .t_next to the CoG boundaries if they are "inside"
@@ -1690,75 +1700,79 @@ procedure select_vowel_target .sound .formants .textgrid
 			.numCoGInt = Get number of intervals: .cogTier
 			.cogInt = Get interval at time: .cogTier, .t_peak
 			.cogLabel$ = Get label of interval: .cogTier, .cogInt
-			if .cogLabel$ = "V" or .cogInt <= 1
+			if .cogLabel$ = "V"
 				.startCoG = Get start time of interval: .cogTier, .cogInt
-			else
-				.startCoG = Get start time of interval: .cogTier, .cogInt - 1
-			endif
-			if .cogLabel$ = "V" or .cogInt >= .numCoGInt
 				.endCoG = Get end time of interval: .cogTier, .cogInt
-			else
-				.endCoG = Get end time of interval: .cogTier, .cogInt + 1
-			endif
-			if .t_valley_prev < .startCoG
-				.t_valley_prev = .startCoG
-			endif
-			if .t_valley_next > .endCoG
-				.t_valley_next = .endCoG
+				if .t_valley_prev < .startCoG
+					.t_valley_prev = .startCoG
+				endif
+				if .t_valley_next > .endCoG
+					.t_valley_next = .endCoG
+				endif
 			endif
 			
 			# Add the previous valley and the current peak
 			selectObject: .textgrid
-			Insert point: 3, .t_peak, "P"
-			.nearestPoint = Get nearest index from time: 4, .t_valley_prev
+			.nearestPoint = Get nearest index from time: .valleyTier, .t_valley_prev
 			.nearest_t = 0
 			if .nearestPoint > 0
-				.nearest_t = Get time of point: 4, .nearestPoint
+				.nearest_t = Get time of point: .valleyTier, .nearestPoint
 			endif
 			# Avoid collisions
 			if abs(.nearest_t - .t_valley_prev) > 0.001
-				Insert point: 4, .t_valley_prev, "V"
+				Insert point: .valleyTier, .t_valley_prev, "V"
 			endif
-			Insert point: 4, .t_valley_next, "V"
+			Insert point: .valleyTier, .t_valley_next, "V"
 		endfor
 		
-		selectObject: .vuvTextGrid, .voicePP, .intensity
+		selectObject: .voicePP, .intensity
 		Remove
 	endif
 	
-	# Set tier numbers
+	# Set tier numbers (again)
 	.vowelTier = 1
 	.targetTier = 2
-	.peakTier = 3
-	.valleyTier = 4
-	.syllablesTier = 5
-	.silencesTier = 6
-	.vuvTier = 7
-	.cogTier = 8
+	.valleyTier = 3
+	.syllablesTier = 4
+	.silencesTier = 5
+	.vuvTier = 6
+	.cogTier = 7
 
-	#################################################################
-	#
-	# The following is overly complicated and brittle
-	# Will be rewritten into a simple scheme where vowel
-	# frames are differentiated from nasals (the most problematic 
-	# confusion):
-	# 1) Voiced
-	# 2) Vowels: CoG >= 96.5 
-	# 
-	#
-	#################################################################
-
+	selectObject: .sound
+	.samplingFrequency = Get sampling frequency
+	.intensity = Get intensity (dB)
 	selectObject: .formants
 	.totalNumFrames = Get number of frames
 		
+	# Nothing found, but there is sound. Try to find at least 1 vowel
+	
+	selectObject: .textgrid
+	.numPeaks = Get number of points: .syllablesTier	
+	if .numPeaks <= 0 and .intensity >= 45
+		selectObject: .sound
+		.t_max = Get time of maximum: 0, 0, "Sinc70"
+		.pp = noprogress To PointProcess (periodic, cc): 75, 600
+		.textGrid = noprogress To TextGrid (vuv): 0.02, 0.01
+		.i = Get interval at time: 1, .t_max
+		.label$ = Get label of interval: 1, .i
+		.start = Get start time of interval: 1, .i
+		.end = Get end time of interval: 1, .i
+		if .label$ = "V"
+			selectObject: .syllableKernels
+			Insert point: .syllablesTier, .t_max, "1"
+			Insert point: .valleyTier, .start, "V"
+			Insert point: .valley, .end, "V"
+		endif
+	endif
+	
 	selectObject: .sound
 	.voicePP = noprogress To PointProcess (periodic, cc): 75, 600
 	selectObject: .textgrid
-	.numPeaks = Get number of points: .peakTier
+	.numPeaks = Get number of points: .syllablesTier
 	.numValleys = Get number of points: .valleyTier
 	for .p to .numPeaks
 		selectObject: .textgrid
-		.tp = Get time of point: .peakTier, .p
+		.tp = Get time of point: .syllablesTier, .p
 		# Find boundaries
 		# From valleys
 		.tl = 0
@@ -1789,26 +1803,6 @@ procedure select_vowel_target .sound .formants .textgrid
 		endif
 		if .tsh < .th and .tsh > .tp
 			.th = .tsh
-		endif
-		
-		# From vuv
-		.vuvl = Get interval at time: .vuvTier, .tl
-		.label$ = Get label of interval: .vuvTier, .vuvl
-		.tvuvl = .tl
-		if .label$ = "U"
-			.tvuvl = Get end time of interval: .vuvTier, .vuvl
-		endif
-		if .tvuvl > .tl and .tvuvl < .tp
-			.tl = .tvuvl
-		endif
-		.vuvh = Get interval at time: .vuvTier, .th
-		.label$ = Get label of interval: .vuvTier, .vuvh
-		.tvuvh = .th
-		if .label$ = "U"
-			.tvuvh = Get start time of interval: .vuvTier, .vuvh
-		endif
-		if .tvuvh < .th and .tvuvh > .tp
-			.th = .tvuvh
 		endif
 		
 		# From formants: 300 <= F1 <= 1000
@@ -2017,7 +2011,7 @@ procedure select_vowel_target .sound .formants .textgrid
 				selectObject: .sound
 				.sd = Get standard deviation: 1, .start, .end
 				# Is there enough sound to warrant a vowel? > -15dB
-				if 20*log10(.sd/(2*10^-5)) - .intensityValue > -15
+				if 20*log10(.sd/(2*10^-5)) - .intensity > -15
 					selectObject: .textgrid
 					Set interval text: .vowelTier, .index, "Vowel"
 				endif
@@ -2058,7 +2052,7 @@ endproc
 # de Jong, N.H. & Wempe, T. Behavior Research Methods (2009) 41: 385.     #
 # https://doi.org/10.3758/BRM.41.2.385                                    #
 # 
-procedure segment_syllablesOLD .silence_threshold .minimum_dip_between_peaks .minimum_pause_duration .keep_Soundfiles_and_Textgrids .soundid
+procedure segment_syllables .silence_threshold .minimum_dip_between_peaks .minimum_pause_duration .keep_Soundfiles_and_Textgrids .soundid
 	# Get intensity
 	selectObject: .soundid
 	.intensity = noprogress To Intensity: 70, 0, "yes"
@@ -2548,30 +2542,3 @@ procedure syllable_nuclei .silence_threshold .minimum_dip_between_peaks .minimum
 endproc
 
 
-# Create st(F2)*st(F2)
-# 
-# Suggested cut_off for vowel: 12751.5
-# (only for voiced segments)
-# Return: st2x1_sound.signal
-procedure st2x1_sound .formants cut_off
-	selectObject: .formants
-	.totalNumFrames = Get number of frames
-	
-	# Create a semitones F2 * F1 signal
-	.dT = Get time step
-	.signal = Create Sound from formula: "Signal", 1, 0, .duration, 1/.dT, "0"
-	for .i to .totalNumFrames
-		selectObject: .formants
-		.t = Get time from frame number: .i
-		.f1 = Get value at time: 1, .t, "hertz", "linear"
-		.f2 = Get value at time: 2, .t, "hertz", "linear"
-		.st1 = 12*log2(.f1)
-		.st2 = 12*log2(.f2)
-		selectObject: .signal
-		.stValue = .st1*.st2 - cut_off
-		if .stValue <= 0
-			.stValue = 0
-		endif
-		Set value at sample number: 0, .i, .stValue
-	endfor
-endproc

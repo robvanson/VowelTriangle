@@ -1594,34 +1594,36 @@ procedure select_vowel_target .sound .formants .textgrid
 		selectObject: .vuvTextGrid
 		Remove
 		
-		# CoG
-		call calculateCOG 0.01 .sound
-		.cogSignal = calculateCOG.cog_tier
-		selectObject: .cogSignal
-		.cogTextGrid = To TextGrid (silences): -55, 0.1, 0.05, "N", "V", 0.001
-		selectObject: .cogSignal
+		# Band Energy Difference (BED)
+		call calculateBED 0.01 .sound
+		.maxBED = calculateBED.maxBED
+		.thressHold =  -17 - .maxBED
+		.bedSignal = calculateBED.bed_tier
+		selectObject: .bedSignal
+		.bedTextGrid = To TextGrid (silences): .thressHold, 0.02, 0.02, "N", "V", 0.01
+		selectObject: .bedSignal
 		Remove
 		
-		# Copy CoG to textgrid (cannot be simply merged and deleted)
+		# Copy BED to textgrid (cannot be simply merged and deleted)
 		selectObject: .textgrid
 		.numTiers = Get number of tiers
-		.cogTier = .numTiers + 1
-		Insert interval tier: .cogTier, "CoG"
-		selectObject: .cogTextGrid
+		.bedTier = .numTiers + 1
+		Insert interval tier: .bedTier, "CoG"
+		selectObject: .bedTextGrid
 		.numIntervals = Get number of intervals: 1
 		for .i to .numIntervals
-			selectObject: .cogTextGrid
+			selectObject: .bedTextGrid
 			.startTime = Get start time of interval: 1, .i
 			.endTime = Get end time of interval: 1, .i
 			.label$ = Get label of interval: 1, .i
 			
 			selectObject: .textgrid
 			if .endTime > 0 and .endTime < .duration
-				Insert boundary: .cogTier, .endTime
+				Insert boundary: .bedTier, .endTime
 			endif
-			Set interval text: .cogTier, .i, .label$
+			Set interval text: .bedTier, .i, .label$
 		endfor
-		selectObject: .cogTextGrid
+		selectObject: .bedTextGrid
 		Remove
 		
 		# Fill the Peaks and Valleys
@@ -1697,12 +1699,12 @@ procedure select_vowel_target .sound .formants .textgrid
 			
 			# Set .t_prev and .t_next to the CoG boundaries if they are "inside"
 			selectObject: .textgrid
-			.numCoGInt = Get number of intervals: .cogTier
-			.cogInt = Get interval at time: .cogTier, .t_peak
-			.cogLabel$ = Get label of interval: .cogTier, .cogInt
+			.numCoGInt = Get number of intervals: .bedTier
+			.cogInt = Get interval at time: .bedTier, .t_peak
+			.cogLabel$ = Get label of interval: .bedTier, .cogInt
 			if .cogLabel$ = "V"
-				.startCoG = Get start time of interval: .cogTier, .cogInt
-				.endCoG = Get end time of interval: .cogTier, .cogInt
+				.startCoG = Get start time of interval: .bedTier, .cogInt
+				.endCoG = Get end time of interval: .bedTier, .cogInt
 				if .t_valley_prev < .startCoG
 					.t_valley_prev = .startCoG
 				endif
@@ -1736,7 +1738,7 @@ procedure select_vowel_target .sound .formants .textgrid
 	.syllablesTier = 4
 	.silencesTier = 5
 	.vuvTier = 6
-	.cogTier = 7
+	.bedTier = 7
 
 	selectObject: .sound
 	.samplingFrequency = Get sampling frequency
@@ -2249,6 +2251,44 @@ procedure calculateCOG .dt .sound
 		.cog_t = 12*log2(.cog_t)
 		selectObject: .cog_tier
 		Add point: .t, .cog_t
+		
+		.t += .dt
+		
+		selectObject: .spectrum
+		Remove
+	endwhile
+	
+	selectObject: .spectrogram
+	Remove
+endproc
+
+# 
+# Determine DED as an intensity tier
+# Returns: calculateBED.bed_tier
+#
+procedure calculateBED .dt .sound
+	selectObject: .sound
+	.duration = Get total duration
+	if .dt <= 0 or .dt > .sound
+		.dt = 0.01
+	endif
+	
+	# Create Spectrogram
+	selectObject: .sound
+	.spectrogram = noprogress To Spectrogram: .dt, 8000, 0.002, 20, "Gaussian"
+	.bed_tier = Create IntensityTier: "BED", 0.0, .duration
+	
+	.t = .dt / 2
+	.maxBED = -999
+	while .t < .duration
+		selectObject: .spectrogram
+		.spectrum = noprogress To Spectrum (slice): .t
+		.bed_t = Get band energy difference: 0, 500, 500, 4000
+		selectObject: .bed_tier
+		Add point: .t, .bed_t
+		if .bed_t > .maxBED
+			.maxBED = .bed_t
+		endif
 		
 		.t += .dt
 		

@@ -545,100 +545,104 @@ uiMessage$ ["IT", "Record"]			= "Registra"
 # Formant values
 
 # Male 
-phonemes [phonLanguage$, "M", "i_corner", "F1"] = 250
-phonemes [phonLanguage$, "M", "i_corner", "F2"] = 2100
-phonemes [phonLanguage$, "M", "a_corner", "F1"] = 850
-phonemes [phonLanguage$, "M", "a_corner", "F2"] = 1290
-phonemes [phonLanguage$, "M", "u_corner", "F1"] = 285
-phonemes [phonLanguage$, "M", "u_corner", "F2"] = 650
+phonemes [phonLanguage$, "M", "i_corner", "F1"] = 242
+phonemes [phonLanguage$, "M", "i_corner", "F2"] = 2330
+phonemes [phonLanguage$, "M", "a_corner", "F1"] = 797
+phonemes [phonLanguage$, "M", "a_corner", "F2"] = 1328
+phonemes [phonLanguage$, "M", "u_corner", "F1"] = 269
+phonemes [phonLanguage$, "M", "u_corner", "F2"] = 626
+
 # @_center is not fixed but derived from current corners
 phonemes [phonLanguage$, "M", "@_center", "F1"] =(phonemes [phonLanguage$, "M", "i_corner", "F1"]*phonemes [phonLanguage$, "M", "u_corner", "F1"]*phonemes [phonLanguage$, "M", "a_corner", "F1"])^(1/3)
 phonemes [phonLanguage$, "M", "@_center", "F2"] = (phonemes [phonLanguage$, "M", "i_corner", "F2"]*phonemes [phonLanguage$, "M", "u_corner", "F2"]*phonemes [phonLanguage$, "M", "a_corner", "F2"])^(1/3)
 
 # Formant values according to 
 # IFA corpus averages from FPA isolated vowels
-# Using Split-Levinson algorithm
-phonemes [phonLanguage$, "M", "A", "F1"] = 695.6000
-phonemes [phonLanguage$, "M", "A", "F2"] = 1065.500
-phonemes [phonLanguage$, "M", "E", "F1"] = 552.5000
-phonemes [phonLanguage$, "M", "E", "F2"] = 1659.200
-phonemes [phonLanguage$, "M", "I", "F1"] = 378.0909
-phonemes [phonLanguage$, "M", "I", "F2"] = 1868.545
-phonemes [phonLanguage$, "M", "O", "F1"] = 482.9000
-phonemes [phonLanguage$, "M", "O", "F2"] = 725.800
-phonemes [phonLanguage$, "M", "Y", "F1"] = 417.7000
-phonemes [phonLanguage$, "M", "Y", "F2"] = 1455.100
-phonemes [phonLanguage$, "M", "Y:", "F1"] = 386.3000
-phonemes [phonLanguage$, "M", "Y:", "F2"] = 1492.400
-phonemes [phonLanguage$, "M", "a", "F1"] = 788.6000
-phonemes [phonLanguage$, "M", "a", "F2"] = 1290.600
-phonemes [phonLanguage$, "M", "au", "F1"] = 583.8000
-phonemes [phonLanguage$, "M", "au", "F2"] = 959.300
-phonemes [phonLanguage$, "M", "e", "F1"] = 372.3000
-phonemes [phonLanguage$, "M", "e", "F2"] = 1959.700
-phonemes [phonLanguage$, "M", "ei", "F1"] = 499.5000
-phonemes [phonLanguage$, "M", "ei", "F2"] = 1733.000
-phonemes [phonLanguage$, "M", "i", "F1"] = 259.5556
-phonemes [phonLanguage$, "M", "i", "F2"] = 1971.889
-phonemes [phonLanguage$, "M", "o", "F1"] = 426.7000
-phonemes [phonLanguage$, "M", "o", "F2"] = 743.600
-phonemes [phonLanguage$, "M", "u", "F1"] = 287.5000
-phonemes [phonLanguage$, "M", "u", "F2"] = 666.500
-phonemes [phonLanguage$, "M", "ui", "F1"] = 495.3000
-phonemes [phonLanguage$, "M", "ui", "F2"] = 1468.600
-phonemes [phonLanguage$, "M", "y", "F1"] = 268.4000
-phonemes [phonLanguage$, "M", "y", "F2"] = 1581.400
+# Using Robust Formant algorithm (Praat)
+phonemes [phonLanguage$, "M", "A", "F1"] = 680
+phonemes [phonLanguage$, "M", "A", "F2"] = 1038
+phonemes [phonLanguage$, "M", "E", "F1"] = 510
+phonemes [phonLanguage$, "M", "E", "F2"] = 1900
+phonemes [phonLanguage$, "M", "I", "F1"] = 354
+phonemes [phonLanguage$, "M", "I", "F2"] = 2167
+phonemes [phonLanguage$, "M", "O", "F1"] = 446
+phonemes [phonLanguage$, "M", "O", "F2"] = 680
+phonemes [phonLanguage$, "M", "Y", "F1"] = 389
+phonemes [phonLanguage$, "M", "Y", "F2"] = 1483
+phonemes [phonLanguage$, "M", "Y:", "F1"] = 370
+phonemes [phonLanguage$, "M", "Y:", "F2"] = 1508
+phonemes [phonLanguage$, "M", "a", "F1"] = 797
+phonemes [phonLanguage$, "M", "a", "F2"] = 1328
+phonemes [phonLanguage$, "M", "au", "F1"] = 542
+phonemes [phonLanguage$, "M", "au", "F2"] = 945
+phonemes [phonLanguage$, "M", "e", "F1"] = 351
+phonemes [phonLanguage$, "M", "e", "F2"] = 2180
+phonemes [phonLanguage$, "M", "ei", "F1"] = 471
+phonemes [phonLanguage$, "M", "ei", "F2"] = 1994
+phonemes [phonLanguage$, "M", "i", "F1"] = 242
+phonemes [phonLanguage$, "M", "i", "F2"] = 2330
+phonemes [phonLanguage$, "M", "o", "F1"] = 393
+phonemes [phonLanguage$, "M", "o", "F2"] = 692
+phonemes [phonLanguage$, "M", "u", "F1"] = 269
+phonemes [phonLanguage$, "M", "u", "F2"] = 626
+phonemes [phonLanguage$, "M", "ui", "F1"] = 475
+phonemes [phonLanguage$, "M", "ui", "F2"] = 1523
+phonemes [phonLanguage$, "M", "y", "F1"] = 254
+phonemes [phonLanguage$, "M", "y", "F2"] = 1609
+
 # Guessed
-phonemes [phonLanguage$, "M", "@", "F1"] = 417.7000
-phonemes [phonLanguage$, "M", "@", "F2"] = 1455.100
+phonemes [phonLanguage$, "M", "@", "F1"] = 373
+phonemes [phonLanguage$, "M", "@", "F2"] = 1247
 
 # Female
-phonemes [phonLanguage$, "F", "i_corner", "F1"] = 280
-phonemes [phonLanguage$, "F", "i_corner", "F2"] = 2200
-phonemes [phonLanguage$, "F", "a_corner", "F1"] = 900
-phonemes [phonLanguage$, "F", "a_corner", "F2"] = 1435
-phonemes [phonLanguage$, "F", "u_corner", "F1"] = 370
-phonemes [phonLanguage$, "F", "u_corner", "F2"] = 700
+phonemes [phonLanguage$, "F", "i_corner", "F1"] = 271
+phonemes [phonLanguage$, "F", "i_corner", "F2"] = 2667
+phonemes [phonLanguage$, "F", "a_corner", "F1"] = 942
+phonemes [phonLanguage$, "F", "a_corner", "F2"] = 1550
+phonemes [phonLanguage$, "F", "u_corner", "F1"] = 334
+phonemes [phonLanguage$, "F", "u_corner", "F2"] = 686
+
 # @_center is not fixed but derived from current corners
 phonemes [phonLanguage$, "F", "@_center", "F1"] =(phonemes [phonLanguage$, "F", "i_corner", "F1"]*phonemes [phonLanguage$, "F", "u_corner", "F1"]*phonemes [phonLanguage$, "F", "a_corner", "F1"])^(1/3)
 phonemes [phonLanguage$, "F", "@_center", "F2"] = (phonemes [phonLanguage$, "F", "i_corner", "F2"]*phonemes [phonLanguage$, "F", "u_corner", "F2"]*phonemes [phonLanguage$, "F", "a_corner", "F2"])^(1/3)
 
 # Formant values according to 
 # IFA corpus average from FPA isolated vowels
-# Using Split-Levinson algorithm
-phonemes [phonLanguage$, "F", "A", "F1"] = 817.7000
-phonemes [phonLanguage$, "F", "A", "F2"] = 1197.300
-phonemes [phonLanguage$, "F", "E", "F1"] = 667.9000
-phonemes [phonLanguage$, "F", "E", "F2"] = 1748.500
-phonemes [phonLanguage$, "F", "I", "F1"] = 429.2222
-phonemes [phonLanguage$, "F", "I", "F2"] = 1937.333
-phonemes [phonLanguage$, "F", "O", "F1"] = 570.8000
-phonemes [phonLanguage$, "F", "O", "F2"] = 882.100
-phonemes [phonLanguage$, "F", "Y", "F1"] = 495.7000
-phonemes [phonLanguage$, "F", "Y", "F2"] = 1635.600
-phonemes [phonLanguage$, "F", "Y:", "F1"] = 431.1000
-phonemes [phonLanguage$, "F", "Y:", "F2"] = 1695.100
-phonemes [phonLanguage$, "F", "a", "F1"] = 853.6000
-phonemes [phonLanguage$, "F", "a", "F2"] = 1435.800
-phonemes [phonLanguage$, "F", "au", "F1"] = 647.6000
-phonemes [phonLanguage$, "F", "au", "F2"] = 1056.700
-phonemes [phonLanguage$, "F", "e", "F1"] = 429.9000
-phonemes [phonLanguage$, "F", "e", "F2"] = 1861.700
-phonemes [phonLanguage$, "F", "ei", "F1"] = 619.9000
-phonemes [phonLanguage$, "F", "ei", "F2"] = 1718.500
-phonemes [phonLanguage$, "F", "i", "F1"] = 294.3000
-phonemes [phonLanguage$, "F", "i", "F2"] = 1855.000
-phonemes [phonLanguage$, "F", "o", "F1"] = 527.5000
-phonemes [phonLanguage$, "F", "o", "F2"] = 894.100
-phonemes [phonLanguage$, "F", "u", "F1"] = 376.0000
-phonemes [phonLanguage$, "F", "u", "F2"] = 735.200
-phonemes [phonLanguage$, "F", "ui", "F1"] = 612.8000
-phonemes [phonLanguage$, "F", "ui", "F2"] = 1559.200
-phonemes [phonLanguage$, "F", "y", "F1"] = 321.2000
-phonemes [phonLanguage$, "F", "y", "F2"] = 1741.700
+# Using Robust Formant algorithm (Praat)
+phonemes [phonLanguage$, "F", "A", "F1"] = 826
+phonemes [phonLanguage$, "F", "A", "F2"] = 1208
+phonemes [phonLanguage$, "F", "E", "F1"] = 648
+phonemes [phonLanguage$, "F", "E", "F2"] = 2136
+phonemes [phonLanguage$, "F", "I", "F1"] = 411
+phonemes [phonLanguage$, "F", "I", "F2"] = 2432
+phonemes [phonLanguage$, "F", "O", "F1"] = 527
+phonemes [phonLanguage$, "F", "O", "F2"] = 836
+phonemes [phonLanguage$, "F", "Y", "F1"] = 447
+phonemes [phonLanguage$, "F", "Y", "F2"] = 1698
+phonemes [phonLanguage$, "F", "Y:", "F1"] = 404
+phonemes [phonLanguage$, "F", "Y:", "F2"] = 1750
+phonemes [phonLanguage$, "F", "a", "F1"] = 942
+phonemes [phonLanguage$, "F", "a", "F2"] = 1550
+phonemes [phonLanguage$, "F", "au", "F1"] = 600
+phonemes [phonLanguage$, "F", "au", "F2"] = 1048
+phonemes [phonLanguage$, "F", "e", "F1"] = 409
+phonemes [phonLanguage$, "F", "e", "F2"] = 2444
+phonemes [phonLanguage$, "F", "ei", "F1"] = 618
+phonemes [phonLanguage$, "F", "ei", "F2"] = 2196
+phonemes [phonLanguage$, "F", "i", "F1"] = 271
+phonemes [phonLanguage$, "F", "i", "F2"] = 2667
+phonemes [phonLanguage$, "F", "o", "F1"] = 470
+phonemes [phonLanguage$, "F", "o", "F2"] = 879
+phonemes [phonLanguage$, "F", "u", "F1"] = 334
+phonemes [phonLanguage$, "F", "u", "F2"] = 686
+phonemes [phonLanguage$, "F", "ui", "F1"] = 594
+phonemes [phonLanguage$, "F", "ui", "F2"] = 1669
+phonemes [phonLanguage$, "F", "y", "F1"] = 285
+phonemes [phonLanguage$, "F", "y", "F2"] = 1765
+
 # Guessed
-phonemes [phonLanguage$, "F", "@", "F1"] = 500.5
-phonemes [phonLanguage$, "F", "@", "F2"] = 1706.6
+phonemes [phonLanguage$, "F", "@", "F1"] = 440
+phonemes [phonLanguage$, "F", "@", "F2"] = 1415
 
 # Run as a non interactive program
 if input_table > 0

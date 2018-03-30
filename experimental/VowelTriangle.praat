@@ -1597,7 +1597,7 @@ procedure select_vowel_target .sound .formants .textgrid
 		# Band Energy Difference (BED)
 		call calculateBED 0.01 .sound
 		.maxBED = calculateBED.maxBED
-		.thressHold =  -17 - .maxBED
+		.thressHold =  -15 - .maxBED
 		.bedSignal = calculateBED.bed_tier
 		selectObject: .bedSignal
 		.bedTextGrid = To TextGrid (silences): .thressHold, 0.02, 0.02, "N", "V", 0.01

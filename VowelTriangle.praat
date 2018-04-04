@@ -1153,7 +1153,7 @@ procedure plot_vowels .plot .sp$ .sound
 	selectObject: .downSampled
 	Remove
 
-	@select_vowel_target: .sound, .formants, .formantsBurg, .syllableKernels
+	@select_vowel_target: .sp$, .sound, .formants, .formantsBurg, .syllableKernels
 	.vowelTier = select_vowel_target.vowelTier
 	.targetTier = select_vowel_target.targetTier
 	selectObject: .syllableKernels
@@ -1685,9 +1685,9 @@ procedure get_most_distant_vowels .sp$ .formants .textgrid .f1_o .f2_o
 	endfor
 endproc
 
-procedure select_vowel_target .sound .formants .formantsBurg .textgrid
-	.f1_Lowest = phonemes [phonLanguage$, "M", "i_corner", "F1"]
-	.f1_Highest = (1050/900) * phonemes [phonLanguage$, "F", "a_corner", "F1"]
+procedure select_vowel_target .sp$ .sound .formants .formantsBurg .textgrid
+	.f1_Lowest = phonemes [phonLanguage$, .sp$, "i_corner", "F1"]
+	.f1_Highest = (1050/900) * phonemes [phonLanguage$, .sp$, "a_corner", "F1"]
 	selectObject: .textgrid
 	.duration = Get total duration
 	.firstTier$ = Get tier name: 1

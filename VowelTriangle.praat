@@ -1686,8 +1686,8 @@ procedure get_most_distant_vowels .sp$ .formants .textgrid .f1_o .f2_o
 endproc
 
 procedure select_vowel_target .sound .formants .formantsBurg .textgrid
-	.f1_Lowest = 250
-	.f1_Highest = 1050
+	.f1_Lowest = phonemes [phonLanguage$, "M", "i_corner", "F1"]
+	.f1_Highest = (1050/900) * phonemes [phonLanguage$, "M", "i_corner", "F1"]
 	selectObject: .textgrid
 	.duration = Get total duration
 	.firstTier$ = Get tier name: 1
@@ -1902,7 +1902,7 @@ procedure select_vowel_target .sound .formants .formantsBurg .textgrid
 			.i_near = Get nearest index: .ttl - .dt
 			.pp_near = Get time from index: .i_near
 			
-			while (.f > 300 and .f < 1000 and .b < 0.9 * .f and .nf >= 4) and .ttl - .dt >= .tl and abs((.ttl - .dt) - .pp_near) <= 0.02
+			while (.f > .f1_Lowest and .f < .f1_Highest and .b < 0.9 * .f and .nf >= 4) and .ttl - .dt >= .tl and abs((.ttl - .dt) - .pp_near) <= 0.02
 				.ttl -= .dt
 				selectObject: .formants
 				.f = Get value at time: 1, .ttl, "Hertz", "Linear"
@@ -1944,7 +1944,7 @@ procedure select_vowel_target .sound .formants .formantsBurg .textgrid
 			.i_near = Get nearest index: .ttl + .dt
 			.pp_near = Get time from index: .i_near
 			
-			while (.f > 300 and .f < 1000 and .b < 0.9 * .f and .nf >= 4) and .tth + .dt <= .th and abs((.ttl + .dt) - .pp_near) <= 0.02
+			while (.f > .f1_Lowest and .f < .f1_Highest and .b < 0.9 * .f and .nf >= 4) and .tth + .dt <= .th and abs((.ttl + .dt) - .pp_near) <= 0.02
 				.tth += .dt
 				selectObject: .formants
 				.f = Get value at time: 1, .tth, "Hertz", "Linear"

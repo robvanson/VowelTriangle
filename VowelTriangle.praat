@@ -1687,7 +1687,7 @@ endproc
 
 procedure select_vowel_target .sound .formants .formantsBurg .textgrid
 	.f1_Lowest = phonemes [phonLanguage$, "M", "i_corner", "F1"]
-	.f1_Highest = (1050/900) * phonemes [phonLanguage$, "M", "i_corner", "F1"]
+	.f1_Highest = (1050/900) * phonemes [phonLanguage$, "F", "a_corner", "F1"]
 	selectObject: .textgrid
 	.duration = Get total duration
 	.firstTier$ = Get tier name: 1

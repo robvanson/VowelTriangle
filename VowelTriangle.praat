@@ -141,6 +141,15 @@ endif
 
 # Define Language
 # Add new targets if necessary
+# Replace the Burg algorithm with the Robust formant algorithm
+# That one is much slower than the Burg algorithm
+robust = 0
+
+# Plot "real" formants instead of the SL formants
+# Alternatives: "Burg" or "NL" (= phonLanguage$)
+plotLanguage$ = "NL"
+
+# Vowel targets for Dutch
 phonLanguage$ = "NL"
 numVowels = 12
 vowelList$ [1] = "i"
@@ -545,104 +554,201 @@ uiMessage$ ["IT", "Record"]			= "Registra"
 # Formant values
 
 # Male 
-phonemes [phonLanguage$, "M", "i_corner", "F1"] = 242
-phonemes [phonLanguage$, "M", "i_corner", "F2"] = 2330
-phonemes [phonLanguage$, "M", "a_corner", "F1"] = 797
-phonemes [phonLanguage$, "M", "a_corner", "F2"] = 1328
-phonemes [phonLanguage$, "M", "u_corner", "F1"] = 269
-phonemes [phonLanguage$, "M", "u_corner", "F2"] = 626
+phonemes ["Burg", "M", "i_corner", "F1"] = 242
+phonemes ["Burg", "M", "i_corner", "F2"] = 2330
+phonemes ["Burg", "M", "a_corner", "F1"] = 797
+phonemes ["Burg", "M", "a_corner", "F2"] = 1328
+phonemes ["Burg", "M", "u_corner", "F1"] = 269
+phonemes ["Burg", "M", "u_corner", "F2"] = 626
 
+# @_center is not fixed but derived from current corners
+phonemes ["Burg", "M", "@_center", "F1"] =(phonemes ["Burg", "M", "i_corner", "F1"]*phonemes ["Burg", "M", "u_corner", "F1"]*phonemes ["Burg", "M", "a_corner", "F1"])^(1/3)
+phonemes ["Burg", "M", "@_center", "F2"] = (phonemes ["Burg", "M", "i_corner", "F2"]*phonemes ["Burg", "M", "u_corner", "F2"]*phonemes ["Burg", "M", "a_corner", "F2"])^(1/3)
+
+# Formant values according to 
+# IFA corpus averages from FPA isolated vowels
+# Using Robust Formant algorithm (Praat)
+phonemes ["Burg", "M", "A", "F1"] = 680
+phonemes ["Burg", "M", "A", "F2"] = 1038
+phonemes ["Burg", "M", "E", "F1"] = 510
+phonemes ["Burg", "M", "E", "F2"] = 1900
+phonemes ["Burg", "M", "I", "F1"] = 354
+phonemes ["Burg", "M", "I", "F2"] = 2167
+phonemes ["Burg", "M", "O", "F1"] = 446
+phonemes ["Burg", "M", "O", "F2"] = 680
+phonemes ["Burg", "M", "Y", "F1"] = 389
+phonemes ["Burg", "M", "Y", "F2"] = 1483
+phonemes ["Burg", "M", "Y:", "F1"] = 370
+phonemes ["Burg", "M", "Y:", "F2"] = 1508
+phonemes ["Burg", "M", "a", "F1"] = 797
+phonemes ["Burg", "M", "a", "F2"] = 1328
+phonemes ["Burg", "M", "au", "F1"] = 542
+phonemes ["Burg", "M", "au", "F2"] = 945
+phonemes ["Burg", "M", "e", "F1"] = 351
+phonemes ["Burg", "M", "e", "F2"] = 2180
+phonemes ["Burg", "M", "ei", "F1"] = 471
+phonemes ["Burg", "M", "ei", "F2"] = 1994
+phonemes ["Burg", "M", "i", "F1"] = 242
+phonemes ["Burg", "M", "i", "F2"] = 2330
+phonemes ["Burg", "M", "o", "F1"] = 393
+phonemes ["Burg", "M", "o", "F2"] = 692
+phonemes ["Burg", "M", "u", "F1"] = 269
+phonemes ["Burg", "M", "u", "F2"] = 626
+phonemes ["Burg", "M", "ui", "F1"] = 475
+phonemes ["Burg", "M", "ui", "F2"] = 1523
+phonemes ["Burg", "M", "y", "F1"] = 254
+phonemes ["Burg", "M", "y", "F2"] = 1609
+
+# Guessed
+phonemes ["Burg", "M", "@", "F1"] = 373
+phonemes ["Burg", "M", "@", "F2"] = 1247
+
+# Female
+phonemes ["Burg", "F", "i_corner", "F1"] = 271
+phonemes ["Burg", "F", "i_corner", "F2"] = 2667
+phonemes ["Burg", "F", "a_corner", "F1"] = 942
+phonemes ["Burg", "F", "a_corner", "F2"] = 1550
+phonemes ["Burg", "F", "u_corner", "F1"] = 334
+phonemes ["Burg", "F", "u_corner", "F2"] = 686
+
+# @_center is not fixed but derived from current corners
+phonemes ["Burg", "F", "@_center", "F1"] =(phonemes ["Burg", "F", "i_corner", "F1"]*phonemes ["Burg", "F", "u_corner", "F1"]*phonemes ["Burg", "F", "a_corner", "F1"])^(1/3)
+phonemes ["Burg", "F", "@_center", "F2"] = (phonemes ["Burg", "F", "i_corner", "F2"]*phonemes ["Burg", "F", "u_corner", "F2"]*phonemes ["Burg", "F", "a_corner", "F2"])^(1/3)
+
+# Formant values according to 
+# IFA corpus average from FPA isolated vowels
+# Using Robust Formant algorithm (Praat)
+phonemes ["Burg", "F", "A", "F1"] = 826
+phonemes ["Burg", "F", "A", "F2"] = 1208
+phonemes ["Burg", "F", "E", "F1"] = 648
+phonemes ["Burg", "F", "E", "F2"] = 2136
+phonemes ["Burg", "F", "I", "F1"] = 411
+phonemes ["Burg", "F", "I", "F2"] = 2432
+phonemes ["Burg", "F", "O", "F1"] = 527
+phonemes ["Burg", "F", "O", "F2"] = 836
+phonemes ["Burg", "F", "Y", "F1"] = 447
+phonemes ["Burg", "F", "Y", "F2"] = 1698
+phonemes ["Burg", "F", "Y:", "F1"] = 404
+phonemes ["Burg", "F", "Y:", "F2"] = 1750
+phonemes ["Burg", "F", "a", "F1"] = 942
+phonemes ["Burg", "F", "a", "F2"] = 1550
+phonemes ["Burg", "F", "au", "F1"] = 600
+phonemes ["Burg", "F", "au", "F2"] = 1048
+phonemes ["Burg", "F", "e", "F1"] = 409
+phonemes ["Burg", "F", "e", "F2"] = 2444
+phonemes ["Burg", "F", "ei", "F1"] = 618
+phonemes ["Burg", "F", "ei", "F2"] = 2196
+phonemes ["Burg", "F", "i", "F1"] = 271
+phonemes ["Burg", "F", "i", "F2"] = 2667
+phonemes ["Burg", "F", "o", "F1"] = 470
+phonemes ["Burg", "F", "o", "F2"] = 879
+phonemes ["Burg", "F", "u", "F1"] = 334
+phonemes ["Burg", "F", "u", "F2"] = 686
+phonemes ["Burg", "F", "ui", "F1"] = 594
+phonemes ["Burg", "F", "ui", "F2"] = 1669
+phonemes ["Burg", "F", "y", "F1"] = 285
+phonemes ["Burg", "F", "y", "F2"] = 1765
+
+# Guessed
+phonemes ["Burg", "F", "@", "F1"] = 440
+phonemes ["Burg", "F", "@", "F2"] = 1415
+
+
+# Male 
+phonemes [phonLanguage$, "M", "i_corner", "F1"] = 250
+phonemes [phonLanguage$, "M", "i_corner", "F2"] = 2100
+phonemes [phonLanguage$, "M", "a_corner", "F1"] = 850
+phonemes [phonLanguage$, "M", "a_corner", "F2"] = 1290
+phonemes [phonLanguage$, "M", "u_corner", "F1"] = 285
+phonemes [phonLanguage$, "M", "u_corner", "F2"] = 650
 # @_center is not fixed but derived from current corners
 phonemes [phonLanguage$, "M", "@_center", "F1"] =(phonemes [phonLanguage$, "M", "i_corner", "F1"]*phonemes [phonLanguage$, "M", "u_corner", "F1"]*phonemes [phonLanguage$, "M", "a_corner", "F1"])^(1/3)
 phonemes [phonLanguage$, "M", "@_center", "F2"] = (phonemes [phonLanguage$, "M", "i_corner", "F2"]*phonemes [phonLanguage$, "M", "u_corner", "F2"]*phonemes [phonLanguage$, "M", "a_corner", "F2"])^(1/3)
 
 # Formant values according to 
 # IFA corpus averages from FPA isolated vowels
-# Using Robust Formant algorithm (Praat)
-phonemes [phonLanguage$, "M", "A", "F1"] = 680
-phonemes [phonLanguage$, "M", "A", "F2"] = 1038
-phonemes [phonLanguage$, "M", "E", "F1"] = 510
-phonemes [phonLanguage$, "M", "E", "F2"] = 1900
-phonemes [phonLanguage$, "M", "I", "F1"] = 354
-phonemes [phonLanguage$, "M", "I", "F2"] = 2167
-phonemes [phonLanguage$, "M", "O", "F1"] = 446
-phonemes [phonLanguage$, "M", "O", "F2"] = 680
-phonemes [phonLanguage$, "M", "Y", "F1"] = 389
-phonemes [phonLanguage$, "M", "Y", "F2"] = 1483
-phonemes [phonLanguage$, "M", "Y:", "F1"] = 370
-phonemes [phonLanguage$, "M", "Y:", "F2"] = 1508
-phonemes [phonLanguage$, "M", "a", "F1"] = 797
-phonemes [phonLanguage$, "M", "a", "F2"] = 1328
-phonemes [phonLanguage$, "M", "au", "F1"] = 542
-phonemes [phonLanguage$, "M", "au", "F2"] = 945
-phonemes [phonLanguage$, "M", "e", "F1"] = 351
-phonemes [phonLanguage$, "M", "e", "F2"] = 2180
-phonemes [phonLanguage$, "M", "ei", "F1"] = 471
-phonemes [phonLanguage$, "M", "ei", "F2"] = 1994
-phonemes [phonLanguage$, "M", "i", "F1"] = 242
-phonemes [phonLanguage$, "M", "i", "F2"] = 2330
-phonemes [phonLanguage$, "M", "o", "F1"] = 393
-phonemes [phonLanguage$, "M", "o", "F2"] = 692
-phonemes [phonLanguage$, "M", "u", "F1"] = 269
-phonemes [phonLanguage$, "M", "u", "F2"] = 626
-phonemes [phonLanguage$, "M", "ui", "F1"] = 475
-phonemes [phonLanguage$, "M", "ui", "F2"] = 1523
-phonemes [phonLanguage$, "M", "y", "F1"] = 254
-phonemes [phonLanguage$, "M", "y", "F2"] = 1609
-
+# Using Split-Levinson algorithm
+phonemes [phonLanguage$, "M", "A", "F1"] = 695.6000
+phonemes [phonLanguage$, "M", "A", "F2"] = 1065.500
+phonemes [phonLanguage$, "M", "E", "F1"] = 552.5000
+phonemes [phonLanguage$, "M", "E", "F2"] = 1659.200
+phonemes [phonLanguage$, "M", "I", "F1"] = 378.0909
+phonemes [phonLanguage$, "M", "I", "F2"] = 1868.545
+phonemes [phonLanguage$, "M", "O", "F1"] = 482.9000
+phonemes [phonLanguage$, "M", "O", "F2"] = 725.800
+phonemes [phonLanguage$, "M", "Y", "F1"] = 417.7000
+phonemes [phonLanguage$, "M", "Y", "F2"] = 1455.100
+phonemes [phonLanguage$, "M", "Y:", "F1"] = 386.3000
+phonemes [phonLanguage$, "M", "Y:", "F2"] = 1492.400
+phonemes [phonLanguage$, "M", "a", "F1"] = 788.6000
+phonemes [phonLanguage$, "M", "a", "F2"] = 1290.600
+phonemes [phonLanguage$, "M", "au", "F1"] = 583.8000
+phonemes [phonLanguage$, "M", "au", "F2"] = 959.300
+phonemes [phonLanguage$, "M", "e", "F1"] = 372.3000
+phonemes [phonLanguage$, "M", "e", "F2"] = 1959.700
+phonemes [phonLanguage$, "M", "ei", "F1"] = 499.5000
+phonemes [phonLanguage$, "M", "ei", "F2"] = 1733.000
+phonemes [phonLanguage$, "M", "i", "F1"] = 259.5556
+phonemes [phonLanguage$, "M", "i", "F2"] = 1971.889
+phonemes [phonLanguage$, "M", "o", "F1"] = 426.7000
+phonemes [phonLanguage$, "M", "o", "F2"] = 743.600
+phonemes [phonLanguage$, "M", "u", "F1"] = 287.5000
+phonemes [phonLanguage$, "M", "u", "F2"] = 666.500
+phonemes [phonLanguage$, "M", "ui", "F1"] = 495.3000
+phonemes [phonLanguage$, "M", "ui", "F2"] = 1468.600
+phonemes [phonLanguage$, "M", "y", "F1"] = 268.4000
+phonemes [phonLanguage$, "M", "y", "F2"] = 1581.400
 # Guessed
-phonemes [phonLanguage$, "M", "@", "F1"] = 373
-phonemes [phonLanguage$, "M", "@", "F2"] = 1247
+phonemes [phonLanguage$, "M", "@", "F1"] = 417.7000
+phonemes [phonLanguage$, "M", "@", "F2"] = 1455.100
 
 # Female
-phonemes [phonLanguage$, "F", "i_corner", "F1"] = 271
-phonemes [phonLanguage$, "F", "i_corner", "F2"] = 2667
-phonemes [phonLanguage$, "F", "a_corner", "F1"] = 942
-phonemes [phonLanguage$, "F", "a_corner", "F2"] = 1550
-phonemes [phonLanguage$, "F", "u_corner", "F1"] = 334
-phonemes [phonLanguage$, "F", "u_corner", "F2"] = 686
-
+phonemes [phonLanguage$, "F", "i_corner", "F1"] = 280
+phonemes [phonLanguage$, "F", "i_corner", "F2"] = 2200
+phonemes [phonLanguage$, "F", "a_corner", "F1"] = 900
+phonemes [phonLanguage$, "F", "a_corner", "F2"] = 1435
+phonemes [phonLanguage$, "F", "u_corner", "F1"] = 370
+phonemes [phonLanguage$, "F", "u_corner", "F2"] = 700
 # @_center is not fixed but derived from current corners
 phonemes [phonLanguage$, "F", "@_center", "F1"] =(phonemes [phonLanguage$, "F", "i_corner", "F1"]*phonemes [phonLanguage$, "F", "u_corner", "F1"]*phonemes [phonLanguage$, "F", "a_corner", "F1"])^(1/3)
 phonemes [phonLanguage$, "F", "@_center", "F2"] = (phonemes [phonLanguage$, "F", "i_corner", "F2"]*phonemes [phonLanguage$, "F", "u_corner", "F2"]*phonemes [phonLanguage$, "F", "a_corner", "F2"])^(1/3)
 
 # Formant values according to 
 # IFA corpus average from FPA isolated vowels
-# Using Robust Formant algorithm (Praat)
-phonemes [phonLanguage$, "F", "A", "F1"] = 826
-phonemes [phonLanguage$, "F", "A", "F2"] = 1208
-phonemes [phonLanguage$, "F", "E", "F1"] = 648
-phonemes [phonLanguage$, "F", "E", "F2"] = 2136
-phonemes [phonLanguage$, "F", "I", "F1"] = 411
-phonemes [phonLanguage$, "F", "I", "F2"] = 2432
-phonemes [phonLanguage$, "F", "O", "F1"] = 527
-phonemes [phonLanguage$, "F", "O", "F2"] = 836
-phonemes [phonLanguage$, "F", "Y", "F1"] = 447
-phonemes [phonLanguage$, "F", "Y", "F2"] = 1698
-phonemes [phonLanguage$, "F", "Y:", "F1"] = 404
-phonemes [phonLanguage$, "F", "Y:", "F2"] = 1750
-phonemes [phonLanguage$, "F", "a", "F1"] = 942
-phonemes [phonLanguage$, "F", "a", "F2"] = 1550
-phonemes [phonLanguage$, "F", "au", "F1"] = 600
-phonemes [phonLanguage$, "F", "au", "F2"] = 1048
-phonemes [phonLanguage$, "F", "e", "F1"] = 409
-phonemes [phonLanguage$, "F", "e", "F2"] = 2444
-phonemes [phonLanguage$, "F", "ei", "F1"] = 618
-phonemes [phonLanguage$, "F", "ei", "F2"] = 2196
-phonemes [phonLanguage$, "F", "i", "F1"] = 271
-phonemes [phonLanguage$, "F", "i", "F2"] = 2667
-phonemes [phonLanguage$, "F", "o", "F1"] = 470
-phonemes [phonLanguage$, "F", "o", "F2"] = 879
-phonemes [phonLanguage$, "F", "u", "F1"] = 334
-phonemes [phonLanguage$, "F", "u", "F2"] = 686
-phonemes [phonLanguage$, "F", "ui", "F1"] = 594
-phonemes [phonLanguage$, "F", "ui", "F2"] = 1669
-phonemes [phonLanguage$, "F", "y", "F1"] = 285
-phonemes [phonLanguage$, "F", "y", "F2"] = 1765
-
+# Using Split-Levinson algorithm
+phonemes [phonLanguage$, "F", "A", "F1"] = 817.7000
+phonemes [phonLanguage$, "F", "A", "F2"] = 1197.300
+phonemes [phonLanguage$, "F", "E", "F1"] = 667.9000
+phonemes [phonLanguage$, "F", "E", "F2"] = 1748.500
+phonemes [phonLanguage$, "F", "I", "F1"] = 429.2222
+phonemes [phonLanguage$, "F", "I", "F2"] = 1937.333
+phonemes [phonLanguage$, "F", "O", "F1"] = 570.8000
+phonemes [phonLanguage$, "F", "O", "F2"] = 882.100
+phonemes [phonLanguage$, "F", "Y", "F1"] = 495.7000
+phonemes [phonLanguage$, "F", "Y", "F2"] = 1635.600
+phonemes [phonLanguage$, "F", "Y:", "F1"] = 431.1000
+phonemes [phonLanguage$, "F", "Y:", "F2"] = 1695.100
+phonemes [phonLanguage$, "F", "a", "F1"] = 853.6000
+phonemes [phonLanguage$, "F", "a", "F2"] = 1435.800
+phonemes [phonLanguage$, "F", "au", "F1"] = 647.6000
+phonemes [phonLanguage$, "F", "au", "F2"] = 1056.700
+phonemes [phonLanguage$, "F", "e", "F1"] = 429.9000
+phonemes [phonLanguage$, "F", "e", "F2"] = 1861.700
+phonemes [phonLanguage$, "F", "ei", "F1"] = 619.9000
+phonemes [phonLanguage$, "F", "ei", "F2"] = 1718.500
+phonemes [phonLanguage$, "F", "i", "F1"] = 294.3000
+phonemes [phonLanguage$, "F", "i", "F2"] = 1855.000
+phonemes [phonLanguage$, "F", "o", "F1"] = 527.5000
+phonemes [phonLanguage$, "F", "o", "F2"] = 894.100
+phonemes [phonLanguage$, "F", "u", "F1"] = 376.0000
+phonemes [phonLanguage$, "F", "u", "F2"] = 735.200
+phonemes [phonLanguage$, "F", "ui", "F1"] = 612.8000
+phonemes [phonLanguage$, "F", "ui", "F2"] = 1559.200
+phonemes [phonLanguage$, "F", "y", "F1"] = 321.2000
+phonemes [phonLanguage$, "F", "y", "F2"] = 1741.700
 # Guessed
-phonemes [phonLanguage$, "F", "@", "F1"] = 440
-phonemes [phonLanguage$, "F", "@", "F2"] = 1415
+phonemes [phonLanguage$, "F", "@", "F1"] = 500.5
+phonemes [phonLanguage$, "F", "@", "F2"] = 1706.6
 
 # Run as a non interactive program
 if input_table > 0
@@ -737,10 +843,10 @@ if input_table > 0
 		if .plotVowels
 			Erase all
 			call set_up_Canvas
-			call plot_vowel_triangle '.sp$'
+			@plot_vowel_triangle:, .sp$
 			Text special... 0.5 Centre 1.05 bottom Helvetica 18 0 ##'title$'#
 		endif
-		@plot_vowels: .plotVowels, .sp$, .sound
+		@plot_vowels: phonLanguage$, .plotVowels, .sp$, .sound
 		@print_output_line: title$, .sp$, plot_vowels.numVowelIntervals, plot_vowels.area2perc, plot_vowels.area1perc, plot_vowels.relDist_i, plot_vowels.relDist_u, plot_vowels.relDist_a, .duration, .intensity
 
 		if index_regex(.plotFile$, "\w")
@@ -789,6 +895,7 @@ while .continue
 			option: "Italiano"
 		#   option: "MyLanguage"
 		boolean: "Log", (output_table$ <> "")
+		boolean: "Burg", (plotLanguage$ = "Burg")
 	.clicked = endPause: (uiMessage$ [uiLanguage$, "Stop"]), (uiMessage$ [uiLanguage$, "Record"]), (uiMessage$ [uiLanguage$, "Open"]), 3, 1	
 	if .clicked = 1
 		.continue = 0
@@ -839,6 +946,12 @@ while .continue
 	# Store preferences
 	writeFileLine: .preferencesLanguageFile$, "Language=",uiLanguage$
 	
+	if burg
+		plotLanguage$ = "Burg"
+	else
+		plotLanguage$ = phonLanguage$
+	endif
+	
 	# Start
 	if log and output_table$ = ""
 		Erase all
@@ -887,13 +1000,14 @@ while .continue
 	# Draw vowel triangle
 	Erase all
 	call set_up_Canvas
-	call plot_vowel_triangle '.sp$'
+	@plot_vowel_triangle: .sp$
 	Text special... 0.5 Centre 1.05 bottom Helvetica 18 0 ##'title$'#
 	
 	selectObject: .sound
 	.duration = Get total duration
 	.intensity = Get intensity (dB)
 	if .intensity > 50
+		#@plot_vowels: phonLanguage$, 1, .sp$, .sound, 
 		@plot_vowels: 1, .sp$, .sound, 
 		@print_output_line: title$, .sp$, plot_vowels.numVowelIntervals, plot_vowels.area2perc, plot_vowels.area1perc, plot_vowels.relDist_i, plot_vowels.relDist_u, plot_vowels.relDist_a, .duration, .intensity
 	endif
@@ -1006,22 +1120,40 @@ endproc
 procedure plot_vowels .plot .sp$ .sound
 	.startT = 0
 	.dot_Radius = default_Dot_Radius
-	call syllable_nuclei -25 4 0.3 1 .sound
-	.syllableKernels = syllable_nuclei.textgridid
-	#call segment_syllables -25 4 0.3 1 .sound
-	#.syllableKernels = segment_syllables.textgridid
+	#call syllable_nuclei -25 4 0.3 1 .sound
+	#.syllableKernels = syllable_nuclei.textgridid
+	call segment_syllables -25 4 0.3 1 .sound
+	.syllableKernels = segment_syllables.textgridid
 	
 	# Calculate the formants
 	selectObject: .sound
 	.duration = Get total duration
 	.soundname$ = selected$("Sound")
 	if .sp$ = "M"
-		.formants = noprogress To Formant (robust): 0.01, 5, 5000, 0.025, 50, 1.5, 5, 1e-06
+		.downSampled = Resample: 10000, 50
+		.formants = noprogress To Formant (sl): 0, 5, 5000, 0.025, 50
+		if robust
+			selectObject: .sound
+			.formantsBurg = noprogress To Formant (robust): 0.01, 5, 5000, 0.025, 50, 1.5, 5, 1e-06
+		else 
+			selectObject: .downSampled
+			.formantsBurg = noprogress To Formant (burg): 0, 5, 5000, 0.025, 50
+		endif
 	else
-		.formants = noprogress To Formant (robust): 0.01, 5, 5500, 0.025, 50, 1.5, 5, 1e-06
+		.downSampled = Resample: 11000, 50
+		.formants = noprogress To Formant (sl): 0, 5, 5500, 0.025, 50
+		if robust
+			selectObject: .sound
+			.formantsBurg = noprogress To Formant (robust): 0.01, 5, 5500, 0.025, 50, 1.5, 5, 1e-06
+		else 
+			selectObject: .downSampled
+			.formantsBurg = noprogress To Formant (burg): 0, 5, 5500, 0.025, 50
+		endif
 	endif
+	selectObject: .downSampled
+	Remove
 
-	call select_vowel_target .sound .formants .syllableKernels
+	@select_vowel_target: .sound, .formants, .formantsBurg, .syllableKernels
 	.vowelTier = select_vowel_target.vowelTier
 	.targetTier = select_vowel_target.targetTier
 	selectObject: .syllableKernels
@@ -1032,28 +1164,32 @@ procedure plot_vowels .plot .sp$ .sound
 
 	
 	# Set new @_center
-	phonemes [phonLanguage$, .sp$, "@_center", "F1"] = (phonemes [phonLanguage$, .sp$, "a", "F1"] * phonemes [phonLanguage$, .sp$, "i", "F1"] * phonemes [phonLanguage$, .sp$, "u", "F1"]) ** (1/3) 
-	phonemes [phonLanguage$, .sp$, "@_center", "F2"] = (phonemes [phonLanguage$, .sp$, "a", "F2"] * phonemes [phonLanguage$, .sp$, "i", "F2"] * phonemes [phonLanguage$, .sp$, "u", "F2"]) ** (1/3) 
+	phonemes [plotLanguage$, .sp$, "@_center", "F1"] = (phonemes [plotLanguage$, .sp$, "a", "F1"] * phonemes [plotLanguage$, .sp$, "i", "F1"] * phonemes [plotLanguage$, .sp$, "u", "F1"]) ** (1/3) 
+	phonemes [plotLanguage$, .sp$, "@_center", "F2"] = (phonemes [plotLanguage$, .sp$, "a", "F2"] * phonemes [plotLanguage$, .sp$, "i", "F2"] * phonemes [plotLanguage$, .sp$, "u", "F2"]) ** (1/3) 
 	
-	.f1_c = phonemes [phonLanguage$, .sp$, "@_center", "F1"]
-	.f2_c = phonemes [phonLanguage$, .sp$, "@_center", "F2"]
+	.f1_c = phonemes [plotLanguage$, .sp$, "@_center", "F1"]
+	.f2_c = phonemes [plotLanguage$, .sp$, "@_center", "F2"]
 	
 	# Plot center
-	@vowel2point: .sp$, .f1_c, .f2_c
+	@vowel2point: plotLanguage$, .sp$, .f1_c, .f2_c
 	.st_c1 = vowel2point.x
 	.st_c2 = vowel2point.y
 	
 	# Near /@/
-	.f1_c = phonemes [phonLanguage$, .sp$, "@_center", "F1"]
-	.f2_c = phonemes [phonLanguage$, .sp$, "@_center", "F2"]
-	@get_closest_vowels: 0, .sp$, .formants, .syllableKernels, .f1_c, .f2_c
+	.f1_c = phonemes [plotLanguage$, .sp$, "@_center", "F1"]
+	.f2_c = phonemes [plotLanguage$, .sp$, "@_center", "F2"]
+	.closestFormat = .formantsBurg
+	if phonLanguage$ = plotLanguage$
+		.closestFormat = 0
+	endif
+	@get_closest_vowels: 0, .sp$, .formants, .closestFormat, .syllableKernels, .f1_c, .f2_c
 	.numVowelIntervals = get_closest_vowels.vowelNum
 	# Actually plot the vowels
 	if .plot
 		for .i to get_closest_vowels.vowelNum
 			.f1 = get_closest_vowels.f1_list [.i]
 			.f2 = get_closest_vowels.f2_list [.i]
-			@vowel2point: .sp$, .f1, .f2
+			@vowel2point: plotLanguage$, .sp$, .f1, .f2
 			.x = vowel2point.x
 			.y = vowel2point.y
 			Paint circle: color$["@"], .x, .y, .dot_Radius
@@ -1061,9 +1197,9 @@ procedure plot_vowels .plot .sp$ .sound
 	endif
 	
 	# Near /i/
-	.f1_i = phonemes [phonLanguage$, .sp$, "i", "F1"]
-	.f2_i = phonemes [phonLanguage$, .sp$, "i", "F2"]
-	@get_closest_vowels: 0, .sp$, .formants, .syllableKernels, .f1_i, .f2_i
+	.f1_i = phonemes [plotLanguage$, .sp$, "i", "F1"]
+	.f2_i = phonemes [plotLanguage$, .sp$, "i", "F2"]
+	@get_closest_vowels: 0, .sp$, .formants, .closestFormat, .syllableKernels, .f1_i, .f2_i
 	.meanDistToCenter ["i"] = get_closest_vowels.meanDistance
 	.stdevDistToCenter ["i"] = get_closest_vowels.stdevDistance
 	.num_i_Intervals = get_closest_vowels.vowelNum
@@ -1072,7 +1208,7 @@ procedure plot_vowels .plot .sp$ .sound
 		for .i to get_closest_vowels.vowelNum
 			.f1 = get_closest_vowels.f1_list [.i]
 			.f2 = get_closest_vowels.f2_list [.i]
-			@vowel2point: .sp$, .f1, .f2
+			@vowel2point: plotLanguage$, .sp$, .f1, .f2
 			.x = vowel2point.x
 			.y = vowel2point.y
 			Paint circle: color$["i"], .x, .y, .dot_Radius
@@ -1080,9 +1216,9 @@ procedure plot_vowels .plot .sp$ .sound
 	endif
 	
 	# Near /u/
-	.f1_u = phonemes [phonLanguage$, .sp$, "u", "F1"]
-	.f2_u = phonemes [phonLanguage$, .sp$, "u", "F2"]
-	@get_closest_vowels: 0, .sp$, .formants, .syllableKernels, .f1_u, .f2_u
+	.f1_u = phonemes [plotLanguage$, .sp$, "u", "F1"]
+	.f2_u = phonemes [plotLanguage$, .sp$, "u", "F2"]
+	@get_closest_vowels:  0, .sp$, .formants, .closestFormat, .syllableKernels, .f1_u, .f2_u
 	.meanDistToCenter ["u"] = get_closest_vowels.meanDistance
 	.stdevDistToCenter ["u"] = get_closest_vowels.stdevDistance
 	.num_u_Intervals = get_closest_vowels.vowelNum
@@ -1091,7 +1227,7 @@ procedure plot_vowels .plot .sp$ .sound
 		for .i to get_closest_vowels.vowelNum
 			.f1 = get_closest_vowels.f1_list [.i]
 			.f2 = get_closest_vowels.f2_list [.i]
-			@vowel2point: .sp$, .f1, .f2
+			@vowel2point: plotLanguage$, .sp$, .f1, .f2
 			.x = vowel2point.x
 			.y = vowel2point.y
 			Paint circle: color$["u"], .x, .y, .dot_Radius
@@ -1099,9 +1235,9 @@ procedure plot_vowels .plot .sp$ .sound
 	endif
 	
 	# Near /a/
-	.f1_a = phonemes [phonLanguage$, .sp$, "a", "F1"]
-	.f2_a = phonemes [phonLanguage$, .sp$, "a", "F2"]
-	@get_closest_vowels: 0, .sp$, .formants, .syllableKernels, .f1_a, .f2_a
+	.f1_a = phonemes [plotLanguage$, .sp$, "a", "F1"]
+	.f2_a = phonemes [plotLanguage$, .sp$, "a", "F2"]
+	@get_closest_vowels:  0, .sp$, .formants, .closestFormat, .syllableKernels, .f1_a, .f2_a
 	.meanDistToCenter ["a"] = get_closest_vowels.meanDistance
 	.stdevDistToCenter ["a"] = get_closest_vowels.stdevDistance
 	.num_a_Intervals = get_closest_vowels.vowelNum
@@ -1110,7 +1246,7 @@ procedure plot_vowels .plot .sp$ .sound
 		for .i to get_closest_vowels.vowelNum
 			.f1 = get_closest_vowels.f1_list [.i]
 			.f2 = get_closest_vowels.f2_list [.i]
-			@vowel2point: .sp$, .f1, .f2
+			@vowel2point: plotLanguage$, .sp$, .f1, .f2
 			.x = vowel2point.x
 			.y = vowel2point.y
 			Paint circle: color$["a"], .x, .y, .dot_Radius
@@ -1127,7 +1263,7 @@ procedure plot_vowels .plot .sp$ .sound
 		Draw line: .x-0.007, .y+0.007, .x+0.007, .y-0.007
 		Draw line: .x-0.007, .y-0.007, .x+0.007, .y+0.007
 		# u
-		@vowel2point: .sp$, .f1_u, .f2_u	
+		@vowel2point: plotLanguage$, .sp$, .f1_u, .f2_u	
 		.x = vowel2point.x
 		.y = vowel2point.y
 		Black
@@ -1135,7 +1271,7 @@ procedure plot_vowels .plot .sp$ .sound
 		Draw line: .x-0.007, .y+0.007, .x+0.007, .y-0.007
 		Draw line: .x-0.007, .y-0.007, .x+0.007, .y+0.007
 		# i
-		@vowel2point: .sp$, .f1_i, .f2_i	
+		@vowel2point: plotLanguage$, .sp$, .f1_i, .f2_i	
 		.x = vowel2point.x
 		.y = vowel2point.y
 		Black
@@ -1143,7 +1279,7 @@ procedure plot_vowels .plot .sp$ .sound
 		Draw line: .x-0.007, .y+0.007, .x+0.007, .y-0.007
 		Draw line: .x-0.007, .y-0.007, .x+0.007, .y+0.007
 		# a
-		@vowel2point: .sp$, .f1_a, .f2_a	
+		@vowel2point: plotLanguage$, .sp$, .f1_a, .f2_a	
 		.x = vowel2point.x
 		.y = vowel2point.y
 		Black
@@ -1153,15 +1289,15 @@ procedure plot_vowels .plot .sp$ .sound
 	endif
 	
 	# Draw new triangle
-	@vowel2point: .sp$, .f1_i, .f2_i
+	@vowel2point: plotLanguage$, .sp$, .f1_i, .f2_i
 	.st_i1 = vowel2point.x
 	.st_i2 = vowel2point.y
 	.ic_dist = sqrt((.st_c1 - .st_i1)^2 + (.st_c2 - .st_i2)^2)
-	@vowel2point: .sp$, .f1_u, .f2_u
+	@vowel2point: plotLanguage$, .sp$, .f1_u, .f2_u
 	.st_u1 = vowel2point.x
 	.st_u2 = vowel2point.y
 	.uc_dist = sqrt((.st_c1 - .st_u1)^2 + (.st_c2 - .st_u2)^2)
-	@vowel2point: .sp$, .f1_a, .f2_a
+	@vowel2point: plotLanguage$, .sp$, .f1_a, .f2_a
 	.st_a1 = vowel2point.x
 	.st_a2 = vowel2point.y
 	.ac_dist = sqrt((.st_c1 - .st_a1)^2 + (.st_c2 - .st_a2)^2)
@@ -1257,16 +1393,16 @@ procedure plot_vowels .plot .sp$ .sound
 		Text special: 0.16, "right", -0.08, "bottom", "Helvetica", 14, "0", " '.relDist_a:0'\%  ('.num_a_Intervals')"
 	endif
 	
-	selectObject: .formants, .syllableKernels
+	selectObject: .formants, .formantsBurg, .syllableKernels
 	Remove
 endproc
 
 procedure print_output_line .title$, .sp$, .numVowelIntervals, .area2perc, .area1perc, .relDist_i, .relDist_u, .relDist_a, .duration, .intensity
 	# Uses global variable
 	if output_table$ = "-"
-		appendInfoLine: title$, tab$, .sp$, tab$, .numVowelIntervals, tab$, fixed$(.area2perc, 0), tab$, fixed$(.area1perc, 0), tab$, fixed$(.relDist_i, 0), tab$, fixed$(.relDist_u, 0), tab$, fixed$(.relDist_a, 0), tab$, fixed$(.duration,0), tab$, fixed$(.intensity,1)
+		appendInfoLine: title$, tab$, .sp$, tab$, .numVowelIntervals, tab$, fixed$(.area2perc, 1), tab$, fixed$(.area1perc, 1), tab$, fixed$(.relDist_i, 1), tab$, fixed$(.relDist_u, 1), tab$, fixed$(.relDist_a, 1), tab$, fixed$(.duration,0), tab$, fixed$(.intensity,1)
 	elsif index_regex(output_table$, "\w")
-		appendFileLine: output_table$, title$, tab$, .sp$, tab$, .numVowelIntervals, tab$, fixed$(.area2perc, 0), tab$, fixed$(.area1perc, 0), tab$, fixed$(.relDist_i, 0), tab$, fixed$(.relDist_u, 0), tab$, fixed$(.relDist_a, 0), tab$, fixed$(.duration,0), tab$, fixed$(.intensity,1)
+		appendFileLine: output_table$, title$, tab$, .sp$, tab$, .numVowelIntervals, tab$, fixed$(.area2perc, 1), tab$, fixed$(.area1perc, 1), tab$, fixed$(.relDist_i, 1), tab$, fixed$(.relDist_u, 1), tab$, fixed$(.relDist_a, 1), tab$, fixed$(.duration,0), tab$, fixed$(.intensity,1)
 	endif	
 endproc
 
@@ -1278,14 +1414,14 @@ procedure plot_standard_vowel .color$ .sp$ .vowel$ .reduction
 	while .vowel$ <> ""
 		.i += 1
 		.v$ = replace_regex$(.vowel$, "^\s*(\S[`]?).*$", "\1", 0)
-		.f1 = phonemes [phonLanguage$, .sp$, .v$, "F1"]
-		.f2 = phonemes [phonLanguage$, .sp$, .v$, "F2"]
+		.f1 = phonemes [plotLanguage$, .sp$, .v$, "F1"]
+		.f2 = phonemes [plotLanguage$, .sp$, .v$, "F2"]
 		if .reduction
 			.factor = 0.9^.reduction
-			.f1 = .factor * (.f1 - phonemes [phonLanguage$, .sp$, "@", "F1"]) + phonemes [phonLanguage$, .sp$, "@", "F1"]
-			.f2 = .factor * (.f2 - phonemes [phonLanguage$, .sp$, "@", "F2"]) + phonemes [phonLanguage$, .sp$, "@", "F2"]
+			.f1 = .factor * (.f1 - phonemes [plotLanguage$, .sp$, "@", "F1"]) + phonemes [plotLanguage$, .sp$, "@", "F1"]
+			.f2 = .factor * (.f2 - phonemes [plotLanguage$, .sp$, "@", "F2"]) + phonemes [plotLanguage$, .sp$, "@", "F2"]
 		endif
-		@vowel2point: .sp$, .f1, .f2
+		@vowel2point: plotLanguage$, .sp$, .f1, .f2
 		.x [.i] = vowel2point.x
 		.y [.i] = vowel2point.y
 		.vowel$ = replace_regex$(.vowel$, "^\s*(\S[`]?)", "", 0)
@@ -1304,25 +1440,25 @@ endproc
 # Plot the vowel triangle
 procedure plot_vowel_triangle .sp$
 	# Draw vowel triangle
-	.a_F1 = phonemes [phonLanguage$, .sp$, "a_corner", "F1"]
-	.a_F2 = phonemes [phonLanguage$, .sp$, "a_corner", "F2"]
+	.a_F1 = phonemes [plotLanguage$, .sp$, "a_corner", "F1"]
+	.a_F2 = phonemes [plotLanguage$, .sp$, "a_corner", "F2"]
 
-	.i_F1 = phonemes [phonLanguage$, .sp$, "i_corner", "F1"]
-	.i_F2 = phonemes [phonLanguage$, .sp$, "i_corner", "F2"]
+	.i_F1 = phonemes [plotLanguage$, .sp$, "i_corner", "F1"]
+	.i_F2 = phonemes [plotLanguage$, .sp$, "i_corner", "F2"]
 
-	.u_F1 = phonemes [phonLanguage$, .sp$, "u_corner", "F1"]
-	.u_F2 = phonemes [phonLanguage$, .sp$, "u_corner", "F2"]
+	.u_F1 = phonemes [plotLanguage$, .sp$, "u_corner", "F1"]
+	.u_F2 = phonemes [plotLanguage$, .sp$, "u_corner", "F2"]
 	
 	Dashed line
 	# u - i
-	@vowel2point: .sp$, .u_F1, .u_F2
+	@vowel2point: plotLanguage$, .sp$, .u_F1, .u_F2
 	.x1 = vowel2point.x
 	.y1 = vowel2point.y
 	Colour: color$ ["u"]
 	Text special: .x1, "Centre", .y1, "Bottom", "Helvetica", 20, "0", "/u/ "+uiMessage$ [uiLanguage$, "Corneru"]
 	Black
 	
-	@vowel2point: .sp$, .i_F1, .i_F2
+	@vowel2point: plotLanguage$, .sp$, .i_F1, .i_F2
 	.x2 = vowel2point.x
 	.y2 = vowel2point.y
 	Colour: color$ ["i"]
@@ -1331,10 +1467,10 @@ procedure plot_vowel_triangle .sp$
 	Draw line: .x1, .y1, .x2, .y2
 	
 	# u - a
-	@vowel2point: .sp$, .u_F1, .u_F2
+	@vowel2point: plotLanguage$, .sp$, .u_F1, .u_F2
 	.x1 = vowel2point.x
 	.y1 = vowel2point.y
-	@vowel2point: .sp$, .a_F1, .a_F2
+	@vowel2point: plotLanguage$, .sp$, .a_F1, .a_F2
 	.x2 = vowel2point.x
 	.y2 = vowel2point.y
 	Colour: color$ ["a"]
@@ -1343,28 +1479,28 @@ procedure plot_vowel_triangle .sp$
 	Draw line: .x1, .y1, .x2, .y2
 	
 	# i - a
-	@vowel2point: .sp$, .i_F1, .i_F2
+	@vowel2point: plotLanguage$, .sp$, .i_F1, .i_F2
 	.x1 = vowel2point.x
 	.y1 = vowel2point.y
-	@vowel2point: .sp$, .a_F1, .a_F2
+	@vowel2point: plotLanguage$, .sp$, .a_F1, .a_F2
 	.x2 = vowel2point.x
 	.y2 = vowel2point.y
 	Draw line: .x1, .y1, .x2, .y2
 endproc
 
 # Convert the frequencies to coordinates
-procedure vowel2point .sp$ .f1 .f2
+procedure vowel2point .phonLanguage$ .sp$ .f1 .f2
 	.spt1 = 12*log2(.f1)
 	.spt2 = 12*log2(.f2)
 	
-	.a_St1 = 12*log2(phonemes [phonLanguage$, .sp$, "a_corner", "F1"])
-	.a_St2 = 12*log2(phonemes [phonLanguage$, .sp$, "a_corner", "F2"])
+	.a_St1 = 12*log2(phonemes [.phonLanguage$, .sp$, "a_corner", "F1"])
+	.a_St2 = 12*log2(phonemes [.phonLanguage$, .sp$, "a_corner", "F2"])
 
-	.i_St1 = 12*log2(phonemes [phonLanguage$, .sp$, "i_corner", "F1"])
-	.i_St2 = 12*log2(phonemes [phonLanguage$, .sp$, "i_corner", "F2"])
+	.i_St1 = 12*log2(phonemes [.phonLanguage$, .sp$, "i_corner", "F1"])
+	.i_St2 = 12*log2(phonemes [.phonLanguage$, .sp$, "i_corner", "F2"])
 
-	.u_St1 = 12*log2(phonemes [phonLanguage$, .sp$, "u_corner", "F1"])
-	.u_St2 = 12*log2(phonemes [phonLanguage$, .sp$, "u_corner", "F2"])
+	.u_St1 = 12*log2(phonemes [.phonLanguage$, .sp$, "u_corner", "F1"])
+	.u_St2 = 12*log2(phonemes [.phonLanguage$, .sp$, "u_corner", "F2"])
 	
 	.dist_iu = sqrt((.i_St1 - .u_St1)^2 + (.i_St2 - .u_St2)^2)
 	.theta = arcsin((.u_St1 - .i_St1)/.dist_iu)
@@ -1393,19 +1529,19 @@ endproc
 
 # Get a list of best targets with distances, one for each vowel segment found
 # Use DTW to get the best match
-procedure get_closest_vowels .cutoff .sp$ .formants .textgrid .f1_o .f2_o
+procedure get_closest_vowels .cutoff .sp$ .formants .formantsBurg .textgrid .f1_o .f2_o
 	.f1 = 0
 	.f2 = 0
 	
 	# Convert to coordinates
-	@vowel2point: .sp$, .f1_o, .f2_o
+	@vowel2point: phonLanguage$, .sp$, .f1_o, .f2_o
 	.st_o1 = vowel2point.x
 	.st_o2 = vowel2point.y
 	
 	# Get center coordinates
 	.fc1 = phonemes [phonLanguage$, .sp$, "@_center", "F1"]
 	.fc2 = phonemes [phonLanguage$, .sp$, "@_center", "F2"]
-	@vowel2point: .sp$, .fc1, .fc2
+	@vowel2point: phonLanguage$, .sp$, .fc1, .fc2
 	.st_c1 = vowel2point.x
 	.st_c2 = vowel2point.y
 	.tcDist_sqr = (.st_o1 - .st_c1)^2 + (.st_o2 - .st_c2)^2
@@ -1431,7 +1567,7 @@ procedure get_closest_vowels .cutoff .sp$ .formants .textgrid .f1_o .f2_o
 			while .t <= .end
 				.ftmp1 = Get value at time: 1, .t, "Hertz", "Linear"
 				.ftmp2 = Get value at time: 2, .t, "Hertz", "Linear"
-				@vowel2point: .sp$, .ftmp1, .ftmp2
+				@vowel2point: phonLanguage$, .sp$, .ftmp1, .ftmp2
 				.stmp1 = vowel2point.x
 				.stmp2 = vowel2point.y
 				.tmpdistsqr = (.st_o1 - .stmp1)^2 + (.st_o2 - .stmp2)^2
@@ -1445,12 +1581,18 @@ procedure get_closest_vowels .cutoff .sp$ .formants .textgrid .f1_o .f2_o
 				.t += 0.005
 			endwhile
 			
+			# Convert to "real" (Burg) formant values
+			if .formantsBurg > 0
+				selectObject: .formantsBurg
+				.numF1 = Get value at time: 1, .num_t, "Hertz", "Linear"
+				.numF2 = Get value at time: 2, .num_t, "Hertz", "Linear"
+			endif
 			
 			# Calculate the distance along the line between the 
 			# center (c) and the target (t) from the best match 'v'
 			# to the center.
 			# 
-			@vowel2point: .sp$, .numF1, .numF2
+			@vowel2point: plotLanguage$, .sp$, .numF1, .numF2
 			.st1 = vowel2point.x
 			.st2 = vowel2point.y
 			
@@ -1483,6 +1625,9 @@ procedure get_closest_vowels .cutoff .sp$ .formants .textgrid .f1_o .f2_o
 		selectObject: .tableDistances
 		.meanDistance = Get column mean (index): 1
 		.stdevDistance = Get column stdev (index): 1
+		if .stdevDistance = undefined
+			.stdevDistance = -1
+		endif
 		Remove
 	endif
 endproc
@@ -1493,7 +1638,7 @@ procedure get_most_distant_vowels .sp$ .formants .textgrid .f1_o .f2_o
 	.f2 = 0
 	
 	# Convert to coordinates
-	@vowel2point: .sp$, .f1_o, .f2_o
+	@vowel2point: phonLanguage$, .sp$, .f1_o, .f2_o
 	.st_o1 = vowel2point.x
 	.st_o2 = vowel2point.y
 	
@@ -1518,7 +1663,7 @@ procedure get_most_distant_vowels .sp$ .formants .textgrid .f1_o .f2_o
 			while .t <= .end
 				.ftmp1 = Get value at time: 1, .t, "Hertz", "Linear"
 				.ftmp2 = Get value at time: 2, .t, "Hertz", "Linear"
-				@vowel2point: .sp$, .ftmp1, .ftmp2
+				@vowel2point: phonLanguage$, .sp$, .ftmp1, .ftmp2
 				.stmp1 = vowel2point.x
 				.stmp2 = vowel2point.y
 				.tmpdistsqr = (.st_o1 - .stmp1)^2 + (.st_o2 - .stmp2)^2
@@ -1540,214 +1685,33 @@ procedure get_most_distant_vowels .sp$ .formants .textgrid .f1_o .f2_o
 	endfor
 endproc
 
-procedure select_vowel_target .sound .formants .textgrid
+procedure select_vowel_target .sound .formants .formantsBurg .textgrid
 	.f1_Lowest = 250
 	.f1_Highest = 1050
 	selectObject: .textgrid
 	.duration = Get total duration
 	.firstTier$ = Get tier name: 1
-
-	# If this is a standard syllable nuclei output
-	# Handles case where TextGrid has already been created
 	if .firstTier$ <> "Vowel"
-		Insert point tier: 1, "Valleys"
 		Insert point tier: 1, "VowelTarget"
 		Insert interval tier: 1, "Vowel"
-		
-		# Set tier numbers
-		.vowelTier = 1
-		.targetTier = 2
-		.valleyTier = 3
-		.syllablesTier = 4
-		.silencesTier = 5
-		.vuvTier = 6
-		.cogTier = 7	
-		
-		# VUV tier
-		# Determine voiced parts
-		selectObject: .sound
-		.intensityValue = Get intensity (dB)
-		.voicePP = noprogress To PointProcess (periodic, cc): 75, 600
-		.meanPeriod = Get mean period: 0, 0, 0.0001, 0.02, 1.3
-		.f1_Lowest = 1.25 * (1/.meanPeriod)
-		.vuvTextGrid = noprogress To TextGrid (vuv): 0.02, 0.01
-		
-		# Copy VUV to textgrid (cannot be simply merged and deleted)
-		selectObject: .textgrid
-		.numTiers = Get number of tiers
-		.vuvTier = .numTiers + 1
-		Insert interval tier: .vuvTier, "vuv"
-		selectObject: .vuvTextGrid
-		.numIntervals = Get number of intervals: 1
-		for .i to .numIntervals
-			selectObject: .vuvTextGrid
-			.startTime = Get start time of interval: 1, .i
-			.endTime = Get end time of interval: 1, .i
-			.label$ = Get label of interval: 1, .i
-			
-			selectObject: .textgrid
-			if .endTime > 0 and .endTime < .duration
-				Insert boundary: .vuvTier, .endTime
-			endif
-			Set interval text: .vuvTier, .i, .label$
-		endfor
-		selectObject: .vuvTextGrid
-		Remove
-		
-		# CoG
-		call calculateCOG 0.01 .sound
-		.cogSignal = calculateCOG.cog_tier
-		selectObject: .cogSignal
-		.cogTextGrid = To TextGrid (silences): -55, 0.1, 0.05, "N", "V", 0.001
-		selectObject: .cogSignal
-		Remove
-		
-		# Copy CoG to textgrid (cannot be simply merged and deleted)
-		selectObject: .textgrid
-		.numTiers = Get number of tiers
-		.cogTier = .numTiers + 1
-		Insert interval tier: .cogTier, "CoG"
-		selectObject: .cogTextGrid
-		.numIntervals = Get number of intervals: 1
-		for .i to .numIntervals
-			selectObject: .cogTextGrid
-			.startTime = Get start time of interval: 1, .i
-			.endTime = Get end time of interval: 1, .i
-			.label$ = Get label of interval: 1, .i
-			
-			selectObject: .textgrid
-			if .endTime > 0 and .endTime < .duration
-				Insert boundary: .cogTier, .endTime
-			endif
-			Set interval text: .cogTier, .i, .label$
-		endfor
-		selectObject: .cogTextGrid
-		Remove
-		
-		# Fill the Peaks and Valleys
-		selectObject: .sound
-		.intensity = noprogress To Intensity: 70, 0, "yes"
-		.dt = Get time step
-		.maxFrame = Get number of frames
-
-		# Determine Peaks and valleys
-		# Is redundant, will probably be simplified later
-		selectObject: .textgrid
-		.numSyllables = Get number of points: .syllablesTier
-		
-		# If there is no syllable, but there is sound, find one
-		if .numSyllables <= 0 and .intensityValue >= 45
-			selectObject: .intensity
-			.t_max = Get time of maximum: 0, 0, "Parabolic"
-			selectObject: .textgrid
-			Insert point: .syllablesTier, .t_max, "1"	
-		endif
-		
-		# Create the other tiers
-		.t_valley_next = -1
-		for .i to .numSyllables
-			selectObject: .textgrid
-			.t_prev = 0
-			if .i > 1
-				.t_prev = Get time of point: .syllablesTier, .i-1
-			endif
-			.t = Get time of point: .syllablesTier, .i
-			# t_peak == syllable nucleus
-			.t_peak = .t
-			.t_next = .duration
-			if .i < .numSyllables
-				.t_next = Get time of point: .syllablesTier, .i+1
-			endif
-			
-			# Maximal interval
-			if .t - .t_prev > 0.4
-				.t_prev = .t - 0.4
-			endif
-			if .t_next - .t > 0.4
-				.t_next = .t + 0.4
-			endif
-			
-			selectObject: .intensity
-			if .t - .t_prev > 0.05
-				.t_valley_prev = Get time of minimum: .t_prev+0.025, .t-0.025, "Parabolic"
-			else
-				.t_valley_prev = (.t + .t_prev)/2
-			endif
-			if .t_next - .t > 0.05
-				.t_valley_next = Get time of minimum: .t+0.025, .t_next-0.025, "Parabolic"
-			else
-				.t_valley_next = (.t_next + .t)/2
-			endif
-			
-			# Set .t_prev and .t_next to the voicing boundaries if they are "inside"
-			selectObject: .textgrid
-			.numVoicingInt = Get number of intervals: .vuvTier
-			.voicingInt = Get interval at time: .vuvTier, .t_peak
-			.vuvLabel$ = Get label of interval: .vuvTier, .voicingInt
-			if .vuvLabel$ = "V"
-				.startVoicing = Get start time of interval: .vuvTier, .voicingInt
-				.endVoicing = Get end time of interval: .vuvTier, .voicingInt
-				if .t_valley_prev < .startVoicing
-					.t_valley_prev = .startVoicing
-				endif
-				if .t_valley_next > .endVoicing
-					.t_valley_next = .endVoicing
-				endif
-			endif
-			
-			# Set .t_prev and .t_next to the CoG boundaries if they are "inside"
-			selectObject: .textgrid
-			.numCoGInt = Get number of intervals: .cogTier
-			.cogInt = Get interval at time: .cogTier, .t_peak
-			.cogLabel$ = Get label of interval: .cogTier, .cogInt
-			if .cogLabel$ = "V"
-				.startCoG = Get start time of interval: .cogTier, .cogInt
-				.endCoG = Get end time of interval: .cogTier, .cogInt
-				if .t_valley_prev < .startCoG
-					.t_valley_prev = .startCoG
-				endif
-				if .t_valley_next > .endCoG
-					.t_valley_next = .endCoG
-				endif
-			endif
-			
-			# Add the previous valley and the current peak
-			selectObject: .textgrid
-			.nearestPoint = Get nearest index from time: .valleyTier, .t_valley_prev
-			.nearest_t = 0
-			if .nearestPoint > 0
-				.nearest_t = Get time of point: .valleyTier, .nearestPoint
-			endif
-			# Avoid collisions
-			if abs(.nearest_t - .t_valley_prev) > 0.001
-				Insert point: .valleyTier, .t_valley_prev, "V"
-			endif
-			Insert point: .valleyTier, .t_valley_next, "V"
-		endfor
-		
-		selectObject: .voicePP, .intensity
-		Remove
 	endif
-	
-	# Set tier numbers (again)
 	.vowelTier = 1
 	.targetTier = 2
-	.valleyTier = 3
-	.syllablesTier = 4
+	.peakTier = 3
+	.valleyTier = 4
 	.silencesTier = 5
 	.vuvTier = 6
-	.cogTier = 7
 
 	selectObject: .sound
 	.samplingFrequency = Get sampling frequency
 	.intensity = Get intensity (dB)
-	selectObject: .formants
+	selectObject: .formantsBurg
 	.totalNumFrames = Get number of frames
 		
 	# Nothing found, but there is sound. Try to find at least 1 vowel
 	
 	selectObject: .textgrid
-	.numPeaks = Get number of points: .syllablesTier	
+	.numPeaks = Get number of points: .peakTier	
 	if .numPeaks <= 0 and .intensity >= 45
 		selectObject: .sound
 		.t_max = Get time of maximum: 0, 0, "Sinc70"
@@ -1759,7 +1723,7 @@ procedure select_vowel_target .sound .formants .textgrid
 		.end = Get end time of interval: 1, .i
 		if .label$ = "V"
 			selectObject: .syllableKernels
-			Insert point: .syllablesTier, .t_max, "1"
+			Insert point: .peakTier, .t_max, "P"
 			Insert point: .valleyTier, .start, "V"
 			Insert point: .valley, .end, "V"
 		endif
@@ -1768,11 +1732,11 @@ procedure select_vowel_target .sound .formants .textgrid
 	selectObject: .sound
 	.voicePP = noprogress To PointProcess (periodic, cc): 75, 600
 	selectObject: .textgrid
-	.numPeaks = Get number of points: .syllablesTier
+	.numPeaks = Get number of points: .peakTier
 	.numValleys = Get number of points: .valleyTier
 	for .p to .numPeaks
 		selectObject: .textgrid
-		.tp = Get time of point: .syllablesTier, .p
+		.tp = Get time of point: .peakTier, .p
 		# Find boundaries
 		# From valleys
 		.tl = 0
@@ -1805,6 +1769,26 @@ procedure select_vowel_target .sound .formants .textgrid
 			.th = .tsh
 		endif
 		
+		# From vuv
+		.vuvl = Get interval at time: .vuvTier, .tl
+		.label$ = Get label of interval: .vuvTier, .vuvl
+		.tvuvl = .tl
+		if .label$ = "U"
+			.tvuvl = Get end time of interval: .vuvTier, .vuvl
+		endif
+		if .tvuvl > .tl and .tvuvl < .tp
+			.tl = .tvuvl
+		endif
+		.vuvh = Get interval at time: .vuvTier, .th
+		.label$ = Get label of interval: .vuvTier, .vuvh
+		.tvuvh = .th
+		if .label$ = "U"
+			.tvuvh = Get start time of interval: .vuvTier, .vuvh
+		endif
+		if .tvuvh < .th and .tvuvh > .tp
+			.th = .tvuvh
+		endif
+		
 		# From formants: 300 <= F1 <= 1000
 		# F1 >= 300
 		selectObject: .formants
@@ -1812,6 +1796,7 @@ procedure select_vowel_target .sound .formants .textgrid
 
 		selectObject: .formants
 		.f = Get value at time: 1, .tl, "Hertz", "Linear"
+		selectObject: .formantsBurg
 		.b = Get bandwidth at time: 1, .tl, "Hertz", "Linear"
 		.iframe = Get frame number from time: .tl
 		if .iframe > .totalNumFrames
@@ -1824,6 +1809,7 @@ procedure select_vowel_target .sound .formants .textgrid
 			.tl += .dt
 			selectObject: .formants
 			.f = Get value at time: 1, .tl, "Hertz", "Linear"
+			selectObject: .formantsBurg
 			.b = Get bandwidth at time: 1, .tl, "Hertz", "Linear"
 			.iframe = Get frame number from time: .tl	
 			if .iframe > .totalNumFrames
@@ -1836,6 +1822,7 @@ procedure select_vowel_target .sound .formants .textgrid
 
 		selectObject: .formants
 		.f = Get value at time: 1, .th, "Hertz", "Linear"
+		selectObject: .formantsBurg
 		.b = Get bandwidth at time: 1, .th, "Hertz", "Linear"
 		.iframe = Get frame number from time: .th
 		if .iframe > .totalNumFrames
@@ -1848,6 +1835,7 @@ procedure select_vowel_target .sound .formants .textgrid
 			.th -= .dt
 			selectObject: .formants
 			.f = Get value at time: 1, .th, "Hertz", "Linear"
+			selectObject: .formantsBurg
 			.b = Get bandwidth at time: 1, .th, "Hertz", "Linear"
 			.iframe = Get frame number from time: .th
 			if .iframe > .totalNumFrames
@@ -1862,17 +1850,6 @@ procedure select_vowel_target .sound .formants .textgrid
 		if .th - .tl > 0.01
 			selectObject: .textgrid
 			.numPoints = Get number of points: .targetTier
-			.tmp = 0
-			if .numPoints > 0
-				.tmp = Get time of point: .targetTier, .numPoints
-			endif
-			if .tl <> .tmp
-				#Insert point: .targetTier, .tl, "L"
-			else
-				.ptxt$ = Get label of point: .targetTier, .numPoints
-				#Set point text: .targetTier, .numPoints, .ptxt$+"L"
-			endif
-			#Insert point: .targetTier, .th, "H"
 			
 			selectObject: .formants
 			if .tp > .tl and .tp < .th
@@ -1910,6 +1887,7 @@ procedure select_vowel_target .sound .formants .textgrid
 			# Lower end
 			selectObject: .formants
 			.f = Get value at time: 1, .ttl, "Hertz", "Linear"
+			selectObject: .formantsBurg
 			.b = Get bandwidth at time: 1, .ttl, "Hertz", "Linear"
 			.iframe = Get frame number from time: .th
 			if .iframe > .totalNumFrames
@@ -1928,6 +1906,7 @@ procedure select_vowel_target .sound .formants .textgrid
 				.ttl -= .dt
 				selectObject: .formants
 				.f = Get value at time: 1, .ttl, "Hertz", "Linear"
+				selectObject: .formantsBurg
 				.b = Get bandwidth at time: 1, .ttl, "Hertz", "Linear"
 				.iframe = Get frame number from time: .ttl
 				if .iframe > .totalNumFrames
@@ -1950,6 +1929,7 @@ procedure select_vowel_target .sound .formants .textgrid
 			.tth = .tp
 			selectObject: .formants
 			.f = Get value at time: 1, .tth, "Hertz", "Linear"
+			selectObject: .formantsBurg
 			.b = Get bandwidth at time: 1, .tth, "Hertz", "Linear"
 			.iframe = Get frame number from time: .th
 			if .iframe > .totalNumFrames
@@ -1968,6 +1948,7 @@ procedure select_vowel_target .sound .formants .textgrid
 				.tth += .dt
 				selectObject: .formants
 				.f = Get value at time: 1, .tth, "Hertz", "Linear"
+				selectObject: .formantsBurg
 				.b = Get bandwidth at time: 1, .tth, "Hertz", "Linear"
 				.iframe = Get frame number from time: .tth
 				if .iframe > .totalNumFrames
@@ -2226,9 +2207,27 @@ procedure segment_syllables .silence_threshold .minimum_dip_between_peaks .minim
 endproc
 
 # 
-# Determine COG as an intensity tier
-# Returns: calculateCOG.cog_tier
+# Determine COG as an intensity
 #
+# .cog_Matrix = Down to Matrix
+# call calculateCOG .dt .soundid
+# .cog_Tier = calculateCOG.cog_tier
+# selectObject: .cog_Tier
+# .numPoints = Get number of points
+# for .i to .numPoints
+# 	selectObject: .cog_Tier
+# 	.cog = Get value at index: .i
+# 	.t = Get time from index: .i
+# 	selectObject: .intensity
+# 	.c = Get frame number from time: .t
+# 	if .c >= 0.5 and .c <= .maxFrame
+# 		selectObject: .cog_Matrix
+# 		Set value: 1, round(.c), .cog
+# 	endif
+# endfor
+# selectObject: .cog_Matrix
+# .cogIntensity = noprogress To Intensity
+
 procedure calculateCOG .dt .sound
 	selectObject: .sound
 	.duration = Get total duration
@@ -2238,7 +2237,7 @@ procedure calculateCOG .dt .sound
 	
 	# Create Spectrogram
 	selectObject: .sound
-	.spectrogram = noprogress To Spectrogram: .dt, 8000, 0.002, 20, "Gaussian"
+	.spectrogram = noprogress To Spectrogram: 0.005, 8000, 0.002, 20, "Gaussian"
 	.cog_tier = Create IntensityTier: "COG", 0.0, .duration
 	
 	.t = .dt / 2
@@ -2246,7 +2245,6 @@ procedure calculateCOG .dt .sound
 		selectObject: .spectrogram
 		.spectrum = noprogress To Spectrum (slice): .t
 		.cog_t = Get centre of gravity: 2
-		.cog_t = 12*log2(.cog_t)
 		selectObject: .cog_tier
 		Add point: .t, .cog_t
 		
@@ -2286,259 +2284,3 @@ procedure initialize_table_collumns .table, .columns$, .initial_value$
 		endif
 	endwhile
 endproc
-
-
-###########################################################################
-#                                                                         #
-#  Praat Script Syllable Nuclei                                           #
-#  Copyright (C) 2008  Nivja de Jong and Ton Wempe                        #
-#                                                                         #
-#    This program is free software: you can redistribute it and/or modify #
-#    it under the terms of the GNU General Public License as published by #
-#    the Free Software Foundation, either version 3 of the License, or    #
-#    (at your option) any later version.                                  #
-#                                                                         #
-#    This program is distributed in the hope that it will be useful,      #
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of       #
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        #
-#    GNU General Public License for more details.                         #
-#                                                                         #
-#    You should have received a copy of the GNU General Public License    #
-#    along with this program.  If not, see http://www.gnu.org/licenses/   #
-#                                                                         #
-###########################################################################
-#
-# modified 2010.09.17 by Hugo Quené, Ingrid Persoon, & Nivja de Jong
-# Overview of changes:
-# + change threshold-calculator: rather than using median, use the almost maximum
-#     minus 25dB. (25 dB is in line with the standard setting to detect silence
-#     in the "To TextGrid (silences)" function.
-#     Almost maximum (.99 quantile) is used rather than maximum to avoid using
-#     irrelevant non-speech sound-bursts.
-# + add silence-information to calculate articulation rate and ASD (average syllable
-#     duration.
-#     NB: speech rate = number of syllables / total time
-#         articulation rate = number of syllables / phonation time
-# + remove max number of syllable nuclei
-# + refer to objects by unique identifier, not by name
-# + keep track of all created intermediate objects, select these explicitly,
-#     then Remove
-# + provide summary output in Info window
-# + do not save TextGrid-file but leave it in Object-window for inspection
-#     (if requested in startup-form)
-# + allow Sound to have starting time different from zero
-#      for Sound objects created with Extract (preserve times)
-# + programming of checking loop for mindip adjusted
-#      in the orig version, precedingtime was not modified if the peak was rejected !!
-#      var precedingtime and precedingint renamed to .currenttime and .currentint
-#
-# + bug fixed concerning summing total pause, feb 28th 2011
-#
-# modified 2014.10.24 by Rob van Son
-# Overview of changes:
-# + Converted to a function form. Can be called as -
-# call syllable_nuclei -25 2 0.3 1 .soundFile
-#   where .soundFile is the ID of an open soundfile
-# + Added noprogress and cleaned up object id assignment
-# 
-###########################################################################
-
-# counts syllables of sound utterances
-# NB unstressed syllables are sometimes overlooked
-# NB filter sounds that are quite noisy beforehand
-# NB use Silence threshold (dB) = -25 (or -20?)
-# NB use Minimum .dip between peaks (dB) = between 2-4 (you can first try;
-#                                                      For clean and filtered: 4)
-# syllable_nuclei.soundname$	- Name of sound object
-# syllable_nuclei.voicedcount	- Count of vocied segments
-# syllable_nuclei.npause		- Count of pauses
-# syllable_nuclei.originaldur	- Original duration
-# syllable_nuclei.speakingtot	- Duration of speech
-# syllable_nuclei.speakingrate	- Syllable per second, gross
-# syllable_nuclei.articulationrate - Syllables per speaking time
-# syllable_nuclei.asd			- Average syllable duration
-# 
-# Arguments
-# real .silence_threshold -25 (dB)
-# real .minimum_dip_between_peaks 2 (dB)
-# real .minimum_pause_duration 0.3 (s)
-# boolean .keep_Soundfiles_and_Textgrids 1
-# fileID .soundFile
-#
-# Example 
-# call syllable_nuclei -25 2 0.3 1 .originalRecording
-
-procedure syllable_nuclei .silence_threshold .minimum_dip_between_peaks .minimum_pause_duration .keep_Soundfiles_and_Textgrids .soundid
-	minimum_Pitch = 70
-	maximum_Pitch = 600
-	
-	# Get object name
-	select .soundid
-	.soundname$ = selected$("Sound")
-
-	# shorten variables
-	.silencedb = .silence_threshold
-	.mindip = .minimum_dip_between_peaks
-	.showtext = .keep_Soundfiles_and_Textgrids
-	.minpause = .minimum_pause_duration
-
-	.originaldur = Get total duration
-	# allow non-zero starting time
-	.bt = Get starting time
-
-	# Use intensity to get .threshold
-	.intid = noprogress To Intensity... 50 0 yes
-	.start = Get time from frame number... 1
-	.nframes = Get number of frames
-	.end = Get time from frame number... '.nframes'
-
-	# estimate noise floor
-	select .intid
-	.minint = Get minimum... 0 0 Parabolic
-	# estimate noise max
-	.maxint = Get maximum... 0 0 Parabolic
-	#get .99 quantile to get maximum (without influence of non-speech sound bursts)
-	.max99int = Get quantile... 0 0 0.99
-
-	# estimate Intensity .threshold
-	.threshold = .max99int + .silencedb
-	.threshold2 = .maxint - .max99int
-	.threshold3 = .silencedb - .threshold2
-	if .threshold < .minint
-	    .threshold = .minint
-	endif
-
-	# get pauses (silences) and speakingtime
-	select .soundid
-	.textgridid = noprogress To TextGrid (silences)... 80 0 '.threshold3' '.minpause' 0.1 silent sounding
-	.silencetierid = Extract tier... 1
-	.silencetableid = Down to TableOfReal... sounding
-	nsounding = Get number of rows
-	.npauses = 'nsounding'
-	.speakingtot = 0
-	for ipause from 1 to .npauses
-	   beginsound = Get value... 'ipause' 1
-	   endsound = Get value... 'ipause' 2
-	   speakingdur = 'endsound' - 'beginsound'
-	   .speakingtot = 'speakingdur' + '.speakingtot'
-	endfor
-
-	select '.intid'
-	Down to Matrix
-	.matid = selected("Matrix")
-	# Convert intensity to sound
-	.sndintid = noprogress To Sound (slice)... 1
-
-	# use total duration, not .end time, to find out duration of .intdur
-	# in order to allow nonzero starting times.
-	.intdur = Get total duration
-	intmax = Get maximum... 0 0 Parabolic
-
-	# estimate peak positions (all peaks)
-	.ppid = noprogress To PointProcess (extrema)... Left yes no Sinc70
-
-	numpeaks = Get number of points
-
-	# fill array with time points
-	for .i from 1 to numpeaks
-	    t'.i' = Get time from index... '.i'
-	endfor
-
-
-	# fill array with intensity values
-	select '.sndintid'
-	.peakcount = 0
-	for .i from 1 to numpeaks
-	    value = Get value at time... t'.i' Cubic
-	    if value > .threshold
-	          .peakcount += 1
-	          int'.peakcount' = value
-	          .timepeaks'.peakcount' = t'.i'
-	    endif
-	endfor
-
-
-	# fill array with valid peaks: only intensity values if preceding
-	# .dip in intensity is greater than .mindip
-	select '.intid'
-	.validpeakcount = 0
-	.currenttime = .timepeaks1
-	.currentint = int1
-
-	for .p to .peakcount-1
-	   .following = .p + 1
-	   .followingtime = .timepeaks'.following'
-	   .dip = Get minimum... '.currenttime' '.followingtime' None
-	   .diffint = abs(.currentint - .dip)
-
-	   if .diffint > .mindip
-	      .validpeakcount += 1
-	      validtime'.validpeakcount' = .timepeaks'.p'
-	   endif
-	      .currenttime = .timepeaks'.following'
-	      .currentint = Get value at time... .timepeaks'.following' Cubic
-	endfor
-
-
-	# Look for only voiced parts
-	select '.soundid'
-	.pitchid = noprogress To Pitch (ac)... 0.02 'minimum_Pitch' 4 no 0.03 0.25 0.01 0.35 0.25 'maximum_Pitch'
-
-	.voicedcount = 0
-	for .i from 1 to .validpeakcount
-	   .querytime = validtime'.i'
-
-	   select '.textgridid'
-	   .whichinterval = Get interval at time... 1 '.querytime'
-	   .whichlabel$ = Get label of interval... 1 '.whichinterval'
-
-	   select '.pitchid'
-	   value = Get value at time... '.querytime' Hertz Linear
-
-	   if value <> undefined
-	      if .whichlabel$ = "sounding"
-	          .voicedcount = .voicedcount + 1
-	          voicedpeak'.voicedcount' = validtime'.i'
-	      endif
-	   endif
-	endfor
-
-	# calculate time correction due to shift in time for Sound object versus
-	# intensity object
-	.timecorrection = .originaldur/.intdur
-
-	# Insert voiced peaks in TextGrid
-	if .showtext > 0
-	   select '.textgridid'
-	   Insert point tier... 1 syllables
-	  
-	   for .i from 1 to .voicedcount
-	       position = voicedpeak'.i' * .timecorrection
-	       Insert point... 1 position '.i'
-	   endfor
-	endif
-
-	# clean up before next sound file is opened
-	select .intid
-	plus .matid
-	plus .sndintid
-	plus .ppid
-	plus .pitchid
-	plus .silencetierid
-	plus .silencetableid
-	#plus .textgridid
-	Remove
-	if .showtext < 1
-	   select '.soundid'
-	   plus '.textgridid'
-	   Remove
-	endif
-
-	# summarize results in Info window
-	.speakingrate = '.voicedcount'/'.originaldur'
-	.articulationrate = '.voicedcount'/'.speakingtot'
-	.npause = '.npauses'-1
-	.asd = '.speakingtot'/'.voicedcount'
-endproc
-
-

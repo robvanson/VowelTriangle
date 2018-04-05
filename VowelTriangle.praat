@@ -93,6 +93,7 @@ elsif startsWith(.locale$, "it")
 endif
 
 .sp_default = 1
+.formant_default = 1
 output_table$ = ""
 
 default_Dot_Radius = 0.01
@@ -145,12 +146,15 @@ endif
 # That one is much slower than the Burg algorithm
 robust = 0
 
-# Plot "real" formants instead of the SL formants
-# Alternatives: "Burg" or "NL" (= phonLanguage$)
-plotLanguage$ = "NL"
+# Select algorithm for calculating formants
+# Alternatives: "SL", "Burg" or "Robust"
 
-# Vowel targets for Dutch
-phonLanguage$ = "NL"
+# Plotting
+plotFormantAlgorithm$ = "SL"
+
+# Vowel targets
+targetFormantAlgorithm$ = "SL"
+
 numVowels = 12
 vowelList$ [1] = "i"
 vowelList$ [2] = "I"
@@ -575,7 +579,13 @@ phonemes ["Burg", "M", "@_center", "F2"] = (phonemes ["Burg", "M", "i_corner", "
 
 # Formant values according to 
 # IFA corpus averages from FPA isolated vowels
-# Using Robust Formant algorithm (Praat)
+
+###############################################
+#
+# Burg's method formant algorithm (Burg)
+#
+###############################################
+
 phonemes ["Burg", "M", "A", "F1"] = 680
 phonemes ["Burg", "M", "A", "F2"] = 1038
 phonemes ["Burg", "M", "E", "F1"] = 510
@@ -662,101 +672,199 @@ phonemes ["Burg", "F", "@", "F1"] = 440
 phonemes ["Burg", "F", "@", "F2"] = 1415
 
 
-# Male 
-phonemes [phonLanguage$, "M", "i_corner", "F1"] = 250
-phonemes [phonLanguage$, "M", "i_corner", "F2"] = 2100
-phonemes [phonLanguage$, "M", "a_corner", "F1"] = 850
-phonemes [phonLanguage$, "M", "a_corner", "F2"] = 1290
-phonemes [phonLanguage$, "M", "u_corner", "F1"] = 285
-phonemes [phonLanguage$, "M", "u_corner", "F2"] = 650
+###############################################
+#
+# Robust formant algorithm (Robust)
+#
+###############################################
+
+phonemes ["Robust", "M", "A", "F1"] = 680
+phonemes ["Robust", "M", "A", "F2"] = 1038
+phonemes ["Robust", "M", "E", "F1"] = 510
+phonemes ["Robust", "M", "E", "F2"] = 1900
+phonemes ["Robust", "M", "I", "F1"] = 354
+phonemes ["Robust", "M", "I", "F2"] = 2167
+phonemes ["Robust", "M", "O", "F1"] = 446
+phonemes ["Robust", "M", "O", "F2"] = 680
+phonemes ["Robust", "M", "Y", "F1"] = 389
+phonemes ["Robust", "M", "Y", "F2"] = 1483
+phonemes ["Robust", "M", "Y:", "F1"] = 370
+phonemes ["Robust", "M", "Y:", "F2"] = 1508
+phonemes ["Robust", "M", "a", "F1"] = 797
+phonemes ["Robust", "M", "a", "F2"] = 1328
+phonemes ["Robust", "M", "au", "F1"] = 542
+phonemes ["Robust", "M", "au", "F2"] = 945
+phonemes ["Robust", "M", "e", "F1"] = 351
+phonemes ["Robust", "M", "e", "F2"] = 2180
+phonemes ["Robust", "M", "ei", "F1"] = 471
+phonemes ["Robust", "M", "ei", "F2"] = 1994
+phonemes ["Robust", "M", "i", "F1"] = 242
+phonemes ["Robust", "M", "i", "F2"] = 2330
+phonemes ["Robust", "M", "o", "F1"] = 393
+phonemes ["Robust", "M", "o", "F2"] = 692
+phonemes ["Robust", "M", "u", "F1"] = 269
+phonemes ["Robust", "M", "u", "F2"] = 626
+phonemes ["Robust", "M", "ui", "F1"] = 475
+phonemes ["Robust", "M", "ui", "F2"] = 1523
+phonemes ["Robust", "M", "y", "F1"] = 254
+phonemes ["Robust", "M", "y", "F2"] = 1609
+
+# Guessed
+phonemes ["Robust", "M", "@", "F1"] = 373
+phonemes ["Robust", "M", "@", "F2"] = 1247
+
+# Female
+phonemes ["Robust", "F", "i_corner", "F1"] = 271
+phonemes ["Robust", "F", "i_corner", "F2"] = 2667
+phonemes ["Robust", "F", "a_corner", "F1"] = 942
+phonemes ["Robust", "F", "a_corner", "F2"] = 1550
+phonemes ["Robust", "F", "u_corner", "F1"] = 334
+phonemes ["Robust", "F", "u_corner", "F2"] = 686
+
 # @_center is not fixed but derived from current corners
-phonemes [phonLanguage$, "M", "@_center", "F1"] =(phonemes [phonLanguage$, "M", "i_corner", "F1"]*phonemes [phonLanguage$, "M", "u_corner", "F1"]*phonemes [phonLanguage$, "M", "a_corner", "F1"])^(1/3)
-phonemes [phonLanguage$, "M", "@_center", "F2"] = (phonemes [phonLanguage$, "M", "i_corner", "F2"]*phonemes [phonLanguage$, "M", "u_corner", "F2"]*phonemes [phonLanguage$, "M", "a_corner", "F2"])^(1/3)
+phonemes ["Robust", "F", "@_center", "F1"] =(phonemes ["Robust", "F", "i_corner", "F1"]*phonemes ["Robust", "F", "u_corner", "F1"]*phonemes ["Robust", "F", "a_corner", "F1"])^(1/3)
+phonemes ["Robust", "F", "@_center", "F2"] = (phonemes ["Robust", "F", "i_corner", "F2"]*phonemes ["Robust", "F", "u_corner", "F2"]*phonemes ["Robust", "F", "a_corner", "F2"])^(1/3)
+
+# Formant values according to 
+# IFA corpus average from FPA isolated vowels
+# Using Robust Formant algorithm (Praat)
+phonemes ["Robust", "F", "A", "F1"] = 826
+phonemes ["Robust", "F", "A", "F2"] = 1208
+phonemes ["Robust", "F", "E", "F1"] = 648
+phonemes ["Robust", "F", "E", "F2"] = 2136
+phonemes ["Robust", "F", "I", "F1"] = 411
+phonemes ["Robust", "F", "I", "F2"] = 2432
+phonemes ["Robust", "F", "O", "F1"] = 527
+phonemes ["Robust", "F", "O", "F2"] = 836
+phonemes ["Robust", "F", "Y", "F1"] = 447
+phonemes ["Robust", "F", "Y", "F2"] = 1698
+phonemes ["Robust", "F", "Y:", "F1"] = 404
+phonemes ["Robust", "F", "Y:", "F2"] = 1750
+phonemes ["Robust", "F", "a", "F1"] = 942
+phonemes ["Robust", "F", "a", "F2"] = 1550
+phonemes ["Robust", "F", "au", "F1"] = 600
+phonemes ["Robust", "F", "au", "F2"] = 1048
+phonemes ["Robust", "F", "e", "F1"] = 409
+phonemes ["Robust", "F", "e", "F2"] = 2444
+phonemes ["Robust", "F", "ei", "F1"] = 618
+phonemes ["Robust", "F", "ei", "F2"] = 2196
+phonemes ["Robust", "F", "i", "F1"] = 271
+phonemes ["Robust", "F", "i", "F2"] = 2667
+phonemes ["Robust", "F", "o", "F1"] = 470
+phonemes ["Robust", "F", "o", "F2"] = 879
+phonemes ["Robust", "F", "u", "F1"] = 334
+phonemes ["Robust", "F", "u", "F2"] = 686
+phonemes ["Robust", "F", "ui", "F1"] = 594
+phonemes ["Robust", "F", "ui", "F2"] = 1669
+phonemes ["Robust", "F", "y", "F1"] = 285
+phonemes ["Robust", "F", "y", "F2"] = 1765
+
+# Guessed
+phonemes ["Robust", "F", "@", "F1"] = 440
+phonemes ["Robust", "F", "@", "F2"] = 1415
+
+
+###############################################
+#
+# Split-Levinson (SL)
+#
+###############################################
+
+# Male 
+phonemes ["SL", "M", "i_corner", "F1"] = 250
+phonemes ["SL", "M", "i_corner", "F2"] = 2100
+phonemes ["SL", "M", "a_corner", "F1"] = 850
+phonemes ["SL", "M", "a_corner", "F2"] = 1290
+phonemes ["SL", "M", "u_corner", "F1"] = 285
+phonemes ["SL", "M", "u_corner", "F2"] = 650
+# @_center is not fixed but derived from current corners
+phonemes ["SL", "M", "@_center", "F1"] =(phonemes ["SL", "M", "i_corner", "F1"]*phonemes ["SL", "M", "u_corner", "F1"]*phonemes ["SL", "M", "a_corner", "F1"])^(1/3)
+phonemes ["SL", "M", "@_center", "F2"] = (phonemes ["SL", "M", "i_corner", "F2"]*phonemes ["SL", "M", "u_corner", "F2"]*phonemes ["SL", "M", "a_corner", "F2"])^(1/3)
 
 # Formant values according to 
 # IFA corpus averages from FPA isolated vowels
 # Using Split-Levinson algorithm
-phonemes [phonLanguage$, "M", "A", "F1"] = 695.6000
-phonemes [phonLanguage$, "M", "A", "F2"] = 1065.500
-phonemes [phonLanguage$, "M", "E", "F1"] = 552.5000
-phonemes [phonLanguage$, "M", "E", "F2"] = 1659.200
-phonemes [phonLanguage$, "M", "I", "F1"] = 378.0909
-phonemes [phonLanguage$, "M", "I", "F2"] = 1868.545
-phonemes [phonLanguage$, "M", "O", "F1"] = 482.9000
-phonemes [phonLanguage$, "M", "O", "F2"] = 725.800
-phonemes [phonLanguage$, "M", "Y", "F1"] = 417.7000
-phonemes [phonLanguage$, "M", "Y", "F2"] = 1455.100
-phonemes [phonLanguage$, "M", "Y:", "F1"] = 386.3000
-phonemes [phonLanguage$, "M", "Y:", "F2"] = 1492.400
-phonemes [phonLanguage$, "M", "a", "F1"] = 788.6000
-phonemes [phonLanguage$, "M", "a", "F2"] = 1290.600
-phonemes [phonLanguage$, "M", "au", "F1"] = 583.8000
-phonemes [phonLanguage$, "M", "au", "F2"] = 959.300
-phonemes [phonLanguage$, "M", "e", "F1"] = 372.3000
-phonemes [phonLanguage$, "M", "e", "F2"] = 1959.700
-phonemes [phonLanguage$, "M", "ei", "F1"] = 499.5000
-phonemes [phonLanguage$, "M", "ei", "F2"] = 1733.000
-phonemes [phonLanguage$, "M", "i", "F1"] = 259.5556
-phonemes [phonLanguage$, "M", "i", "F2"] = 1971.889
-phonemes [phonLanguage$, "M", "o", "F1"] = 426.7000
-phonemes [phonLanguage$, "M", "o", "F2"] = 743.600
-phonemes [phonLanguage$, "M", "u", "F1"] = 287.5000
-phonemes [phonLanguage$, "M", "u", "F2"] = 666.500
-phonemes [phonLanguage$, "M", "ui", "F1"] = 495.3000
-phonemes [phonLanguage$, "M", "ui", "F2"] = 1468.600
-phonemes [phonLanguage$, "M", "y", "F1"] = 268.4000
-phonemes [phonLanguage$, "M", "y", "F2"] = 1581.400
+phonemes ["SL", "M", "A", "F1"] = 695.6000
+phonemes ["SL", "M", "A", "F2"] = 1065.500
+phonemes ["SL", "M", "E", "F1"] = 552.5000
+phonemes ["SL", "M", "E", "F2"] = 1659.200
+phonemes ["SL", "M", "I", "F1"] = 378.0909
+phonemes ["SL", "M", "I", "F2"] = 1868.545
+phonemes ["SL", "M", "O", "F1"] = 482.9000
+phonemes ["SL", "M", "O", "F2"] = 725.800
+phonemes ["SL", "M", "Y", "F1"] = 417.7000
+phonemes ["SL", "M", "Y", "F2"] = 1455.100
+phonemes ["SL", "M", "Y:", "F1"] = 386.3000
+phonemes ["SL", "M", "Y:", "F2"] = 1492.400
+phonemes ["SL", "M", "a", "F1"] = 788.6000
+phonemes ["SL", "M", "a", "F2"] = 1290.600
+phonemes ["SL", "M", "au", "F1"] = 583.8000
+phonemes ["SL", "M", "au", "F2"] = 959.300
+phonemes ["SL", "M", "e", "F1"] = 372.3000
+phonemes ["SL", "M", "e", "F2"] = 1959.700
+phonemes ["SL", "M", "ei", "F1"] = 499.5000
+phonemes ["SL", "M", "ei", "F2"] = 1733.000
+phonemes ["SL", "M", "i", "F1"] = 259.5556
+phonemes ["SL", "M", "i", "F2"] = 1971.889
+phonemes ["SL", "M", "o", "F1"] = 426.7000
+phonemes ["SL", "M", "o", "F2"] = 743.600
+phonemes ["SL", "M", "u", "F1"] = 287.5000
+phonemes ["SL", "M", "u", "F2"] = 666.500
+phonemes ["SL", "M", "ui", "F1"] = 495.3000
+phonemes ["SL", "M", "ui", "F2"] = 1468.600
+phonemes ["SL", "M", "y", "F1"] = 268.4000
+phonemes ["SL", "M", "y", "F2"] = 1581.400
 # Guessed
-phonemes [phonLanguage$, "M", "@", "F1"] = 417.7000
-phonemes [phonLanguage$, "M", "@", "F2"] = 1455.100
+phonemes ["SL", "M", "@", "F1"] = 417.7000
+phonemes ["SL", "M", "@", "F2"] = 1455.100
 
 # Female
-phonemes [phonLanguage$, "F", "i_corner", "F1"] = 280
-phonemes [phonLanguage$, "F", "i_corner", "F2"] = 2200
-phonemes [phonLanguage$, "F", "a_corner", "F1"] = 900
-phonemes [phonLanguage$, "F", "a_corner", "F2"] = 1435
-phonemes [phonLanguage$, "F", "u_corner", "F1"] = 370
-phonemes [phonLanguage$, "F", "u_corner", "F2"] = 700
+phonemes ["SL", "F", "i_corner", "F1"] = 280
+phonemes ["SL", "F", "i_corner", "F2"] = 2200
+phonemes ["SL", "F", "a_corner", "F1"] = 900
+phonemes ["SL", "F", "a_corner", "F2"] = 1435
+phonemes ["SL", "F", "u_corner", "F1"] = 370
+phonemes ["SL", "F", "u_corner", "F2"] = 700
 # @_center is not fixed but derived from current corners
-phonemes [phonLanguage$, "F", "@_center", "F1"] =(phonemes [phonLanguage$, "F", "i_corner", "F1"]*phonemes [phonLanguage$, "F", "u_corner", "F1"]*phonemes [phonLanguage$, "F", "a_corner", "F1"])^(1/3)
-phonemes [phonLanguage$, "F", "@_center", "F2"] = (phonemes [phonLanguage$, "F", "i_corner", "F2"]*phonemes [phonLanguage$, "F", "u_corner", "F2"]*phonemes [phonLanguage$, "F", "a_corner", "F2"])^(1/3)
+phonemes ["SL", "F", "@_center", "F1"] =(phonemes ["SL", "F", "i_corner", "F1"]*phonemes ["SL", "F", "u_corner", "F1"]*phonemes ["SL", "F", "a_corner", "F1"])^(1/3)
+phonemes ["SL", "F", "@_center", "F2"] = (phonemes ["SL", "F", "i_corner", "F2"]*phonemes ["SL", "F", "u_corner", "F2"]*phonemes ["SL", "F", "a_corner", "F2"])^(1/3)
 
 # Formant values according to 
 # IFA corpus average from FPA isolated vowels
 # Using Split-Levinson algorithm
-phonemes [phonLanguage$, "F", "A", "F1"] = 817.7000
-phonemes [phonLanguage$, "F", "A", "F2"] = 1197.300
-phonemes [phonLanguage$, "F", "E", "F1"] = 667.9000
-phonemes [phonLanguage$, "F", "E", "F2"] = 1748.500
-phonemes [phonLanguage$, "F", "I", "F1"] = 429.2222
-phonemes [phonLanguage$, "F", "I", "F2"] = 1937.333
-phonemes [phonLanguage$, "F", "O", "F1"] = 570.8000
-phonemes [phonLanguage$, "F", "O", "F2"] = 882.100
-phonemes [phonLanguage$, "F", "Y", "F1"] = 495.7000
-phonemes [phonLanguage$, "F", "Y", "F2"] = 1635.600
-phonemes [phonLanguage$, "F", "Y:", "F1"] = 431.1000
-phonemes [phonLanguage$, "F", "Y:", "F2"] = 1695.100
-phonemes [phonLanguage$, "F", "a", "F1"] = 853.6000
-phonemes [phonLanguage$, "F", "a", "F2"] = 1435.800
-phonemes [phonLanguage$, "F", "au", "F1"] = 647.6000
-phonemes [phonLanguage$, "F", "au", "F2"] = 1056.700
-phonemes [phonLanguage$, "F", "e", "F1"] = 429.9000
-phonemes [phonLanguage$, "F", "e", "F2"] = 1861.700
-phonemes [phonLanguage$, "F", "ei", "F1"] = 619.9000
-phonemes [phonLanguage$, "F", "ei", "F2"] = 1718.500
-phonemes [phonLanguage$, "F", "i", "F1"] = 294.3000
-phonemes [phonLanguage$, "F", "i", "F2"] = 1855.000
-phonemes [phonLanguage$, "F", "o", "F1"] = 527.5000
-phonemes [phonLanguage$, "F", "o", "F2"] = 894.100
-phonemes [phonLanguage$, "F", "u", "F1"] = 376.0000
-phonemes [phonLanguage$, "F", "u", "F2"] = 735.200
-phonemes [phonLanguage$, "F", "ui", "F1"] = 612.8000
-phonemes [phonLanguage$, "F", "ui", "F2"] = 1559.200
-phonemes [phonLanguage$, "F", "y", "F1"] = 321.2000
-phonemes [phonLanguage$, "F", "y", "F2"] = 1741.700
+phonemes ["SL", "F", "A", "F1"] = 817.7000
+phonemes ["SL", "F", "A", "F2"] = 1197.300
+phonemes ["SL", "F", "E", "F1"] = 667.9000
+phonemes ["SL", "F", "E", "F2"] = 1748.500
+phonemes ["SL", "F", "I", "F1"] = 429.2222
+phonemes ["SL", "F", "I", "F2"] = 1937.333
+phonemes ["SL", "F", "O", "F1"] = 570.8000
+phonemes ["SL", "F", "O", "F2"] = 882.100
+phonemes ["SL", "F", "Y", "F1"] = 495.7000
+phonemes ["SL", "F", "Y", "F2"] = 1635.600
+phonemes ["SL", "F", "Y:", "F1"] = 431.1000
+phonemes ["SL", "F", "Y:", "F2"] = 1695.100
+phonemes ["SL", "F", "a", "F1"] = 853.6000
+phonemes ["SL", "F", "a", "F2"] = 1435.800
+phonemes ["SL", "F", "au", "F1"] = 647.6000
+phonemes ["SL", "F", "au", "F2"] = 1056.700
+phonemes ["SL", "F", "e", "F1"] = 429.9000
+phonemes ["SL", "F", "e", "F2"] = 1861.700
+phonemes ["SL", "F", "ei", "F1"] = 619.9000
+phonemes ["SL", "F", "ei", "F2"] = 1718.500
+phonemes ["SL", "F", "i", "F1"] = 294.3000
+phonemes ["SL", "F", "i", "F2"] = 1855.000
+phonemes ["SL", "F", "o", "F1"] = 527.5000
+phonemes ["SL", "F", "o", "F2"] = 894.100
+phonemes ["SL", "F", "u", "F1"] = 376.0000
+phonemes ["SL", "F", "u", "F2"] = 735.200
+phonemes ["SL", "F", "ui", "F1"] = 612.8000
+phonemes ["SL", "F", "ui", "F2"] = 1559.200
+phonemes ["SL", "F", "y", "F1"] = 321.2000
+phonemes ["SL", "F", "y", "F2"] = 1741.700
 # Guessed
-phonemes [phonLanguage$, "F", "@", "F1"] = 500.5
-phonemes [phonLanguage$, "F", "@", "F2"] = 1706.6
+phonemes ["SL", "F", "@", "F1"] = 500.5
+phonemes ["SL", "F", "@", "F2"] = 1706.6
 
 # Run as a non interactive program
 if input_table > 0
@@ -854,7 +962,7 @@ if input_table > 0
 			@plot_vowel_triangle:, .sp$
 			Text special... 0.5 Centre 1.05 bottom Helvetica 18 0 ##'title$'#
 		endif
-		@plot_vowels: phonLanguage$, .plotVowels, .sp$, .sound
+		@plot_vowels: targetFormantAlgorithm$, .plotVowels, .sp$, .sound
 		@print_output_line: title$, .sp$, plot_vowels.numVowelIntervals, plot_vowels.area2perc, plot_vowels.area1perc, plot_vowels.relDist_i, plot_vowels.relDist_u, plot_vowels.relDist_a, .duration, .intensity
 
 		if index_regex(.plotFile$, "\w")
@@ -904,7 +1012,10 @@ while .continue
 		#   option: "MyLanguage"
 		boolean: "Log", (output_table$ <> "")
 		comment: uiMessage$ [uiLanguage$, "Experimental"]
-		boolean: "Burg", (plotLanguage$ = "Burg")
+		optionMenu: "Formant", .formant_default
+			option: "SL"
+			option: "Burg"
+			option: "Robust"
 	.clicked = endPause: (uiMessage$ [uiLanguage$, "Stop"]), (uiMessage$ [uiLanguage$, "Record"]), (uiMessage$ [uiLanguage$, "Open"]), 3, 1	
 	if .clicked = 1
 		.continue = 0
@@ -955,10 +1066,18 @@ while .continue
 	# Store preferences
 	writeFileLine: .preferencesLanguageFile$, "Language=",uiLanguage$
 	
-	if burg
-		plotLanguage$ = "Burg"
+	if formant$ = "Burg"
+		plotFormantAlgorithm$ = "Burg"
+		targetFormantAlgorithm$ = "Burg"
+		.formant_default = 2
+	elsif formant$ = "Robust"
+		plotFormantAlgorithm$ = "Robust"
+		targetFormantAlgorithm$ = "Robust"
+		.formant_default = 3
 	else
-		plotLanguage$ = phonLanguage$
+		plotFormantAlgorithm$ = "SL"
+		targetFormantAlgorithm$ = "SL"
+		.formant_default = 1
 	endif
 	
 	# Start
@@ -1016,7 +1135,7 @@ while .continue
 	.duration = Get total duration
 	.intensity = Get intensity (dB)
 	if .intensity > 50
-		#@plot_vowels: phonLanguage$, 1, .sp$, .sound, 
+		#@plot_vowels: targetFormantAlgorithm$, 1, .sp$, .sound, 
 		@plot_vowels: 1, .sp$, .sound, 
 		@print_output_line: title$, .sp$, plot_vowels.numVowelIntervals, plot_vowels.area2perc, plot_vowels.area1perc, plot_vowels.relDist_i, plot_vowels.relDist_u, plot_vowels.relDist_a, .duration, .intensity
 	endif
@@ -1139,30 +1258,47 @@ procedure plot_vowels .plot .sp$ .sound
 	.duration = Get total duration
 	.soundname$ = selected$("Sound")
 	if .sp$ = "M"
-		.downSampled = Resample: 10000, 50
-		.formants = noprogress To Formant (sl): 0, 5, 5000, 0.025, 50
-		if robust
-			selectObject: .sound
-			.formantsBurg = noprogress To Formant (robust): 0.01, 5, 5000, 0.025, 50, 1.5, 5, 1e-06
-		else 
-			selectObject: .downSampled
-			.formantsBurg = noprogress To Formant (burg): 0, 5, 5000, 0.025, 50
-		endif
+		.maxFormant = 5000
 	else
-		.downSampled = Resample: 11000, 50
-		.formants = noprogress To Formant (sl): 0, 5, 5500, 0.025, 50
-		if robust
-			selectObject: .sound
-			.formantsBurg = noprogress To Formant (robust): 0.01, 5, 5500, 0.025, 50, 1.5, 5, 1e-06
-		else 
+		.maxFormant = 5500
+	endif
+	
+	# Targets
+	selectObject: .sound
+	if targetFormantAlgorithm$ = "Burg"
+		.formants = noprogress To Formant (burg): 0, 5, .maxFormant, 0.025, 50
+		.formantsBandwidth = Copy: "Plot"
+	elsif targetFormantAlgorithm$ = "Robust"
+		.formants = noprogress To Formant (robust): 0.01, 5, .maxFormant, 0.025, 50, 1.5, 5, 1e-06
+		.formantsBandwidth = Copy: "Bandwidth"
+	else
+		selectObject: .sound
+		.downSampled = Resample: 2*.maxFormant, 50
+		.formants = noprogress To Formant (sl): 0, 5, .maxFormant, 0.025, 50
+		selectObject: .downSampled
+		Remove
+		selectObject: .sound
+		.formantsBandwidth = noprogress To Formant (burg): 0, 5, .maxFormant, 0.025, 50
+	endif
+	
+	# Plot
+	if targetFormantAlgorithm$ = plotFormantAlgorithm$
+		.formantsPlot = .formants
+	else
+		selectObject: .sound
+		if plotFormantAlgorithm$ = "Burg"
+			.formantsPlot = noprogress To Formant (burg): 0, 5, .maxForman, 0.025, 50
+		elsif plotFormantAlgorithm$ = "Robust"
+			.formantsPlot = noprogress To Formant (robust): 0.01, 5, .maxForman, 0.025, 50, 1.5, 5, 1e-06
+		else
+			.downSampled = Resample: 2*.maxFormant, 50
+			.formantsPlot = noprogress To Formant (sl): 0, 5, .maxForman, 0.025, 50
 			selectObject: .downSampled
-			.formantsBurg = noprogress To Formant (burg): 0, 5, 5500, 0.025, 50
+			Remove
 		endif
 	endif
-	selectObject: .downSampled
-	Remove
-
-	@select_vowel_target: .sp$, .sound, .formants, .formantsBurg, .syllableKernels
+	
+	@select_vowel_target: .sp$, .sound, .formants, .formantsBandwidth, .syllableKernels
 	.vowelTier = select_vowel_target.vowelTier
 	.targetTier = select_vowel_target.targetTier
 	selectObject: .syllableKernels
@@ -1173,32 +1309,28 @@ procedure plot_vowels .plot .sp$ .sound
 
 	
 	# Set new @_center
-	phonemes [plotLanguage$, .sp$, "@_center", "F1"] = (phonemes [plotLanguage$, .sp$, "a", "F1"] * phonemes [plotLanguage$, .sp$, "i", "F1"] * phonemes [plotLanguage$, .sp$, "u", "F1"]) ** (1/3) 
-	phonemes [plotLanguage$, .sp$, "@_center", "F2"] = (phonemes [plotLanguage$, .sp$, "a", "F2"] * phonemes [plotLanguage$, .sp$, "i", "F2"] * phonemes [plotLanguage$, .sp$, "u", "F2"]) ** (1/3) 
+	phonemes [plotFormantAlgorithm$, .sp$, "@_center", "F1"] = (phonemes [plotFormantAlgorithm$, .sp$, "a", "F1"] * phonemes [plotFormantAlgorithm$, .sp$, "i", "F1"] * phonemes [plotFormantAlgorithm$, .sp$, "u", "F1"]) ** (1/3) 
+	phonemes [plotFormantAlgorithm$, .sp$, "@_center", "F2"] = (phonemes [plotFormantAlgorithm$, .sp$, "a", "F2"] * phonemes [plotFormantAlgorithm$, .sp$, "i", "F2"] * phonemes [plotFormantAlgorithm$, .sp$, "u", "F2"]) ** (1/3) 
 	
-	.f1_c = phonemes [plotLanguage$, .sp$, "@_center", "F1"]
-	.f2_c = phonemes [plotLanguage$, .sp$, "@_center", "F2"]
+	.f1_c = phonemes [plotFormantAlgorithm$, .sp$, "@_center", "F1"]
+	.f2_c = phonemes [plotFormantAlgorithm$, .sp$, "@_center", "F2"]
 	
 	# Plot center
-	@vowel2point: plotLanguage$, .sp$, .f1_c, .f2_c
+	@vowel2point: plotFormantAlgorithm$, .sp$, .f1_c, .f2_c
 	.st_c1 = vowel2point.x
 	.st_c2 = vowel2point.y
 	
 	# Near /@/
-	.f1_c = phonemes [plotLanguage$, .sp$, "@_center", "F1"]
-	.f2_c = phonemes [plotLanguage$, .sp$, "@_center", "F2"]
-	.closestFormat = .formantsBurg
-	if phonLanguage$ = plotLanguage$
-		.closestFormat = 0
-	endif
-	@get_closest_vowels: 0, .sp$, .formants, .closestFormat, .syllableKernels, .f1_c, .f2_c
+	.f1_c = phonemes [plotFormantAlgorithm$, .sp$, "@_center", "F1"]
+	.f2_c = phonemes [plotFormantAlgorithm$, .sp$, "@_center", "F2"]
+	@get_closest_vowels: 0, .sp$, .formants, .formantsPlot, .syllableKernels, .f1_c, .f2_c
 	.numVowelIntervals = get_closest_vowels.vowelNum
 	# Actually plot the vowels
 	if .plot
 		for .i to get_closest_vowels.vowelNum
 			.f1 = get_closest_vowels.f1_list [.i]
 			.f2 = get_closest_vowels.f2_list [.i]
-			@vowel2point: plotLanguage$, .sp$, .f1, .f2
+			@vowel2point: plotFormantAlgorithm$, .sp$, .f1, .f2
 			.x = vowel2point.x
 			.y = vowel2point.y
 			Paint circle: color$["@"], .x, .y, .dot_Radius
@@ -1206,9 +1338,9 @@ procedure plot_vowels .plot .sp$ .sound
 	endif
 	
 	# Near /i/
-	.f1_i = phonemes [plotLanguage$, .sp$, "i", "F1"]
-	.f2_i = phonemes [plotLanguage$, .sp$, "i", "F2"]
-	@get_closest_vowels: 0, .sp$, .formants, .closestFormat, .syllableKernels, .f1_i, .f2_i
+	.f1_i = phonemes [plotFormantAlgorithm$, .sp$, "i", "F1"]
+	.f2_i = phonemes [plotFormantAlgorithm$, .sp$, "i", "F2"]
+	@get_closest_vowels: 0, .sp$, .formants, .formantsPlot, .syllableKernels, .f1_i, .f2_i
 	.meanDistToCenter ["i"] = get_closest_vowels.meanDistance
 	.stdevDistToCenter ["i"] = get_closest_vowels.stdevDistance
 	.num_i_Intervals = get_closest_vowels.vowelNum
@@ -1217,7 +1349,7 @@ procedure plot_vowels .plot .sp$ .sound
 		for .i to get_closest_vowels.vowelNum
 			.f1 = get_closest_vowels.f1_list [.i]
 			.f2 = get_closest_vowels.f2_list [.i]
-			@vowel2point: plotLanguage$, .sp$, .f1, .f2
+			@vowel2point: plotFormantAlgorithm$, .sp$, .f1, .f2
 			.x = vowel2point.x
 			.y = vowel2point.y
 			Paint circle: color$["i"], .x, .y, .dot_Radius
@@ -1225,9 +1357,9 @@ procedure plot_vowels .plot .sp$ .sound
 	endif
 	
 	# Near /u/
-	.f1_u = phonemes [plotLanguage$, .sp$, "u", "F1"]
-	.f2_u = phonemes [plotLanguage$, .sp$, "u", "F2"]
-	@get_closest_vowels:  0, .sp$, .formants, .closestFormat, .syllableKernels, .f1_u, .f2_u
+	.f1_u = phonemes [plotFormantAlgorithm$, .sp$, "u", "F1"]
+	.f2_u = phonemes [plotFormantAlgorithm$, .sp$, "u", "F2"]
+	@get_closest_vowels:  0, .sp$, .formants, .formantsPlot, .syllableKernels, .f1_u, .f2_u
 	.meanDistToCenter ["u"] = get_closest_vowels.meanDistance
 	.stdevDistToCenter ["u"] = get_closest_vowels.stdevDistance
 	.num_u_Intervals = get_closest_vowels.vowelNum
@@ -1236,7 +1368,7 @@ procedure plot_vowels .plot .sp$ .sound
 		for .i to get_closest_vowels.vowelNum
 			.f1 = get_closest_vowels.f1_list [.i]
 			.f2 = get_closest_vowels.f2_list [.i]
-			@vowel2point: plotLanguage$, .sp$, .f1, .f2
+			@vowel2point: plotFormantAlgorithm$, .sp$, .f1, .f2
 			.x = vowel2point.x
 			.y = vowel2point.y
 			Paint circle: color$["u"], .x, .y, .dot_Radius
@@ -1244,9 +1376,9 @@ procedure plot_vowels .plot .sp$ .sound
 	endif
 	
 	# Near /a/
-	.f1_a = phonemes [plotLanguage$, .sp$, "a", "F1"]
-	.f2_a = phonemes [plotLanguage$, .sp$, "a", "F2"]
-	@get_closest_vowels:  0, .sp$, .formants, .closestFormat, .syllableKernels, .f1_a, .f2_a
+	.f1_a = phonemes [plotFormantAlgorithm$, .sp$, "a", "F1"]
+	.f2_a = phonemes [plotFormantAlgorithm$, .sp$, "a", "F2"]
+	@get_closest_vowels:  0, .sp$, .formants, .formantsPlot, .syllableKernels, .f1_a, .f2_a
 	.meanDistToCenter ["a"] = get_closest_vowels.meanDistance
 	.stdevDistToCenter ["a"] = get_closest_vowels.stdevDistance
 	.num_a_Intervals = get_closest_vowels.vowelNum
@@ -1255,7 +1387,7 @@ procedure plot_vowels .plot .sp$ .sound
 		for .i to get_closest_vowels.vowelNum
 			.f1 = get_closest_vowels.f1_list [.i]
 			.f2 = get_closest_vowels.f2_list [.i]
-			@vowel2point: plotLanguage$, .sp$, .f1, .f2
+			@vowel2point: plotFormantAlgorithm$, .sp$, .f1, .f2
 			.x = vowel2point.x
 			.y = vowel2point.y
 			Paint circle: color$["a"], .x, .y, .dot_Radius
@@ -1272,7 +1404,7 @@ procedure plot_vowels .plot .sp$ .sound
 		Draw line: .x-0.007, .y+0.007, .x+0.007, .y-0.007
 		Draw line: .x-0.007, .y-0.007, .x+0.007, .y+0.007
 		# u
-		@vowel2point: plotLanguage$, .sp$, .f1_u, .f2_u	
+		@vowel2point: plotFormantAlgorithm$, .sp$, .f1_u, .f2_u	
 		.x = vowel2point.x
 		.y = vowel2point.y
 		Black
@@ -1280,7 +1412,7 @@ procedure plot_vowels .plot .sp$ .sound
 		Draw line: .x-0.007, .y+0.007, .x+0.007, .y-0.007
 		Draw line: .x-0.007, .y-0.007, .x+0.007, .y+0.007
 		# i
-		@vowel2point: plotLanguage$, .sp$, .f1_i, .f2_i	
+		@vowel2point: plotFormantAlgorithm$, .sp$, .f1_i, .f2_i	
 		.x = vowel2point.x
 		.y = vowel2point.y
 		Black
@@ -1288,7 +1420,7 @@ procedure plot_vowels .plot .sp$ .sound
 		Draw line: .x-0.007, .y+0.007, .x+0.007, .y-0.007
 		Draw line: .x-0.007, .y-0.007, .x+0.007, .y+0.007
 		# a
-		@vowel2point: plotLanguage$, .sp$, .f1_a, .f2_a	
+		@vowel2point: plotFormantAlgorithm$, .sp$, .f1_a, .f2_a	
 		.x = vowel2point.x
 		.y = vowel2point.y
 		Black
@@ -1298,15 +1430,15 @@ procedure plot_vowels .plot .sp$ .sound
 	endif
 	
 	# Draw new triangle
-	@vowel2point: plotLanguage$, .sp$, .f1_i, .f2_i
+	@vowel2point: plotFormantAlgorithm$, .sp$, .f1_i, .f2_i
 	.st_i1 = vowel2point.x
 	.st_i2 = vowel2point.y
 	.ic_dist = sqrt((.st_c1 - .st_i1)^2 + (.st_c2 - .st_i2)^2)
-	@vowel2point: plotLanguage$, .sp$, .f1_u, .f2_u
+	@vowel2point: plotFormantAlgorithm$, .sp$, .f1_u, .f2_u
 	.st_u1 = vowel2point.x
 	.st_u2 = vowel2point.y
 	.uc_dist = sqrt((.st_c1 - .st_u1)^2 + (.st_c2 - .st_u2)^2)
-	@vowel2point: plotLanguage$, .sp$, .f1_a, .f2_a
+	@vowel2point: plotFormantAlgorithm$, .sp$, .f1_a, .f2_a
 	.st_a1 = vowel2point.x
 	.st_a2 = vowel2point.y
 	.ac_dist = sqrt((.st_c1 - .st_a1)^2 + (.st_c2 - .st_a2)^2)
@@ -1384,7 +1516,8 @@ procedure plot_vowels .plot .sp$ .sound
 
 	# Print areas as percentage
 	if .plot
-		Text special: 1, "right", 0.07, "bottom", "Helvetica", 16, "0", uiMessage$ [uiLanguage$, "AreaTitle"]
+		.shift = Text width (world coordinates): " ('plotFormantAlgorithm$')"
+		Text special: 1+.shift, "right", 0.07, "bottom", "Helvetica", 16, "0", uiMessage$ [uiLanguage$, "AreaTitle"]+" ('plotFormantAlgorithm$')"
 		Text special: 0.9, "right", 0.02, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "Area1"]
 		Text special: 0.9, "left", 0.02, "bottom", "Helvetica", 14, "0", ": '.area1perc:0'\% "
 		Text special: 0.9, "right", -0.03, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "Area2"]
@@ -1402,7 +1535,7 @@ procedure plot_vowels .plot .sp$ .sound
 		Text special: 0.16, "right", -0.08, "bottom", "Helvetica", 14, "0", " '.relDist_a:0'\%  ('.num_a_Intervals')"
 	endif
 	
-	selectObject: .formants, .formantsBurg, .syllableKernels
+	selectObject: .formants, .formantsBandwidth, .syllableKernels
 	Remove
 endproc
 
@@ -1423,14 +1556,14 @@ procedure plot_standard_vowel .color$ .sp$ .vowel$ .reduction
 	while .vowel$ <> ""
 		.i += 1
 		.v$ = replace_regex$(.vowel$, "^\s*(\S[`]?).*$", "\1", 0)
-		.f1 = phonemes [plotLanguage$, .sp$, .v$, "F1"]
-		.f2 = phonemes [plotLanguage$, .sp$, .v$, "F2"]
+		.f1 = phonemes [plotFormantAlgorithm$, .sp$, .v$, "F1"]
+		.f2 = phonemes [plotFormantAlgorithm$, .sp$, .v$, "F2"]
 		if .reduction
 			.factor = 0.9^.reduction
-			.f1 = .factor * (.f1 - phonemes [plotLanguage$, .sp$, "@", "F1"]) + phonemes [plotLanguage$, .sp$, "@", "F1"]
-			.f2 = .factor * (.f2 - phonemes [plotLanguage$, .sp$, "@", "F2"]) + phonemes [plotLanguage$, .sp$, "@", "F2"]
+			.f1 = .factor * (.f1 - phonemes [plotFormantAlgorithm$, .sp$, "@", "F1"]) + phonemes [plotFormantAlgorithm$, .sp$, "@", "F1"]
+			.f2 = .factor * (.f2 - phonemes [plotFormantAlgorithm$, .sp$, "@", "F2"]) + phonemes [plotFormantAlgorithm$, .sp$, "@", "F2"]
 		endif
-		@vowel2point: plotLanguage$, .sp$, .f1, .f2
+		@vowel2point: plotFormantAlgorithm$, .sp$, .f1, .f2
 		.x [.i] = vowel2point.x
 		.y [.i] = vowel2point.y
 		.vowel$ = replace_regex$(.vowel$, "^\s*(\S[`]?)", "", 0)
@@ -1449,25 +1582,25 @@ endproc
 # Plot the vowel triangle
 procedure plot_vowel_triangle .sp$
 	# Draw vowel triangle
-	.a_F1 = phonemes [plotLanguage$, .sp$, "a_corner", "F1"]
-	.a_F2 = phonemes [plotLanguage$, .sp$, "a_corner", "F2"]
+	.a_F1 = phonemes [plotFormantAlgorithm$, .sp$, "a_corner", "F1"]
+	.a_F2 = phonemes [plotFormantAlgorithm$, .sp$, "a_corner", "F2"]
 
-	.i_F1 = phonemes [plotLanguage$, .sp$, "i_corner", "F1"]
-	.i_F2 = phonemes [plotLanguage$, .sp$, "i_corner", "F2"]
+	.i_F1 = phonemes [plotFormantAlgorithm$, .sp$, "i_corner", "F1"]
+	.i_F2 = phonemes [plotFormantAlgorithm$, .sp$, "i_corner", "F2"]
 
-	.u_F1 = phonemes [plotLanguage$, .sp$, "u_corner", "F1"]
-	.u_F2 = phonemes [plotLanguage$, .sp$, "u_corner", "F2"]
+	.u_F1 = phonemes [plotFormantAlgorithm$, .sp$, "u_corner", "F1"]
+	.u_F2 = phonemes [plotFormantAlgorithm$, .sp$, "u_corner", "F2"]
 	
 	Dashed line
 	# u - i
-	@vowel2point: plotLanguage$, .sp$, .u_F1, .u_F2
+	@vowel2point: plotFormantAlgorithm$, .sp$, .u_F1, .u_F2
 	.x1 = vowel2point.x
 	.y1 = vowel2point.y
 	Colour: color$ ["u"]
 	Text special: .x1, "Centre", .y1, "Bottom", "Helvetica", 20, "0", "/u/ "+uiMessage$ [uiLanguage$, "Corneru"]
 	Black
 	
-	@vowel2point: plotLanguage$, .sp$, .i_F1, .i_F2
+	@vowel2point: plotFormantAlgorithm$, .sp$, .i_F1, .i_F2
 	.x2 = vowel2point.x
 	.y2 = vowel2point.y
 	Colour: color$ ["i"]
@@ -1476,10 +1609,10 @@ procedure plot_vowel_triangle .sp$
 	Draw line: .x1, .y1, .x2, .y2
 	
 	# u - a
-	@vowel2point: plotLanguage$, .sp$, .u_F1, .u_F2
+	@vowel2point: plotFormantAlgorithm$, .sp$, .u_F1, .u_F2
 	.x1 = vowel2point.x
 	.y1 = vowel2point.y
-	@vowel2point: plotLanguage$, .sp$, .a_F1, .a_F2
+	@vowel2point: plotFormantAlgorithm$, .sp$, .a_F1, .a_F2
 	.x2 = vowel2point.x
 	.y2 = vowel2point.y
 	Colour: color$ ["a"]
@@ -1488,28 +1621,28 @@ procedure plot_vowel_triangle .sp$
 	Draw line: .x1, .y1, .x2, .y2
 	
 	# i - a
-	@vowel2point: plotLanguage$, .sp$, .i_F1, .i_F2
+	@vowel2point: plotFormantAlgorithm$, .sp$, .i_F1, .i_F2
 	.x1 = vowel2point.x
 	.y1 = vowel2point.y
-	@vowel2point: plotLanguage$, .sp$, .a_F1, .a_F2
+	@vowel2point: plotFormantAlgorithm$, .sp$, .a_F1, .a_F2
 	.x2 = vowel2point.x
 	.y2 = vowel2point.y
 	Draw line: .x1, .y1, .x2, .y2
 endproc
 
 # Convert the frequencies to coordinates
-procedure vowel2point .phonLanguage$ .sp$ .f1 .f2
+procedure vowel2point .targetFormantAlgorithm$ .sp$ .f1 .f2
 	.spt1 = 12*log2(.f1)
 	.spt2 = 12*log2(.f2)
 	
-	.a_St1 = 12*log2(phonemes [.phonLanguage$, .sp$, "a_corner", "F1"])
-	.a_St2 = 12*log2(phonemes [.phonLanguage$, .sp$, "a_corner", "F2"])
+	.a_St1 = 12*log2(phonemes [.targetFormantAlgorithm$, .sp$, "a_corner", "F1"])
+	.a_St2 = 12*log2(phonemes [.targetFormantAlgorithm$, .sp$, "a_corner", "F2"])
 
-	.i_St1 = 12*log2(phonemes [.phonLanguage$, .sp$, "i_corner", "F1"])
-	.i_St2 = 12*log2(phonemes [.phonLanguage$, .sp$, "i_corner", "F2"])
+	.i_St1 = 12*log2(phonemes [.targetFormantAlgorithm$, .sp$, "i_corner", "F1"])
+	.i_St2 = 12*log2(phonemes [.targetFormantAlgorithm$, .sp$, "i_corner", "F2"])
 
-	.u_St1 = 12*log2(phonemes [.phonLanguage$, .sp$, "u_corner", "F1"])
-	.u_St2 = 12*log2(phonemes [.phonLanguage$, .sp$, "u_corner", "F2"])
+	.u_St1 = 12*log2(phonemes [.targetFormantAlgorithm$, .sp$, "u_corner", "F1"])
+	.u_St2 = 12*log2(phonemes [.targetFormantAlgorithm$, .sp$, "u_corner", "F2"])
 	
 	.dist_iu = sqrt((.i_St1 - .u_St1)^2 + (.i_St2 - .u_St2)^2)
 	.theta = arcsin((.u_St1 - .i_St1)/.dist_iu)
@@ -1538,19 +1671,19 @@ endproc
 
 # Get a list of best targets with distances, one for each vowel segment found
 # Use DTW to get the best match
-procedure get_closest_vowels .cutoff .sp$ .formants .formantsBurg .textgrid .f1_o .f2_o
+procedure get_closest_vowels .cutoff .sp$ .formants .formantsPlot .textgrid .f1_o .f2_o
 	.f1 = 0
 	.f2 = 0
 	
 	# Convert to coordinates
-	@vowel2point: phonLanguage$, .sp$, .f1_o, .f2_o
+	@vowel2point: targetFormantAlgorithm$, .sp$, .f1_o, .f2_o
 	.st_o1 = vowel2point.x
 	.st_o2 = vowel2point.y
 	
 	# Get center coordinates
-	.fc1 = phonemes [phonLanguage$, .sp$, "@_center", "F1"]
-	.fc2 = phonemes [phonLanguage$, .sp$, "@_center", "F2"]
-	@vowel2point: phonLanguage$, .sp$, .fc1, .fc2
+	.fc1 = phonemes [targetFormantAlgorithm$, .sp$, "@_center", "F1"]
+	.fc2 = phonemes [targetFormantAlgorithm$, .sp$, "@_center", "F2"]
+	@vowel2point: targetFormantAlgorithm$, .sp$, .fc1, .fc2
 	.st_c1 = vowel2point.x
 	.st_c2 = vowel2point.y
 	.tcDist_sqr = (.st_o1 - .st_c1)^2 + (.st_o2 - .st_c2)^2
@@ -1576,7 +1709,7 @@ procedure get_closest_vowels .cutoff .sp$ .formants .formantsBurg .textgrid .f1_
 			while .t <= .end
 				.ftmp1 = Get value at time: 1, .t, "Hertz", "Linear"
 				.ftmp2 = Get value at time: 2, .t, "Hertz", "Linear"
-				@vowel2point: phonLanguage$, .sp$, .ftmp1, .ftmp2
+				@vowel2point: targetFormantAlgorithm$, .sp$, .ftmp1, .ftmp2
 				.stmp1 = vowel2point.x
 				.stmp2 = vowel2point.y
 				.tmpdistsqr = (.st_o1 - .stmp1)^2 + (.st_o2 - .stmp2)^2
@@ -1591,8 +1724,8 @@ procedure get_closest_vowels .cutoff .sp$ .formants .formantsBurg .textgrid .f1_
 			endwhile
 			
 			# Convert to "real" (Burg) formant values
-			if .formantsBurg > 0
-				selectObject: .formantsBurg
+			if .formants != .formantsPlot
+				selectObject: .formantsPlot
 				.numF1 = Get value at time: 1, .num_t, "Hertz", "Linear"
 				.numF2 = Get value at time: 2, .num_t, "Hertz", "Linear"
 			endif
@@ -1601,7 +1734,7 @@ procedure get_closest_vowels .cutoff .sp$ .formants .formantsBurg .textgrid .f1_
 			# center (c) and the target (t) from the best match 'v'
 			# to the center.
 			# 
-			@vowel2point: plotLanguage$, .sp$, .numF1, .numF2
+			@vowel2point: plotFormantAlgorithm$, .sp$, .numF1, .numF2
 			.st1 = vowel2point.x
 			.st2 = vowel2point.y
 			
@@ -1641,13 +1774,13 @@ procedure get_closest_vowels .cutoff .sp$ .formants .formantsBurg .textgrid .f1_
 	endif
 endproc
 
-# Collect all the most distant vowles
+# Collect all the most distant vowels
 procedure get_most_distant_vowels .sp$ .formants .textgrid .f1_o .f2_o
 	.f1 = 0
 	.f2 = 0
 	
 	# Convert to coordinates
-	@vowel2point: phonLanguage$, .sp$, .f1_o, .f2_o
+	@vowel2point: targetFormantAlgorithm$, .sp$, .f1_o, .f2_o
 	.st_o1 = vowel2point.x
 	.st_o2 = vowel2point.y
 	
@@ -1672,7 +1805,7 @@ procedure get_most_distant_vowels .sp$ .formants .textgrid .f1_o .f2_o
 			while .t <= .end
 				.ftmp1 = Get value at time: 1, .t, "Hertz", "Linear"
 				.ftmp2 = Get value at time: 2, .t, "Hertz", "Linear"
-				@vowel2point: phonLanguage$, .sp$, .ftmp1, .ftmp2
+				@vowel2point: targetFormantAlgorithm$, .sp$, .ftmp1, .ftmp2
 				.stmp1 = vowel2point.x
 				.stmp2 = vowel2point.y
 				.tmpdistsqr = (.st_o1 - .stmp1)^2 + (.st_o2 - .stmp2)^2
@@ -1694,9 +1827,9 @@ procedure get_most_distant_vowels .sp$ .formants .textgrid .f1_o .f2_o
 	endfor
 endproc
 
-procedure select_vowel_target .sp$ .sound .formants .formantsBurg .textgrid
-	.f1_Lowest = phonemes [phonLanguage$, .sp$, "i_corner", "F1"]
-	.f1_Highest = (1050/900) * phonemes [phonLanguage$, .sp$, "a_corner", "F1"]
+procedure select_vowel_target .sp$ .sound .formants .formantsBandwidth .textgrid
+	.f1_Lowest = phonemes [targetFormantAlgorithm$, .sp$, "i_corner", "F1"]
+	.f1_Highest = (1050/900) * phonemes [targetFormantAlgorithm$, .sp$, "a_corner", "F1"]
 	selectObject: .textgrid
 	.duration = Get total duration
 	.firstTier$ = Get tier name: 1
@@ -1714,7 +1847,7 @@ procedure select_vowel_target .sp$ .sound .formants .formantsBurg .textgrid
 	selectObject: .sound
 	.samplingFrequency = Get sampling frequency
 	.intensity = Get intensity (dB)
-	selectObject: .formantsBurg
+	selectObject: .formantsBandwidth
 	.totalNumFrames = Get number of frames
 		
 	# Nothing found, but there is sound. Try to find at least 1 vowel
@@ -1805,7 +1938,7 @@ procedure select_vowel_target .sp$ .sound .formants .formantsBurg .textgrid
 
 		selectObject: .formants
 		.f = Get value at time: 1, .tl, "Hertz", "Linear"
-		selectObject: .formantsBurg
+		selectObject: .formantsBandwidth
 		.b = Get bandwidth at time: 1, .tl, "Hertz", "Linear"
 		.iframe = Get frame number from time: .tl
 		if .iframe > .totalNumFrames
@@ -1818,7 +1951,7 @@ procedure select_vowel_target .sp$ .sound .formants .formantsBurg .textgrid
 			.tl += .dt
 			selectObject: .formants
 			.f = Get value at time: 1, .tl, "Hertz", "Linear"
-			selectObject: .formantsBurg
+			selectObject: .formantsBandwidth
 			.b = Get bandwidth at time: 1, .tl, "Hertz", "Linear"
 			.iframe = Get frame number from time: .tl	
 			if .iframe > .totalNumFrames
@@ -1831,7 +1964,7 @@ procedure select_vowel_target .sp$ .sound .formants .formantsBurg .textgrid
 
 		selectObject: .formants
 		.f = Get value at time: 1, .th, "Hertz", "Linear"
-		selectObject: .formantsBurg
+		selectObject: .formantsBandwidth
 		.b = Get bandwidth at time: 1, .th, "Hertz", "Linear"
 		.iframe = Get frame number from time: .th
 		if .iframe > .totalNumFrames
@@ -1844,7 +1977,7 @@ procedure select_vowel_target .sp$ .sound .formants .formantsBurg .textgrid
 			.th -= .dt
 			selectObject: .formants
 			.f = Get value at time: 1, .th, "Hertz", "Linear"
-			selectObject: .formantsBurg
+			selectObject: .formantsBandwidth
 			.b = Get bandwidth at time: 1, .th, "Hertz", "Linear"
 			.iframe = Get frame number from time: .th
 			if .iframe > .totalNumFrames
@@ -1896,7 +2029,7 @@ procedure select_vowel_target .sp$ .sound .formants .formantsBurg .textgrid
 			# Lower end
 			selectObject: .formants
 			.f = Get value at time: 1, .ttl, "Hertz", "Linear"
-			selectObject: .formantsBurg
+			selectObject: .formantsBandwidth
 			.b = Get bandwidth at time: 1, .ttl, "Hertz", "Linear"
 			.iframe = Get frame number from time: .th
 			if .iframe > .totalNumFrames
@@ -1915,7 +2048,7 @@ procedure select_vowel_target .sp$ .sound .formants .formantsBurg .textgrid
 				.ttl -= .dt
 				selectObject: .formants
 				.f = Get value at time: 1, .ttl, "Hertz", "Linear"
-				selectObject: .formantsBurg
+				selectObject: .formantsBandwidth
 				.b = Get bandwidth at time: 1, .ttl, "Hertz", "Linear"
 				.iframe = Get frame number from time: .ttl
 				if .iframe > .totalNumFrames
@@ -1938,7 +2071,7 @@ procedure select_vowel_target .sp$ .sound .formants .formantsBurg .textgrid
 			.tth = .tp
 			selectObject: .formants
 			.f = Get value at time: 1, .tth, "Hertz", "Linear"
-			selectObject: .formantsBurg
+			selectObject: .formantsBandwidth
 			.b = Get bandwidth at time: 1, .tth, "Hertz", "Linear"
 			.iframe = Get frame number from time: .th
 			if .iframe > .totalNumFrames
@@ -1957,7 +2090,7 @@ procedure select_vowel_target .sp$ .sound .formants .formantsBurg .textgrid
 				.tth += .dt
 				selectObject: .formants
 				.f = Get value at time: 1, .tth, "Hertz", "Linear"
-				selectObject: .formantsBurg
+				selectObject: .formantsBandwidth
 				.b = Get bandwidth at time: 1, .tth, "Hertz", "Linear"
 				.iframe = Get frame number from time: .tth
 				if .iframe > .totalNumFrames

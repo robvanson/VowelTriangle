@@ -142,18 +142,15 @@ endif
 
 # Define Language
 # Add new targets if necessary
-# Replace the Burg algorithm with the Robust formant algorithm
-# That one is much slower than the Burg algorithm
-robust = 0
 
 # Select algorithm for calculating formants
 # Alternatives: "SL", "Burg" or "Robust"
 
-# Plotting
-plotFormantAlgorithm$ = "SL"
-
 # Vowel targets
 targetFormantAlgorithm$ = "SL"
+
+# Plotting can be different from the target, in principle
+plotFormantAlgorithm$ = targetFormantAlgorithm$
 
 numVowels = 12
 vowelList$ [1] = "i"
@@ -962,7 +959,7 @@ if input_table > 0
 			@plot_vowel_triangle:, .sp$
 			Text special... 0.5 Centre 1.05 bottom Helvetica 18 0 ##'title$'#
 		endif
-		@plot_vowels: targetFormantAlgorithm$, .plotVowels, .sp$, .sound
+		@plot_vowels: .plotVowels, .sp$, .sound
 		@print_output_line: title$, .sp$, plot_vowels.numVowelIntervals, plot_vowels.area2perc, plot_vowels.area1perc, plot_vowels.relDist_i, plot_vowels.relDist_u, plot_vowels.relDist_a, .duration, .intensity
 
 		if index_regex(.plotFile$, "\w")

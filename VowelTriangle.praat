@@ -560,7 +560,14 @@ uiMessage$ ["IT", "Record"]			= "Registra"
 #
 ##############################################################
 
-# Formant values
+# Formant values according to 
+# IFA corpus averages from FPA isolated vowels
+
+###############################################
+#
+# Burg's method formant algorithm (Burg)
+#
+###############################################
 
 # Male 
 phonemes ["Burg", "M", "i_corner", "F1"] = 242
@@ -573,15 +580,6 @@ phonemes ["Burg", "M", "u_corner", "F2"] = 626
 # @_center is not fixed but derived from current corners
 phonemes ["Burg", "M", "@_center", "F1"] =(phonemes ["Burg", "M", "i_corner", "F1"]*phonemes ["Burg", "M", "u_corner", "F1"]*phonemes ["Burg", "M", "a_corner", "F1"])^(1/3)
 phonemes ["Burg", "M", "@_center", "F2"] = (phonemes ["Burg", "M", "i_corner", "F2"]*phonemes ["Burg", "M", "u_corner", "F2"]*phonemes ["Burg", "M", "a_corner", "F2"])^(1/3)
-
-# Formant values according to 
-# IFA corpus averages from FPA isolated vowels
-
-###############################################
-#
-# Burg's method formant algorithm (Burg)
-#
-###############################################
 
 phonemes ["Burg", "M", "A", "F1"] = 680
 phonemes ["Burg", "M", "A", "F2"] = 1038
@@ -674,6 +672,18 @@ phonemes ["Burg", "F", "@", "F2"] = 1415
 # Robust formant algorithm (Robust)
 #
 ###############################################
+
+#Male
+phonemes ["Robust", "M", "i_corner", "F1"] = 242
+phonemes ["Robust", "M", "i_corner", "F2"] = 2330
+phonemes ["Robust", "M", "a_corner", "F1"] = 797
+phonemes ["Robust", "M", "a_corner", "F2"] = 1328
+phonemes ["Robust", "M", "u_corner", "F1"] = 269
+phonemes ["Robust", "M", "u_corner", "F2"] = 626
+
+# @_center is not fixed but derived from current corners
+phonemes ["Robust", "M", "@_center", "F1"] =(phonemes ["Robust", "M", "i_corner", "F1"]*phonemes ["Robust", "M", "u_corner", "F1"]*phonemes ["Robust", "M", "a_corner", "F1"])^(1/3)
+phonemes ["Robust", "M", "@_center", "F2"] = (phonemes ["Robust", "M", "i_corner", "F2"]*phonemes ["Robust", "M", "u_corner", "F2"]*phonemes ["Robust", "M", "a_corner", "F2"])^(1/3)
 
 phonemes ["Robust", "M", "A", "F1"] = 680
 phonemes ["Robust", "M", "A", "F2"] = 1038

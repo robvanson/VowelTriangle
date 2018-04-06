@@ -1481,6 +1481,9 @@ procedure get_closest_vowels .cutoff .sp$ .formants .textgrid .f1_o .f2_o
 		selectObject: .tableDistances
 		.meanDistance = Get column mean (index): 1
 		.stdevDistance = Get column stdev (index): 1
+		if .stdevDistance = undefined
+			.stdevDistance = .meanDistance/2
+		endif
 		Remove
 	endif
 endproc
@@ -1707,17 +1710,6 @@ procedure select_vowel_target .sound .formants .textgrid
 		if .th - .tl > 0.01
 			selectObject: .textgrid
 			.numPoints = Get number of points: .targetTier
-			.tmp = 0
-			if .numPoints > 0
-				.tmp = Get time of point: .targetTier, .numPoints
-			endif
-			if .tl <> .tmp
-				#Insert point: .targetTier, .tl, "L"
-			else
-				.ptxt$ = Get label of point: .targetTier, .numPoints
-				#Set point text: .targetTier, .numPoints, .ptxt$+"L"
-			endif
-			#Insert point: .targetTier, .th, "H"
 			
 			selectObject: .formants
 			if .tp > .tl and .tp < .th

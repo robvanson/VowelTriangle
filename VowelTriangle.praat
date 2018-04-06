@@ -214,6 +214,8 @@ uiMessage$ ["EN", "Done"] = "Done"
 uiMessage$ ["EN", "Stop"] = "Stop"
 uiMessage$ ["EN", "Open"] = "Open"
 uiMessage$ ["EN", "Record"] = "Record"
+uiMessage$ ["EN", "untitled"] = "untitled"
+uiMessage$ ["EN", "Title"] 			= "Title"
 
 # Dutch
 uiMessage$ ["NL", "PauseRecord"] 	= "Neem lopende spraak op"
@@ -256,6 +258,8 @@ uiMessage$ ["NL", "Done"] 			= "Klaar"
 uiMessage$ ["NL", "Stop"] 			= "Stop"
 uiMessage$ ["NL", "Open"] 			= "Open"
 uiMessage$ ["NL", "Record"] 		= "Opnemen"
+uiMessage$ ["NL", "untitled"] 		= "zonder titel"
+uiMessage$ ["NL", "Title"] 			= "Titel"
 
 # German
 uiMessage$ ["DE", "PauseRecord"] 	= "Zeichne laufende Sprache auf"
@@ -298,6 +302,8 @@ uiMessage$ ["DE", "Done"] 			= "Fertig"
 uiMessage$ ["DE", "Stop"] 			= "Halt"
 uiMessage$ ["DE", "Open"] 			= "Öffnen"
 uiMessage$ ["DE", "Record"] 		= "Aufzeichnen"
+uiMessage$ ["DE", "untitled"] 		= "ohne Titel"
+uiMessage$ ["DE", "Title"] 			= "Titel"
 
 # French
 uiMessage$ ["FR", "PauseRecord"]	= "Enregistrer un discours continu"
@@ -340,6 +346,8 @@ uiMessage$ ["FR", "Done"]			= "Terminé"
 uiMessage$ ["FR", "Stop"]			= "Arrêt"
 uiMessage$ ["FR", "Open"]			= "Ouvert"
 uiMessage$ ["FR", "Record"]			= "Enregistrer"
+uiMessage$ ["FR", "untitled"] 		= "sans titre"
+uiMessage$ ["FR", "Title"] 			= "Titre"
 
 # Chinese
 uiMessage$ ["ZH", "PauseRecord"] = "录音连续演讲"
@@ -382,7 +390,8 @@ uiMessage$ ["ZH", "Done"] = "准备"
 uiMessage$ ["ZH", "Stop"] = "结束"
 uiMessage$ ["ZH", "Open"] = "打开录音"
 uiMessage$ ["ZH", "Record"] = "录制演讲"
-
+uiMessage$ ["ZH", "untitled"] = "无标题"
+uiMessage$ ["ZH", "Title"] 			= "标题"
 
 # Spanish
 uiMessage$ ["ES", "PauseRecord"]	= "Grabar un discurso continuo"
@@ -425,6 +434,8 @@ uiMessage$ ["ES", "Done"]			= "Terminado"
 uiMessage$ ["ES", "Stop"]			= "Detener"
 uiMessage$ ["ES", "Open"]			= "Abrir"
 uiMessage$ ["ES", "Record"]			= "Grabar"
+uiMessage$ ["ES", "untitled"] 		= "no tiene título"
+uiMessage$ ["ES", "Title"] 			= "Título"
 
 # Portugese
 uiMessage$ ["PT", "PauseRecord"]	= "Gravar um discurso contínuo"
@@ -467,6 +478,8 @@ uiMessage$ ["PT", "Done"]			= "Terminado"
 uiMessage$ ["PT", "Stop"]			= "Pare"
 uiMessage$ ["PT", "Open"]			= "Abrir"
 uiMessage$ ["PT", "Record"]			= "Gravar"
+uiMessage$ ["PT", "untitled"] 		= "sem título"
+uiMessage$ ["PT", "Title"] 			= "Título"
 
 # Italian
 uiMessage$ ["IT", "PauseRecord"]	= "Registra un discorso continuo"
@@ -509,6 +522,8 @@ uiMessage$ ["IT", "Done"]			= "Finito"
 uiMessage$ ["IT", "Stop"]			= "Fermare"
 uiMessage$ ["IT", "Open"]			= "Apri"
 uiMessage$ ["IT", "Record"]			= "Registra"
+uiMessage$ ["IT", "untitled"] 		= "senza titolo"
+uiMessage$ ["IT", "Title"] 			= "Titolo"
 
 #############################################################
 #
@@ -569,28 +584,6 @@ uiMessage$ ["IT", "Record"]			= "Registra"
 # Split-Levinson (SL)
 #
 ###############################################
-
-# Male 
-phonemes ["SL", "M", "i_corner", "F1"] = 250
-phonemes ["SL", "M", "i_corner", "F2"] = 2075
-phonemes ["SL", "M", "a_corner", "F1"] = 810
-phonemes ["SL", "M", "a_corner", "F2"] = 1290
-phonemes ["SL", "M", "u_corner", "F1"] = 275
-phonemes ["SL", "M", "u_corner", "F2"] = 640
-# @_center is not fixed but derived from current corners
-phonemes ["SL", "M", "@_center", "F1"] =(phonemes ["SL", "M", "i_corner", "F1"]*phonemes ["SL", "M", "u_corner", "F1"]*phonemes ["SL", "M", "a_corner", "F1"])^(1/3)
-phonemes ["SL", "M", "@_center", "F2"] = (phonemes ["SL", "M", "i_corner", "F2"]*phonemes ["SL", "M", "u_corner", "F2"]*phonemes ["SL", "M", "a_corner", "F2"])^(1/3)
-
-# Female 
-phonemes ["SL", "F", "i_corner", "F1"] = 275
-phonemes ["SL", "F", "i_corner", "F2"] = 2000
-phonemes ["SL", "F", "a_corner", "F1"] = 885
-phonemes ["SL", "F", "a_corner", "F2"] = 1435
-phonemes ["SL", "F", "u_corner", "F1"] = 365
-phonemes ["SL", "F", "u_corner", "F2"] = 690
-# @_center is not fixed but derived from current corners
-phonemes ["SL", "F", "@_center", "F1"] =(phonemes ["SL", "F", "i_corner", "F1"]*phonemes ["SL", "F", "u_corner", "F1"]*phonemes ["SL", "F", "a_corner", "F1"])^(1/3)
-phonemes ["SL", "F", "@_center", "F2"] = (phonemes ["SL", "F", "i_corner", "F2"]*phonemes ["SL", "F", "u_corner", "F2"]*phonemes ["SL", "F", "a_corner", "F2"])^(1/3)
 
 # Male 
 phonemes ["SL", "M", "A", "F1"] = 696
@@ -662,36 +655,34 @@ phonemes ["SL", "F", "y", "F2"] = 1742
 phonemes ["SL", "F", "@", "F1"] = 500.5
 phonemes ["SL", "F", "@", "F2"] = 1706.6
 
+# Triangle
+# Male 
+phonemes ["SL", "M", "i_corner", "F1"] = phonemes ["SL", "M", "i", "F1"]/(2^(1/12))
+phonemes ["SL", "M", "i_corner", "F2"] = phonemes ["SL", "M", "i", "F2"]*(2^(1/12))
+phonemes ["SL", "M", "a_corner", "F1"] = phonemes ["SL", "M", "a", "F1"]*(2^(1/12))
+phonemes ["SL", "M", "a_corner", "F2"] = phonemes ["SL", "M", "a", "F2"]
+phonemes ["SL", "M", "u_corner", "F1"] = phonemes ["SL", "M", "u", "F1"]/(2^(1/12))
+phonemes ["SL", "M", "u_corner", "F2"] = phonemes ["SL", "M", "u", "F2"]/(2^(1/12))
+# @_center is not fixed but derived from current corners
+phonemes ["SL", "M", "@_center", "F1"] =(phonemes ["SL", "M", "i_corner", "F1"]*phonemes ["SL", "M", "u_corner", "F1"]*phonemes ["SL", "M", "a_corner", "F1"])^(1/3)
+phonemes ["SL", "M", "@_center", "F2"] = (phonemes ["SL", "M", "i_corner", "F2"]*phonemes ["SL", "M", "u_corner", "F2"]*phonemes ["SL", "M", "a_corner", "F2"])^(1/3)
+
+# Female 
+phonemes ["SL", "F", "i_corner", "F1"] = phonemes ["SL", "F", "i", "F1"]/(2^(1/12))
+phonemes ["SL", "F", "i_corner", "F2"] = phonemes ["SL", "F", "i", "F2"]*(2^(1/12))
+phonemes ["SL", "F", "a_corner", "F1"] = phonemes ["SL", "F", "a", "F1"]*(2^(1/12))
+phonemes ["SL", "F", "a_corner", "F2"] = phonemes ["SL", "F", "a", "F2"]
+phonemes ["SL", "F", "u_corner", "F1"] = phonemes ["SL", "F", "u", "F1"]/(2^(1/12))
+phonemes ["SL", "F", "u_corner", "F2"] = phonemes ["SL", "F", "u", "F2"]/(2^(1/12))
+# @_center is not fixed but derived from current corners
+phonemes ["SL", "F", "@_center", "F1"] =(phonemes ["SL", "F", "i_corner", "F1"]*phonemes ["SL", "F", "u_corner", "F1"]*phonemes ["SL", "F", "a_corner", "F1"])^(1/3)
+phonemes ["SL", "F", "@_center", "F2"] = (phonemes ["SL", "F", "i_corner", "F2"]*phonemes ["SL", "F", "u_corner", "F2"]*phonemes ["SL", "F", "a_corner", "F2"])^(1/3)
 
 ###############################################
 #
 # Burg's method formant algorithm (Burg)
 #
 ###############################################
-
-# Triangle
-# Male 
-phonemes ["Burg", "M", "i_corner", "F1"] = 250
-phonemes ["Burg", "M", "i_corner", "F2"] = 2275
-phonemes ["Burg", "M", "a_corner", "F1"] = 845
-phonemes ["Burg", "M", "a_corner", "F2"] = 1300
-phonemes ["Burg", "M", "u_corner", "F1"] = 285
-phonemes ["Burg", "M", "u_corner", "F2"] = 645
-# @_center is not fixed but derived from current corners
-phonemes ["Burg", "M", "@_center", "F1"] =(phonemes ["Burg", "M", "i_corner", "F1"]*phonemes ["Burg", "M", "u_corner", "F1"]*phonemes ["Burg", "M", "a_corner", "F1"])^(1/3)
-phonemes ["Burg", "M", "@_center", "F2"] = (phonemes ["Burg", "M", "i_corner", "F2"]*phonemes ["Burg", "M", "u_corner", "F2"]*phonemes ["Burg", "M", "a_corner", "F2"])^(1/3)
-
-# Female
-phonemes ["Burg", "F", "i_corner", "F1"] = 300
-phonemes ["Burg", "F", "i_corner", "F2"] = 2450
-phonemes ["Burg", "F", "a_corner", "F1"] = 950
-phonemes ["Burg", "F", "a_corner", "F2"] = 1530
-phonemes ["Burg", "F", "u_corner", "F1"] = 380
-phonemes ["Burg", "F", "u_corner", "F2"] = 720
-# @_center is not fixed but derived from current corners
-phonemes ["Burg", "F", "@_center", "F1"] =(phonemes ["Burg", "F", "i_corner", "F1"]*phonemes ["Burg", "F", "u_corner", "F1"]*phonemes ["Burg", "F", "a_corner", "F1"])^(1/3)
-phonemes ["Burg", "F", "@_center", "F2"] = (phonemes ["Burg", "F", "i_corner", "F2"]*phonemes ["Burg", "F", "u_corner", "F2"]*phonemes ["Burg", "F", "a_corner", "F2"])^(1/3)
-
 
 # Male 
 phonemes ["Burg", "M", "A", "F1"] = 743
@@ -765,35 +756,35 @@ phonemes ["Burg", "F", "y", "F2"] = 1803
 phonemes ["Burg", "F", "@", "F1"] = 440
 phonemes ["Burg", "F", "@", "F2"] = 1415
 
+# Triangle
+# Male 
+phonemes ["Burg", "M", "i_corner", "F1"] = phonemes ["Burg", "M", "i", "F1"]/(2^(1/12))
+phonemes ["Burg", "M", "i_corner", "F2"] = phonemes ["Burg", "M", "i", "F2"]*(2^(1/12))
+phonemes ["Burg", "M", "a_corner", "F1"] = phonemes ["Burg", "M", "a", "F1"]*(2^(1/12))
+phonemes ["Burg", "M", "a_corner", "F2"] = phonemes ["Burg", "M", "a", "F2"]
+phonemes ["Burg", "M", "u_corner", "F1"] = phonemes ["Burg", "M", "u", "F1"]/(2^(1/12))
+phonemes ["Burg", "M", "u_corner", "F2"] = phonemes ["Burg", "M", "u", "F2"]/(2^(1/12))
+# @_center is not fixed but derived from current corners
+phonemes ["Burg", "M", "@_center", "F1"] =(phonemes ["Burg", "M", "i_corner", "F1"]*phonemes ["Burg", "M", "u_corner", "F1"]*phonemes ["Burg", "M", "a_corner", "F1"])^(1/3)
+phonemes ["Burg", "M", "@_center", "F2"] = (phonemes ["Burg", "M", "i_corner", "F2"]*phonemes ["Burg", "M", "u_corner", "F2"]*phonemes ["Burg", "M", "a_corner", "F2"])^(1/3)
+
+# Female
+phonemes ["Burg", "F", "i_corner", "F1"] = phonemes ["Burg", "F", "i", "F1"]/(2^(1/12))
+phonemes ["Burg", "F", "i_corner", "F2"] = phonemes ["Burg", "F", "i", "F2"]*(2^(1/12))
+phonemes ["Burg", "F", "a_corner", "F1"] = phonemes ["Burg", "F", "a", "F1"]*(2^(1/12))
+phonemes ["Burg", "F", "a_corner", "F2"] = phonemes ["Burg", "F", "a", "F2"]
+phonemes ["Burg", "F", "u_corner", "F1"] = phonemes ["Burg", "F", "u", "F1"]/(2^(1/12))
+phonemes ["Burg", "F", "u_corner", "F2"] = phonemes ["Burg", "F", "u", "F2"]/(2^(1/12))
+# @_center is not fixed but derived from current corners
+phonemes ["Burg", "F", "@_center", "F1"] =(phonemes ["Burg", "F", "i_corner", "F1"]*phonemes ["Burg", "F", "u_corner", "F1"]*phonemes ["Burg", "F", "a_corner", "F1"])^(1/3)
+phonemes ["Burg", "F", "@_center", "F2"] = (phonemes ["Burg", "F", "i_corner", "F2"]*phonemes ["Burg", "F", "u_corner", "F2"]*phonemes ["Burg", "F", "a_corner", "F2"])^(1/3)
+
 
 ###############################################
 #
 # Robust formant algorithm (Robust)
 #
 ###############################################
-
-# Male
-phonemes ["Robust", "M", "i_corner", "F1"] = 230
-phonemes ["Robust", "M", "i_corner", "F2"] = 2450
-phonemes ["Robust", "M", "a_corner", "F1"] = 810
-phonemes ["Robust", "M", "a_corner", "F2"] = 1330
-phonemes ["Robust", "M", "u_corner", "F1"] = 260
-phonemes ["Robust", "M", "u_corner", "F2"] = 615
-# @_center is not fixed but derived from current corners
-phonemes ["Robust", "M", "@_center", "F1"] =(phonemes ["Robust", "M", "i_corner", "F1"]*phonemes ["Robust", "M", "u_corner", "F1"]*phonemes ["Robust", "M", "a_corner", "F1"])^(1/3)
-phonemes ["Robust", "M", "@_center", "F2"] = (phonemes ["Robust", "M", "i_corner", "F2"]*phonemes ["Robust", "M", "u_corner", "F2"]*phonemes ["Robust", "M", "a_corner", "F2"])^(1/3)
-                                              
-# Female
-phonemes ["Robust", "F", "i_corner", "F1"] = 260
-phonemes ["Robust", "F", "i_corner", "F2"] = 2750
-phonemes ["Robust", "F", "a_corner", "F1"] = 950
-phonemes ["Robust", "F", "a_corner", "F2"] = 1550
-phonemes ["Robust", "F", "u_corner", "F1"] = 325
-phonemes ["Robust", "F", "u_corner", "F2"] = 675
-# @_center is not fixed but derived from current corners
-phonemes ["Robust", "F", "@_center", "F1"] =(phonemes ["Robust", "F", "i_corner", "F1"]*phonemes ["Robust", "F", "u_corner", "F1"]*phonemes ["Robust", "F", "a_corner", "F1"])^(1/3)
-phonemes ["Robust", "F", "@_center", "F2"] = (phonemes ["Robust", "F", "i_corner", "F2"]*phonemes ["Robust", "F", "u_corner", "F2"]*phonemes ["Robust", "F", "a_corner", "F2"])^(1/3)
-
 
 # Male
 phonemes ["Robust", "M", "A", "F1"] = 680
@@ -866,6 +857,30 @@ phonemes ["Robust", "F", "y", "F2"] = 1765
 # Guessed
 phonemes ["Robust", "F", "@", "F1"] = 440
 phonemes ["Robust", "F", "@", "F2"] = 1415
+
+# Triangle
+# Male
+phonemes ["Robust", "M", "i_corner", "F1"] = phonemes ["Robust", "M", "i", "F1"]/(2^(1/12))
+phonemes ["Robust", "M", "i_corner", "F2"] = phonemes ["Robust", "M", "i", "F2"]*(2^(1/12))
+phonemes ["Robust", "M", "a_corner", "F1"] = phonemes ["Robust", "M", "a", "F1"]*(2^(1/12))
+phonemes ["Robust", "M", "a_corner", "F2"] = phonemes ["Robust", "M", "a", "F2"]
+phonemes ["Robust", "M", "u_corner", "F1"] = phonemes ["Robust", "M", "u", "F1"]/(2^(1/12))
+phonemes ["Robust", "M", "u_corner", "F2"] = phonemes ["Robust", "M", "u", "F2"]/(2^(1/12))
+# @_center is not fixed but derived from current corners
+phonemes ["Robust", "M", "@_center", "F1"] =(phonemes ["Robust", "M", "i_corner", "F1"]*phonemes ["Robust", "M", "u_corner", "F1"]*phonemes ["Robust", "M", "a_corner", "F1"])^(1/3)
+phonemes ["Robust", "M", "@_center", "F2"] = (phonemes ["Robust", "M", "i_corner", "F2"]*phonemes ["Robust", "M", "u_corner", "F2"]*phonemes ["Robust", "M", "a_corner", "F2"])^(1/3)
+                                              
+# Female
+phonemes ["Robust", "F", "i_corner", "F1"] = phonemes ["Robust", "F", "i", "F1"]/(2^(1/12))
+phonemes ["Robust", "F", "i_corner", "F2"] = phonemes ["Robust", "F", "i", "F2"]*(2^(1/12))
+phonemes ["Robust", "F", "a_corner", "F1"] = phonemes ["Robust", "F", "a", "F1"]*(2^(1/12))
+phonemes ["Robust", "F", "a_corner", "F2"] = phonemes ["Robust", "F", "a", "F2"]
+phonemes ["Robust", "F", "u_corner", "F1"] = phonemes ["Robust", "F", "u", "F1"]/(2^(1/12))
+phonemes ["Robust", "F", "u_corner", "F2"] = phonemes ["Robust", "F", "u", "F2"]/(2^(1/12))
+# @_center is not fixed but derived from current corners
+phonemes ["Robust", "F", "@_center", "F1"] =(phonemes ["Robust", "F", "i_corner", "F1"]*phonemes ["Robust", "F", "u_corner", "F1"]*phonemes ["Robust", "F", "a_corner", "F1"])^(1/3)
+phonemes ["Robust", "F", "@_center", "F2"] = (phonemes ["Robust", "F", "i_corner", "F2"]*phonemes ["Robust", "F", "u_corner", "F2"]*phonemes ["Robust", "F", "a_corner", "F2"])^(1/3)
+
 
 
 ###############################################
@@ -998,6 +1013,8 @@ endif
 # Run master loop
 while .continue
 	
+	.titleVar$ = uiMessage$ [uiLanguage$, "Title"]
+	.titleVar$ = replace_regex$(.titleVar$, "^([A-Z])", "\l\1", 0)
 	.speakerIsA$ = uiMessage$ [uiLanguage$, "Speaker is a"]
 	.speakerIsAVar$ = replace_regex$(.speakerIsA$, "^([A-Z])", "\l\1", 0)
 	.speakerIsAVar$ = replace_regex$(.speakerIsAVar$, "\s*\(.*$", "", 0)
@@ -1009,7 +1026,7 @@ while .continue
 
 	.recording = 0
 	beginPause: "Select a recording"
-		sentence: "Title", "untitled"
+		sentence: uiMessage$ [uiLanguage$, "Title"], uiMessage$ [uiLanguage$, "untitled"]
 		comment: uiMessage$ [uiLanguage$, "CommentOpen"]
 		comment: uiMessage$ [uiLanguage$, "CommentRecord"]
 		choice: .speakerIsA$, .sp_default
@@ -1040,6 +1057,11 @@ while .continue
 		.recording = 1
 	endif
 
+	title$ = '.titleVar$'$
+	if title$ = uiMessage$ [uiLanguage$, "untitled"]
+		title$ = "untitled"
+	endif
+	
 	.sp$ = "M"
 	.sp_default = 2
 	if uiMessage$ [uiLanguage$, "Female"] = '.speakerIsAVar$'$

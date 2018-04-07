@@ -33,13 +33,25 @@ uiLanguage$ = "EN"
 .defaultLanguage = 1
 .preferencesLanguageFile$ = preferencesDirectory$+"/VowelTriangle.prefs"
 .preferencesLang$ = ""
+.formant_default = 1
 if fileReadable(.preferencesLanguageFile$)
-	.preferencesLang$ = readFile$(.preferencesLanguageFile$)
-	if index_regex(.preferencesLang$, "Language\s*=\s*([^\n]+)") > 0
-		.preferencesLang$ = replace_regex$(.preferencesLang$, "^.*Language=([^\n]+).*", "\L\1", 0)
+	.preferences$ = readFile$(.preferencesLanguageFile$)
+	if index_regex(.preferences$, "Language\s*=\s*([^\n]+)") > 0
+		.preferencesLang$ = replace_regex$(.preferences$, ".*Language=([^\n]+).*", "\L\1", 0)
 	else
 		.preferencesLang$ = ""
 	endif
+	if index_regex(.preferences$, "Formant\s*=\s*([^\n]+)") > 0
+		.tmp$ = replace_regex$(.preferences$, ".*Formant=([^\n]+).*", "\1", 0)
+		if index(.tmp$, "Burg")
+			.formant_default = 2
+		elsif index(.tmp$, "Robust")
+			.formant_default = 3
+		endif
+	else
+		.formant_default = 1
+	endif
+	
 endif
 
 .locale$ = "en"
@@ -93,7 +105,6 @@ elsif startsWith(.locale$, "it")
 endif
 
 .sp_default = 1
-.formant_default = 1
 output_table$ = ""
 
 default_Dot_Radius = 0.01
@@ -1100,9 +1111,6 @@ while .continue
 	#	.defaultLanguage = 9
 	endif
 	
-	# Store preferences
-	writeFileLine: .preferencesLanguageFile$, "Language=",uiLanguage$
-	
 	if formant$ = "Burg"
 		plotFormantAlgorithm$ = "Burg"
 		targetFormantAlgorithm$ = "Burg"
@@ -1116,6 +1124,10 @@ while .continue
 		targetFormantAlgorithm$ = "SL"
 		.formant_default = 1
 	endif
+	
+	# Store preferences
+	writeFileLine: .preferencesLanguageFile$, "Language=",uiLanguage$
+	appendFileLine: .preferencesLanguageFile$, "Formant=",targetFormantAlgorithm$
 	
 	# Start
 	if log and output_table$ = ""

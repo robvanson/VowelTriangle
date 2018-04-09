@@ -36,13 +36,14 @@ uiLanguage$ = "EN"
 .formant_default = 1
 if fileReadable(.preferencesLanguageFile$)
 	.preferences$ = readFile$(.preferencesLanguageFile$)
-	if index_regex(.preferences$, "Language\s*=\s*([^\n]+)") > 0
-		.preferencesLang$ = replace_regex$(.preferences$, ".*Language=([^\n]+).*", "\L\1", 0)
+	if index(.preferences$, "Language=") > 0
+		.preferencesLang$ = extractWord$(.preferences$, "Language=")
 	else
 		.preferencesLang$ = ""
 	endif
-	if index_regex(.preferences$, "Formant\s*=\s*([^\n]+)") > 0
-		.tmp$ = replace_regex$(.preferences$, ".*Formant=([^\n]+).*", "\1", 0)
+	# Always assume that the preferences file could be corrupted
+	if index(.preferences$, "Formant=") > 0
+		.tmp$ = extractWord$(.preferences$, "Formant=")
 		if index(.tmp$, "Burg")
 			.formant_default = 2
 		elsif index(.tmp$, "Robust")
@@ -73,30 +74,32 @@ else
 		.locale$ = replace_regex$(.locale$, "^.*Default System UI language : ([^\s]+).*", "\1", 0)
 		deleteFile: .scratch$	
 	endif
+	.locale$ = replace_regex$(.preferencesLang$, "(.)", "\U\1", 0)
 endif
 
-if startsWith(.locale$, "en")
+# Always assume that the preferences file could be corrupted
+if startsWith(.locale$, "EN")
 	uiLanguage$ = "EN"
 	.defaultLanguage = 1
-elsif startsWith(.locale$, "nl")
+elsif startsWith(.locale$, "NL")
 	uiLanguage$ = "NL"
 	.defaultLanguage = 2
-elsif startsWith(.locale$, "de")
+elsif startsWith(.locale$, "DE")
 	uiLanguage$ = "DE"
 	.defaultLanguage = 3
-elsif startsWith(.locale$, "fr")
+elsif startsWith(.locale$, "FR")
 	uiLanguage$ = "FR"
 	.defaultLanguage = 4
-elsif startsWith(.locale$, "zh")
+elsif startsWith(.locale$, "ZH")
 	uiLanguage$ = "ZH"
 	.defaultLanguage = 5
-elsif startsWith(.locale$, "es")
+elsif startsWith(.locale$, "ES")
 	uiLanguage$ = "ES"
 	.defaultLanguage = 6
-elsif startsWith(.locale$, "pt")
+elsif startsWith(.locale$, "PT")
 	uiLanguage$ = "PT"
 	.defaultLanguage = 7
-elsif startsWith(.locale$, "it")
+elsif startsWith(.locale$, "IT")
 	uiLanguage$ = "IT"
 	.defaultLanguage = 8
 #elsif startsWith(.locale$, "MYLANGUAGE")

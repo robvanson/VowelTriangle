@@ -955,7 +955,7 @@ if input_table > 0
 
 				.tmp = Read from file: .preFix$ + .fileName$
 				if .tmp <= 0 or numberOfSelected("Sound") <= 0
-					exitScript: "Not a valid Sound file"
+					exitScript: uiMessage$ [uiLanguage$, "ErrorSound"]
 				endif
 				name$ = selected$("Sound")
 				.soundPart = Convert to mono
@@ -980,7 +980,7 @@ if input_table > 0
 		elsif file$ <> "" and fileReadable(file$) and index_regex(file$, "(?i\.(wav|mp3|aif[fc]))")
 			tmp = Read from file: file$
 			if tmp <= 0 or numberOfSelected("Sound") <= 0
-				exitScript: "Not a valid Sound file"
+				exitScript: uiMessage$ [uiLanguage$, "ErrorSound"]
 			endif
 			name$ = selected$("Sound")
 			.sound = Convert to mono
@@ -990,7 +990,7 @@ if input_table > 0
 			selectObject(tmp)
 			Remove
 		else
-			exitScript: "Not a valid file"
+			exitScript: uiMessage$ [uiLanguage$, "ErrorSound"]
 		endif
 		
 		if .plotVowels
@@ -1014,7 +1014,7 @@ if input_table > 0
 	selectObject: input_table
 	Remove
 	
-	exitScript: "Ready"
+	exitScript: uiMessage$ [uiLanguage$, "Done"]
 endif
 
 
@@ -1170,6 +1170,9 @@ while .continue
 	.open1$ = uiMessage$ [uiLanguage$, "Open1"]
 	.open2$ = uiMessage$ [uiLanguage$, "Open2"]
 	@read_and_select_audio: .recording, .open1$ , .open2$
+	if read_and_select_audio.sound < 1
+		goto NEXTROUND
+	endif
 	.sound = read_and_select_audio.sound
 	if title$ = "untitled"
 		title$ = replace_regex$(read_and_select_audio.filename$, "\.[^\.]+$", "", 0)
@@ -1208,28 +1211,33 @@ while .continue
 	.clicked = endPause: (uiMessage$ [uiLanguage$, "Continue"]), (uiMessage$ [uiLanguage$, "Done"]), 2, 2
 	.continue = (.clicked = 1)
 	
+	label NEXTROUND
 endwhile
 
 #####################################################################
 
 procedure read_and_select_audio .type .message1$ .message2$
+	.sound = -1
 	if .type
 		Record mono Sound...
 		beginPause: (uiMessage$ [uiLanguage$, "PauseRecord"])
 			comment: uiMessage$ [uiLanguage$, "CommentList"]
 		.clicked = endPause: (uiMessage$ [uiLanguage$, "Stop"]), (uiMessage$ [uiLanguage$, "Continue"]), 2, 1
 		if .clicked = 1
-			@exitVowelTriangle: (uiMessage$ [uiLanguage$, "Stopped"])
+			pauseScript: (uiMessage$ [uiLanguage$, "Stopped"])
+			goto RETURN
 		endif
 		if numberOfSelected("Sound") <= 0
-			@exitVowelTriangle: (uiMessage$ [uiLanguage$, "ErrorSound"])
+			pauseScript: (uiMessage$ [uiLanguage$, "ErrorSound"])
+			goto RETURN
 		endif
 		.source = selected ("Sound")
 		.filename$ = "Recorded speech"
 	else
 		.filename$ = chooseReadFile$: .message1$
 		if .filename$ = "" or not fileReadable(.filename$) or not index_regex(.filename$, "(?i\.(wav|mp3|aif[fc]))")
-			@exitVowelTriangle: (uiMessage$ [uiLanguage$, "No readable recording selected "])+.filename$
+			pauseScript: (uiMessage$ [uiLanguage$, "No readable recording selected "])+.filename$
+			goto RETURN
 		endif
 		
 		.source = Open long sound file: .filename$
@@ -1237,7 +1245,8 @@ procedure read_and_select_audio .type .message1$ .message2$
 		.fullName$ = selected$()
 		.fileType$ = extractWord$ (.fullName$, "")
 		if .fileType$ <> "Sound" and .fileType$ <> "LongSound"
-			@exitVowelTriangle:  (uiMessage$ [uiLanguage$, "ErrorSound"])+.filename$
+			pauseScript:  (uiMessage$ [uiLanguage$, "ErrorSound"])+.filename$
+			goto RETURN
 		endif
 	endif
 	
@@ -1257,7 +1266,7 @@ procedure read_and_select_audio .type .message1$ .message2$
 		comment: (uiMessage$ [uiLanguage$, "SelectSound3"])
 	.clicked = endPause: (uiMessage$ [uiLanguage$, "Stop"]), (uiMessage$ [uiLanguage$, "Continue"]), 2, 1
 	if .clicked = 1
-		@exitVowelTriangle: (uiMessage$ [uiLanguage$, "Stopped"])
+		pauseScript: (uiMessage$ [uiLanguage$, "Stopped"])
 	endif
 	
 	editor: .source
@@ -1283,6 +1292,8 @@ procedure read_and_select_audio .type .message1$ .message2$
 
 	selectObject: .sound
 	Rename: .filename$
+	
+	label RETURN
 endproc
 
 # Set up Canvas

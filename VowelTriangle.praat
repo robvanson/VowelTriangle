@@ -48,6 +48,8 @@ if fileReadable(.preferencesLanguageFile$)
 			.formant_default = 2
 		elsif index(.tmp$, "Robust")
 			.formant_default = 3
+		elsif index(.tmp$, "KeepAll")
+			.formant_default = 4
 		endif
 	else
 		.formant_default = 1
@@ -158,10 +160,10 @@ endif
 # Add new targets if necessary
 
 # Select algorithm for calculating formants
-# Alternatives: "SL", "Burg" or "Robust"
+# Alternatives: "SL", "Burg", "Robust", or "KeepAll"
 
 # Vowel targets
-targetFormantAlgorithm$ = "SL"
+targetFormantAlgorithm$ = "Robust"
 
 # Plotting can be different from the target, in principle
 plotFormantAlgorithm$ = targetFormantAlgorithm$
@@ -896,6 +898,108 @@ phonemes ["Robust", "F", "@_center", "F1"] =(phonemes ["Robust", "F", "i_corner"
 phonemes ["Robust", "F", "@_center", "F2"] = (phonemes ["Robust", "F", "i_corner", "F2"]*phonemes ["Robust", "F", "u_corner", "F2"]*phonemes ["Robust", "F", "a_corner", "F2"])^(1/3)
 
 
+###############################################
+#
+# KeepAll formant algorithm (KeepAll)
+#
+###############################################
+
+# Male
+phonemes ["KeepAll", "M", "A", "F1"] = 680
+phonemes ["KeepAll", "M", "A", "F2"] = 1038
+phonemes ["KeepAll", "M", "E", "F1"] = 510
+phonemes ["KeepAll", "M", "E", "F2"] = 1900
+phonemes ["KeepAll", "M", "I", "F1"] = 354
+phonemes ["KeepAll", "M", "I", "F2"] = 2167
+phonemes ["KeepAll", "M", "O", "F1"] = 446
+phonemes ["KeepAll", "M", "O", "F2"] = 680
+phonemes ["KeepAll", "M", "Y", "F1"] = 389
+phonemes ["KeepAll", "M", "Y", "F2"] = 1483
+phonemes ["KeepAll", "M", "Y:", "F1"] = 370
+phonemes ["KeepAll", "M", "Y:", "F2"] = 1508
+phonemes ["KeepAll", "M", "a", "F1"] = 797
+phonemes ["KeepAll", "M", "a", "F2"] = 1328
+phonemes ["KeepAll", "M", "au", "F1"] = 542
+phonemes ["KeepAll", "M", "au", "F2"] = 945
+phonemes ["KeepAll", "M", "e", "F1"] = 351
+phonemes ["KeepAll", "M", "e", "F2"] = 2180
+phonemes ["KeepAll", "M", "ei", "F1"] = 471
+phonemes ["KeepAll", "M", "ei", "F2"] = 1994
+phonemes ["KeepAll", "M", "i", "F1"] = 242
+phonemes ["KeepAll", "M", "i", "F2"] = 2330
+phonemes ["KeepAll", "M", "o", "F1"] = 393
+phonemes ["KeepAll", "M", "o", "F2"] = 692
+phonemes ["KeepAll", "M", "u", "F1"] = 269
+phonemes ["KeepAll", "M", "u", "F2"] = 626
+phonemes ["KeepAll", "M", "ui", "F1"] = 475
+phonemes ["KeepAll", "M", "ui", "F2"] = 1523
+phonemes ["KeepAll", "M", "y", "F1"] = 254
+phonemes ["KeepAll", "M", "y", "F2"] = 1609
+
+# Guessed
+phonemes ["KeepAll", "M", "@", "F1"] = 373
+phonemes ["KeepAll", "M", "@", "F2"] = 1247
+
+# Female
+phonemes ["KeepAll", "F", "A", "F1"] = 826
+phonemes ["KeepAll", "F", "A", "F2"] = 1208
+phonemes ["KeepAll", "F", "E", "F1"] = 648
+phonemes ["KeepAll", "F", "E", "F2"] = 2136
+phonemes ["KeepAll", "F", "I", "F1"] = 411
+phonemes ["KeepAll", "F", "I", "F2"] = 2432
+phonemes ["KeepAll", "F", "O", "F1"] = 527
+phonemes ["KeepAll", "F", "O", "F2"] = 836
+phonemes ["KeepAll", "F", "Y", "F1"] = 447
+phonemes ["KeepAll", "F", "Y", "F2"] = 1698
+phonemes ["KeepAll", "F", "Y:", "F1"] = 404
+phonemes ["KeepAll", "F", "Y:", "F2"] = 1750
+phonemes ["KeepAll", "F", "a", "F1"] = 942
+phonemes ["KeepAll", "F", "a", "F2"] = 1550
+phonemes ["KeepAll", "F", "au", "F1"] = 600
+phonemes ["KeepAll", "F", "au", "F2"] = 1048
+phonemes ["KeepAll", "F", "e", "F1"] = 409
+phonemes ["KeepAll", "F", "e", "F2"] = 2444
+phonemes ["KeepAll", "F", "ei", "F1"] = 618
+phonemes ["KeepAll", "F", "ei", "F2"] = 2196
+phonemes ["KeepAll", "F", "i", "F1"] = 271
+phonemes ["KeepAll", "F", "i", "F2"] = 2667
+phonemes ["KeepAll", "F", "o", "F1"] = 470
+phonemes ["KeepAll", "F", "o", "F2"] = 879
+phonemes ["KeepAll", "F", "u", "F1"] = 334
+phonemes ["KeepAll", "F", "u", "F2"] = 686
+phonemes ["KeepAll", "F", "ui", "F1"] = 594
+phonemes ["KeepAll", "F", "ui", "F2"] = 1669
+phonemes ["KeepAll", "F", "y", "F1"] = 285
+phonemes ["KeepAll", "F", "y", "F2"] = 1765
+
+# Guessed
+phonemes ["KeepAll", "F", "@", "F1"] = 440
+phonemes ["KeepAll", "F", "@", "F2"] = 1415
+
+# Triangle
+# Male
+phonemes ["KeepAll", "M", "i_corner", "F1"] = phonemes ["KeepAll", "M", "i", "F1"]/(2^(1/12))
+phonemes ["KeepAll", "M", "i_corner", "F2"] = phonemes ["KeepAll", "M", "i", "F2"]*(2^(1/12))
+phonemes ["KeepAll", "M", "a_corner", "F1"] = phonemes ["KeepAll", "M", "a", "F1"]*(2^(1/12))
+phonemes ["KeepAll", "M", "a_corner", "F2"] = phonemes ["KeepAll", "M", "a", "F2"]
+phonemes ["KeepAll", "M", "u_corner", "F1"] = phonemes ["KeepAll", "M", "u", "F1"]/(2^(1/12))
+phonemes ["KeepAll", "M", "u_corner", "F2"] = phonemes ["KeepAll", "M", "u", "F2"]/(2^(1/12))
+# @_center is not fixed but derived from current corners
+phonemes ["KeepAll", "M", "@_center", "F1"] =(phonemes ["KeepAll", "M", "i_corner", "F1"]*phonemes ["KeepAll", "M", "u_corner", "F1"]*phonemes ["KeepAll", "M", "a_corner", "F1"])^(1/3)
+phonemes ["KeepAll", "M", "@_center", "F2"] = (phonemes ["KeepAll", "M", "i_corner", "F2"]*phonemes ["KeepAll", "M", "u_corner", "F2"]*phonemes ["KeepAll", "M", "a_corner", "F2"])^(1/3)
+                                              
+# Female
+phonemes ["KeepAll", "F", "i_corner", "F1"] = phonemes ["KeepAll", "F", "i", "F1"]/(2^(1/12))
+phonemes ["KeepAll", "F", "i_corner", "F2"] = phonemes ["KeepAll", "F", "i", "F2"]*(2^(1/12))
+phonemes ["KeepAll", "F", "a_corner", "F1"] = phonemes ["KeepAll", "F", "a", "F1"]*(2^(1/12))
+phonemes ["KeepAll", "F", "a_corner", "F2"] = phonemes ["KeepAll", "F", "a", "F2"]
+phonemes ["KeepAll", "F", "u_corner", "F1"] = phonemes ["KeepAll", "F", "u", "F1"]/(2^(1/12))
+phonemes ["KeepAll", "F", "u_corner", "F2"] = phonemes ["KeepAll", "F", "u", "F2"]/(2^(1/12))
+# @_center is not fixed but derived from current corners
+phonemes ["KeepAll", "F", "@_center", "F1"] =(phonemes ["KeepAll", "F", "i_corner", "F1"]*phonemes ["KeepAll", "F", "u_corner", "F1"]*phonemes ["KeepAll", "F", "a_corner", "F1"])^(1/3)
+phonemes ["KeepAll", "F", "@_center", "F2"] = (phonemes ["KeepAll", "F", "i_corner", "F2"]*phonemes ["KeepAll", "F", "u_corner", "F2"]*phonemes ["KeepAll", "F", "a_corner", "F2"])^(1/3)
+
+
 
 ###############################################
 #
@@ -1062,6 +1166,7 @@ while .continue
 			option: "SL"
 			option: "Burg"
 			option: "Robust"
+			option: "Keep All"
 	.clicked = endPause: (uiMessage$ [uiLanguage$, "Stop"]), (uiMessage$ [uiLanguage$, "Record"]), (uiMessage$ [uiLanguage$, "Open"]), 3, 1	
 	if .clicked = 1
 		.continue = 0
@@ -1113,7 +1218,7 @@ while .continue
 	#	uiLanguage$ = "MyCode"
 	#	.defaultLanguage = 9
 	endif
-	
+
 	if formant$ = "Burg"
 		plotFormantAlgorithm$ = "Burg"
 		targetFormantAlgorithm$ = "Burg"
@@ -1122,6 +1227,10 @@ while .continue
 		plotFormantAlgorithm$ = "Robust"
 		targetFormantAlgorithm$ = "Robust"
 		.formant_default = 3
+	elsif formant$ = "Keep All"
+		plotFormantAlgorithm$ = "KeepAll"
+		targetFormantAlgorithm$ = "KeepAll"
+		.formant_default = 4
 	else
 		plotFormantAlgorithm$ = "SL"
 		targetFormantAlgorithm$ = "SL"
@@ -1266,7 +1375,10 @@ procedure read_and_select_audio .type .message1$ .message2$
 		comment: (uiMessage$ [uiLanguage$, "SelectSound3"])
 	.clicked = endPause: (uiMessage$ [uiLanguage$, "Stop"]), (uiMessage$ [uiLanguage$, "Continue"]), 2, 1
 	if .clicked = 1
+		selectObject: .source
+		Remove
 		pauseScript: (uiMessage$ [uiLanguage$, "Stopped"])
+		goto RETURN
 	endif
 	
 	editor: .source
@@ -1334,6 +1446,9 @@ procedure plot_vowels .plot .sp$ .sound
 	elsif targetFormantAlgorithm$ = "Robust"
 		.formants = noprogress To Formant (robust): 0.01, 5, .maxFormant, 0.025, 50, 1.5, 5, 1e-06
 		.formantsBandwidth = Copy: "Bandwidth"
+	elsif targetFormantAlgorithm$ = "KeepAll"
+		.formants = noprogress To Formant (keep all): 0.01, 5, .maxFormant, 0.025, 50
+		.formantsBandwidth = Copy: "Bandwidth"
 	else
 		selectObject: .sound
 		.downSampled = Resample: 2*.maxFormant, 50
@@ -1350,12 +1465,14 @@ procedure plot_vowels .plot .sp$ .sound
 	else
 		selectObject: .sound
 		if plotFormantAlgorithm$ = "Burg"
-			.formantsPlot = noprogress To Formant (burg): 0, 5, .maxForman, 0.025, 50
+			.formantsPlot = noprogress To Formant (burg): 0, 5, .maxFormant, 0.025, 50
 		elsif plotFormantAlgorithm$ = "Robust"
-			.formantsPlot = noprogress To Formant (robust): 0.01, 5, .maxForman, 0.025, 50, 1.5, 5, 1e-06
+			.formantsPlot = noprogress To Formant (robust): 0.01, 5, .maxFormant, 0.025, 50, 1.5, 5, 1e-06
+		elsif plotFormantAlgorithm$ = "KeepAll"
+			formantsPlot = noprogress To Formant (keep all): 0, 5, .maxFormant, 0.025, 50
 		else
 			.downSampled = Resample: 2*.maxFormant, 50
-			.formantsPlot = noprogress To Formant (sl): 0, 5, .maxForman, 0.025, 50
+			.formantsPlot = noprogress To Formant (sl): 0, 5, .maxFormant, 0.025, 50
 			selectObject: .downSampled
 			Remove
 		endif

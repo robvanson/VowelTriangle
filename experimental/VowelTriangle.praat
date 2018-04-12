@@ -1487,6 +1487,9 @@ procedure plot_vowels .plot .sp$ .sound
 		.dot_Radius = default_Dot_Radius / sqrt(.numTargets/dot_Radius_Cutoff)
 	endif
 
+	# Get Vocal Track Length
+	@estimate_Vocal_Tract_Length: .formantsPlot, .syllableKernels, .targetTier
+printline ['estimate_Vocal_Tract_Length.meanPhi']
 	
 	# Set new @_center
 	phonemes [plotFormantAlgorithm$, .sp$, "@_center", "F1"] = (phonemes [plotFormantAlgorithm$, .sp$, "a", "F1"] * phonemes [plotFormantAlgorithm$, .sp$, "i", "F1"] * phonemes [plotFormantAlgorithm$, .sp$, "u", "F1"]) ** (1/3) 
@@ -2526,6 +2529,50 @@ procedure segment_syllables .silence_threshold .minimum_dip_between_peaks .minim
 	Remove
 	
 	selectObject: .textgridid
+endproc
+
+#
+# Vocal Tract Length according to:
+# Lammert, Adam C., and Shrikanth S. Narayanan. 
+# “On Short-Time Estimation of Vocal Tract Length from Formant Frequencies.” 
+# Edited by Charles R Larson. PLOS ONE 10, no. 7 (July 15, 2015): e0132193. 
+# https://doi.org/10.1371/journal.pone.0132193.
+#
+procedure estimate_Vocal_Tract_Length .formant .textGrid .targetTier
+	# Coefficients
+	.beta[0] = 229
+	.beta[1] = 0.030
+	.beta[2] = 0.082
+	.beta[3] = 0.124
+	.beta[4] = 0.354
+	
+	selectObject: .textGrid
+	.numTargets = Get number of points: .targetTier
+	.n = 0
+	.sumPhi = 0
+	for .p to .numTargets
+		selectObject: .textGrid
+		.t = Get time of point: .targetTier, .p
+		selectObject: .formant 
+		.phi = .beta[0]
+		for .i to 4
+			.f[.i] = Get value at time: .i, .t, "hertz", "Linear"
+			if .f[.i] <> undefined and .phi <> undefined
+				.phi += .beta[.i] * .f[.i] / (2*.i - 1)
+			else
+				.phi = undefined
+			endif
+		endfor
+		if .phi <> undefined
+			.sumPhi += .phi
+			.n += 1
+		endif
+	endfor
+	
+	.meanPhi = -1
+	if .n > 0
+		.meanPhi = .sumPhi / .n
+	endif
 endproc
 
 # 

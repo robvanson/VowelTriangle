@@ -1526,6 +1526,7 @@ procedure plot_vowels .plot .sp$ .sound
 	# Get Vocal Track Length
 	@estimate_Vocal_Tract_Length: .formantsPlot, .syllableKernels, .targetTier
 	.vocalTractLength = estimate_Vocal_Tract_Length.vtl
+	.vtlCorrection = averagePhi_VTL[plotFormantAlgorithm$, .sp$] / estimate_Vocal_Tract_Length.phi
 	
 	# Set new @_center
 	phonemes [plotFormantAlgorithm$, .sp$, "@_center", "F1"] = (phonemes [plotFormantAlgorithm$, .sp$, "a", "F1"] * phonemes [plotFormantAlgorithm$, .sp$, "i", "F1"] * phonemes [plotFormantAlgorithm$, .sp$, "u", "F1"]) ** (1/3) 
@@ -1535,21 +1536,21 @@ procedure plot_vowels .plot .sp$ .sound
 	.f2_c = phonemes [plotFormantAlgorithm$, .sp$, "@_center", "F2"]
 	
 	# Plot center
-	@vowel2point: plotFormantAlgorithm$, .sp$, .f1_c, .f2_c
+	@vowel2point: 1, plotFormantAlgorithm$, .sp$, .f1_c, .f2_c
 	.st_c1 = vowel2point.x
 	.st_c2 = vowel2point.y
 	
 	# Near /@/
 	.f1_c = phonemes [plotFormantAlgorithm$, .sp$, "@_center", "F1"]
 	.f2_c = phonemes [plotFormantAlgorithm$, .sp$, "@_center", "F2"]
-	@get_closest_vowels: 0, .sp$, .formants, .formantsPlot, .syllableKernels, .f1_c, .f2_c
+	@get_closest_vowels: 0, .sp$, .formants, .formantsPlot, .syllableKernels, .f1_c, .f2_c, .vtlCorrection
 	.numVowelIntervals = get_closest_vowels.vowelNum
 	# Actually plot the vowels
 	if .plot
 		for .i to get_closest_vowels.vowelNum
 			.f1 = get_closest_vowels.f1_list [.i]
 			.f2 = get_closest_vowels.f2_list [.i]
-			@vowel2point: plotFormantAlgorithm$, .sp$, .f1, .f2
+			@vowel2point: .vtlCorrection, plotFormantAlgorithm$, .sp$, .f1, .f2
 			.x = vowel2point.x
 			.y = vowel2point.y
 			Paint circle: color$["@"], .x, .y, .dot_Radius
@@ -1559,7 +1560,7 @@ procedure plot_vowels .plot .sp$ .sound
 	# Near /i/
 	.f1_i = phonemes [plotFormantAlgorithm$, .sp$, "i", "F1"]
 	.f2_i = phonemes [plotFormantAlgorithm$, .sp$, "i", "F2"]
-	@get_closest_vowels: 0, .sp$, .formants, .formantsPlot, .syllableKernels, .f1_i, .f2_i
+	@get_closest_vowels: 0, .sp$, .formants, .formantsPlot, .syllableKernels, .f1_i, .f2_i, .vtlCorrection
 	.meanDistToCenter ["i"] = get_closest_vowels.meanDistance
 	.stdevDistToCenter ["i"] = get_closest_vowels.stdevDistance
 	.num_i_Intervals = get_closest_vowels.vowelNum
@@ -1568,7 +1569,7 @@ procedure plot_vowels .plot .sp$ .sound
 		for .i to get_closest_vowels.vowelNum
 			.f1 = get_closest_vowels.f1_list [.i]
 			.f2 = get_closest_vowels.f2_list [.i]
-			@vowel2point: plotFormantAlgorithm$, .sp$, .f1, .f2
+			@vowel2point: .vtlCorrection, plotFormantAlgorithm$, .sp$, .f1, .f2
 			.x = vowel2point.x
 			.y = vowel2point.y
 			Paint circle: color$["i"], .x, .y, .dot_Radius
@@ -1578,7 +1579,7 @@ procedure plot_vowels .plot .sp$ .sound
 	# Near /u/
 	.f1_u = phonemes [plotFormantAlgorithm$, .sp$, "u", "F1"]
 	.f2_u = phonemes [plotFormantAlgorithm$, .sp$, "u", "F2"]
-	@get_closest_vowels:  0, .sp$, .formants, .formantsPlot, .syllableKernels, .f1_u, .f2_u
+	@get_closest_vowels:  0, .sp$, .formants, .formantsPlot, .syllableKernels, .f1_u, .f2_u, .vtlCorrection
 	.meanDistToCenter ["u"] = get_closest_vowels.meanDistance
 	.stdevDistToCenter ["u"] = get_closest_vowels.stdevDistance
 	.num_u_Intervals = get_closest_vowels.vowelNum
@@ -1587,7 +1588,7 @@ procedure plot_vowels .plot .sp$ .sound
 		for .i to get_closest_vowels.vowelNum
 			.f1 = get_closest_vowels.f1_list [.i]
 			.f2 = get_closest_vowels.f2_list [.i]
-			@vowel2point: plotFormantAlgorithm$, .sp$, .f1, .f2
+			@vowel2point: .vtlCorrection, plotFormantAlgorithm$, .sp$, .f1, .f2
 			.x = vowel2point.x
 			.y = vowel2point.y
 			Paint circle: color$["u"], .x, .y, .dot_Radius
@@ -1597,7 +1598,7 @@ procedure plot_vowels .plot .sp$ .sound
 	# Near /a/
 	.f1_a = phonemes [plotFormantAlgorithm$, .sp$, "a", "F1"]
 	.f2_a = phonemes [plotFormantAlgorithm$, .sp$, "a", "F2"]
-	@get_closest_vowels:  0, .sp$, .formants, .formantsPlot, .syllableKernels, .f1_a, .f2_a
+	@get_closest_vowels:  0, .sp$, .formants, .formantsPlot, .syllableKernels, .f1_a, .f2_a, .vtlCorrection
 	.meanDistToCenter ["a"] = get_closest_vowels.meanDistance
 	.stdevDistToCenter ["a"] = get_closest_vowels.stdevDistance
 	.num_a_Intervals = get_closest_vowels.vowelNum
@@ -1606,7 +1607,7 @@ procedure plot_vowels .plot .sp$ .sound
 		for .i to get_closest_vowels.vowelNum
 			.f1 = get_closest_vowels.f1_list [.i]
 			.f2 = get_closest_vowels.f2_list [.i]
-			@vowel2point: plotFormantAlgorithm$, .sp$, .f1, .f2
+			@vowel2point: .vtlCorrection, plotFormantAlgorithm$, .sp$, .f1, .f2
 			.x = vowel2point.x
 			.y = vowel2point.y
 			Paint circle: color$["a"], .x, .y, .dot_Radius
@@ -1623,7 +1624,7 @@ procedure plot_vowels .plot .sp$ .sound
 		Draw line: .x-0.007, .y+0.007, .x+0.007, .y-0.007
 		Draw line: .x-0.007, .y-0.007, .x+0.007, .y+0.007
 		# u
-		@vowel2point: plotFormantAlgorithm$, .sp$, .f1_u, .f2_u	
+		@vowel2point: 1, plotFormantAlgorithm$, .sp$, .f1_u, .f2_u	
 		.x = vowel2point.x
 		.y = vowel2point.y
 		Black
@@ -1631,7 +1632,7 @@ procedure plot_vowels .plot .sp$ .sound
 		Draw line: .x-0.007, .y+0.007, .x+0.007, .y-0.007
 		Draw line: .x-0.007, .y-0.007, .x+0.007, .y+0.007
 		# i
-		@vowel2point: plotFormantAlgorithm$, .sp$, .f1_i, .f2_i	
+		@vowel2point: 1, plotFormantAlgorithm$, .sp$, .f1_i, .f2_i	
 		.x = vowel2point.x
 		.y = vowel2point.y
 		Black
@@ -1639,7 +1640,7 @@ procedure plot_vowels .plot .sp$ .sound
 		Draw line: .x-0.007, .y+0.007, .x+0.007, .y-0.007
 		Draw line: .x-0.007, .y-0.007, .x+0.007, .y+0.007
 		# a
-		@vowel2point: plotFormantAlgorithm$, .sp$, .f1_a, .f2_a	
+		@vowel2point: 1, plotFormantAlgorithm$, .sp$, .f1_a, .f2_a	
 		.x = vowel2point.x
 		.y = vowel2point.y
 		Black
@@ -1649,15 +1650,15 @@ procedure plot_vowels .plot .sp$ .sound
 	endif
 	
 	# Draw new triangle
-	@vowel2point: plotFormantAlgorithm$, .sp$, .f1_i, .f2_i
+	@vowel2point: 1, plotFormantAlgorithm$, .sp$, .f1_i, .f2_i
 	.st_i1 = vowel2point.x
 	.st_i2 = vowel2point.y
 	.ic_dist = sqrt((.st_c1 - .st_i1)^2 + (.st_c2 - .st_i2)^2)
-	@vowel2point: plotFormantAlgorithm$, .sp$, .f1_u, .f2_u
+	@vowel2point: 1, plotFormantAlgorithm$, .sp$, .f1_u, .f2_u
 	.st_u1 = vowel2point.x
 	.st_u2 = vowel2point.y
 	.uc_dist = sqrt((.st_c1 - .st_u1)^2 + (.st_c2 - .st_u2)^2)
-	@vowel2point: plotFormantAlgorithm$, .sp$, .f1_a, .f2_a
+	@vowel2point: 1, plotFormantAlgorithm$, .sp$, .f1_a, .f2_a
 	.st_a1 = vowel2point.x
 	.st_a2 = vowel2point.y
 	.ac_dist = sqrt((.st_c1 - .st_a1)^2 + (.st_c2 - .st_a2)^2)
@@ -1784,7 +1785,7 @@ procedure plot_standard_vowel .color$ .sp$ .vowel$ .reduction
 			.f1 = .factor * (.f1 - phonemes [plotFormantAlgorithm$, .sp$, "@", "F1"]) + phonemes [plotFormantAlgorithm$, .sp$, "@", "F1"]
 			.f2 = .factor * (.f2 - phonemes [plotFormantAlgorithm$, .sp$, "@", "F2"]) + phonemes [plotFormantAlgorithm$, .sp$, "@", "F2"]
 		endif
-		@vowel2point: plotFormantAlgorithm$, .sp$, .f1, .f2
+		@vowel2point: 1, plotFormantAlgorithm$, .sp$, .f1, .f2
 		.x [.i] = vowel2point.x
 		.y [.i] = vowel2point.y
 		.vowel$ = replace_regex$(.vowel$, "^\s*(\S[`]?)", "", 0)
@@ -1814,14 +1815,14 @@ procedure plot_vowel_triangle .sp$
 	
 	Dashed line
 	# u - i
-	@vowel2point: plotFormantAlgorithm$, .sp$, .u_F1, .u_F2
+	@vowel2point: 1, plotFormantAlgorithm$, .sp$, .u_F1, .u_F2
 	.x1 = vowel2point.x
 	.y1 = vowel2point.y
 	Colour: color$ ["u"]
 	Text special: .x1, "Centre", .y1, "Bottom", "Helvetica", 20, "0", "/u/ "+uiMessage$ [uiLanguage$, "Corneru"]
 	Black
 	
-	@vowel2point: plotFormantAlgorithm$, .sp$, .i_F1, .i_F2
+	@vowel2point: 1, plotFormantAlgorithm$, .sp$, .i_F1, .i_F2
 	.x2 = vowel2point.x
 	.y2 = vowel2point.y
 	Colour: color$ ["i"]
@@ -1830,10 +1831,10 @@ procedure plot_vowel_triangle .sp$
 	Draw line: .x1, .y1, .x2, .y2
 	
 	# u - a
-	@vowel2point: plotFormantAlgorithm$, .sp$, .u_F1, .u_F2
+	@vowel2point: 1, plotFormantAlgorithm$, .sp$, .u_F1, .u_F2
 	.x1 = vowel2point.x
 	.y1 = vowel2point.y
-	@vowel2point: plotFormantAlgorithm$, .sp$, .a_F1, .a_F2
+	@vowel2point: 1, plotFormantAlgorithm$, .sp$, .a_F1, .a_F2
 	.x2 = vowel2point.x
 	.y2 = vowel2point.y
 	Colour: color$ ["a"]
@@ -1842,19 +1843,25 @@ procedure plot_vowel_triangle .sp$
 	Draw line: .x1, .y1, .x2, .y2
 	
 	# i - a
-	@vowel2point: plotFormantAlgorithm$, .sp$, .i_F1, .i_F2
+	@vowel2point: 1, plotFormantAlgorithm$, .sp$, .i_F1, .i_F2
 	.x1 = vowel2point.x
 	.y1 = vowel2point.y
-	@vowel2point: plotFormantAlgorithm$, .sp$, .a_F1, .a_F2
+	@vowel2point: 1, plotFormantAlgorithm$, .sp$, .a_F1, .a_F2
 	.x2 = vowel2point.x
 	.y2 = vowel2point.y
 	Draw line: .x1, .y1, .x2, .y2
 endproc
 
 # Convert the frequencies to coordinates
-procedure vowel2point .targetFormantAlgorithm$ .sp$ .f1 .f2
+procedure vowel2point .correction .targetFormantAlgorithm$ .sp$ .f1 .f2
+	.corrSt = 12*log2(.correction)
+
 	.spt1 = 12*log2(.f1)
 	.spt2 = 12*log2(.f2)
+	
+	# Apply correction
+	.spt1 += .corrSt
+	.spt2 += .corrSt
 	
 	.a_St1 = 12*log2(phonemes [.targetFormantAlgorithm$, .sp$, "a_corner", "F1"])
 	.a_St2 = 12*log2(phonemes [.targetFormantAlgorithm$, .sp$, "a_corner", "F2"])
@@ -1892,19 +1899,19 @@ endproc
 
 # Get a list of best targets with distances, one for each vowel segment found
 # Use DTW to get the best match
-procedure get_closest_vowels .cutoff .sp$ .formants .formantsPlot .textgrid .f1_o .f2_o
+procedure get_closest_vowels .cutoff .sp$ .formants .formantsPlot .textgrid .f1_o .f2_o .correction
 	.f1 = 0
 	.f2 = 0
 	
 	# Convert to coordinates
-	@vowel2point: targetFormantAlgorithm$, .sp$, .f1_o, .f2_o
+	@vowel2point: .correction, targetFormantAlgorithm$, .sp$, .f1_o, .f2_o
 	.st_o1 = vowel2point.x
 	.st_o2 = vowel2point.y
 	
 	# Get center coordinates
 	.fc1 = phonemes [targetFormantAlgorithm$, .sp$, "@_center", "F1"]
 	.fc2 = phonemes [targetFormantAlgorithm$, .sp$, "@_center", "F2"]
-	@vowel2point: targetFormantAlgorithm$, .sp$, .fc1, .fc2
+	@vowel2point: 1, targetFormantAlgorithm$, .sp$, .fc1, .fc2
 	.st_c1 = vowel2point.x
 	.st_c2 = vowel2point.y
 	.tcDist_sqr = (.st_o1 - .st_c1)^2 + (.st_o2 - .st_c2)^2
@@ -1930,7 +1937,7 @@ procedure get_closest_vowels .cutoff .sp$ .formants .formantsPlot .textgrid .f1_
 			while .t <= .end
 				.ftmp1 = Get value at time: 1, .t, "Hertz", "Linear"
 				.ftmp2 = Get value at time: 2, .t, "Hertz", "Linear"
-				@vowel2point: targetFormantAlgorithm$, .sp$, .ftmp1, .ftmp2
+				@vowel2point: .correction, targetFormantAlgorithm$, .sp$, .ftmp1, .ftmp2
 				.stmp1 = vowel2point.x
 				.stmp2 = vowel2point.y
 				.tmpdistsqr = (.st_o1 - .stmp1)^2 + (.st_o2 - .stmp2)^2
@@ -1955,7 +1962,7 @@ procedure get_closest_vowels .cutoff .sp$ .formants .formantsPlot .textgrid .f1_
 			# center (c) and the target (t) from the best match 'v'
 			# to the center.
 			# 
-			@vowel2point: plotFormantAlgorithm$, .sp$, .numF1, .numF2
+			@vowel2point: .correction, plotFormantAlgorithm$, .sp$, .numF1, .numF2
 			.st1 = vowel2point.x
 			.st2 = vowel2point.y
 			
@@ -1996,12 +2003,12 @@ procedure get_closest_vowels .cutoff .sp$ .formants .formantsPlot .textgrid .f1_
 endproc
 
 # Collect all the most distant vowels
-procedure get_most_distant_vowels .sp$ .formants .textgrid .f1_o .f2_o
+procedure get_most_distant_vowels .sp$ .formants .textgrid .f1_o .f2_o .correction
 	.f1 = 0
 	.f2 = 0
 	
 	# Convert to coordinates
-	@vowel2point: targetFormantAlgorithm$, .sp$, .f1_o, .f2_o
+	@vowel2point: 1, targetFormantAlgorithm$, .sp$, .f1_o, .f2_o
 	.st_o1 = vowel2point.x
 	.st_o2 = vowel2point.y
 	
@@ -2026,7 +2033,7 @@ procedure get_most_distant_vowels .sp$ .formants .textgrid .f1_o .f2_o
 			while .t <= .end
 				.ftmp1 = Get value at time: 1, .t, "Hertz", "Linear"
 				.ftmp2 = Get value at time: 2, .t, "Hertz", "Linear"
-				@vowel2point: targetFormantAlgorithm$, .sp$, .ftmp1, .ftmp2
+				@vowel2point: .correction, targetFormantAlgorithm$, .sp$, .ftmp1, .ftmp2
 				.stmp1 = vowel2point.x
 				.stmp2 = vowel2point.y
 				.tmpdistsqr = (.st_o1 - .stmp1)^2 + (.st_o2 - .stmp2)^2

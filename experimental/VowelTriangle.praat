@@ -204,6 +204,7 @@ uiMessage$ ["EN", "AreaTitle"] = "Rel. Area"
 uiMessage$ ["EN", "Area1"] = "1"
 uiMessage$ ["EN", "Area2"] = "2"
 uiMessage$ ["EN", "AreaN"] = "N"
+uiMessage$ ["EN", "VTL"] = "Vocal tract"
 
 uiMessage$ ["EN", "LogFile"] = "Write log to table (""-"" write to the info window)"
 uiMessage$ ["EN", "CommentContinue"] = "Click on ""Continue"" if you want to analyze more speech samples"
@@ -248,6 +249,7 @@ uiMessage$ ["NL", "AreaTitle"] 		= "Rel. Oppervlak"
 uiMessage$ ["NL", "Area1"] 			= "1"
 uiMessage$ ["NL", "Area2"] 			= "2"
 uiMessage$ ["NL", "AreaN"] 			= "N"
+uiMessage$ ["NL", "VTL"] 			= "Spraakkanaal"
 
 uiMessage$ ["NL", "LogFile"] 		= "Schrijf resultaten naar log bestand (""-"" schrijft naar info venster)"
 uiMessage$ ["NL", "CommentContinue"] = "Klik op ""Doorgaan"" als u meer spraakopnamen wilt analyseren"
@@ -292,6 +294,7 @@ uiMessage$ ["DE", "AreaTitle"] 		= "Rel. Oberfläche"
 uiMessage$ ["DE", "Area1"] 			= "1"
 uiMessage$ ["DE", "Area2"] 			= "2"
 uiMessage$ ["DE", "AreaN"] 			= "N"
+uiMessage$ ["DE", "VTL"] 			= "Vokaltrakt"
                                      
 uiMessage$ ["DE", "LogFile"] 		= "Daten in Tabelle schreiben (""-"" in das Informationsfenster schreiben)"
 uiMessage$ ["DE", "CommentContinue"]= "Klicken Sie auf ""Weiter"", wenn Sie mehr Sprachproben analysieren möchten"
@@ -336,6 +339,7 @@ uiMessage$ ["FR", "AreaTitle"]		= "Surface Relative"
 uiMessage$ ["FR", "Area1"]			= "1"
 uiMessage$ ["FR", "Area2"]			= "2"
 uiMessage$ ["FR", "AreaN"]			= "N"
+uiMessage$ ["FR", "VTL"] 			= "Conduit vocal"
                                      
 uiMessage$ ["FR", "LogFile"]		= "Écrire un fichier journal dans une table (""-"" écrire dans la fenêtre d'information)"
 uiMessage$ ["FR", "CommentContinue"]= "Cliquez sur ""Continuer"" si vous voulez analyser plus d'échantillons de discours"
@@ -366,20 +370,21 @@ uiMessage$ ["FR", "untitled"] 		= "sans titre"
 uiMessage$ ["FR", "Title"] 			= "Titre"
 
 # Chinese
-uiMessage$ ["ZH", "PauseRecord"] = "录音连续演讲"
-uiMessage$ ["ZH", "Record1"] = "录音##连续演讲#"
-uiMessage$ ["ZH", "Record2"] = "请准备好开始"
-uiMessage$ ["ZH", "Record3"] = "选择你想要分析的语音"
-uiMessage$ ["ZH", "Open1"] = "打开包含演讲的录音"
-uiMessage$ ["ZH", "Open2"] = "选择你想要分析的语音"
-uiMessage$ ["ZH", "Corneri"] = "必"
-uiMessage$ ["ZH", "Corneru"] = "不"
-uiMessage$ ["ZH", "Cornera"] = "巴"
-uiMessage$ ["ZH", "DistanceTitle"] = "相对长度 (N)"
-uiMessage$ ["ZH", "AreaTitle"] = "相对表面"
-uiMessage$ ["ZH", "Area1"] = "1"
-uiMessage$ ["ZH", "Area2"] = "2"
-uiMessage$ ["ZH", "AreaN"] = "N"
+uiMessage$ ["ZH", "PauseRecord"] 	= "录音连续演讲"
+uiMessage$ ["ZH", "Record1"] 		= "录音##连续演讲#"
+uiMessage$ ["ZH", "Record2"] 		= "请准备好开始"
+uiMessage$ ["ZH", "Record3"] 		= "选择你想要分析的语音"
+uiMessage$ ["ZH", "Open1"] 			= "打开包含演讲的录音"
+uiMessage$ ["ZH", "Open2"] 			= "选择你想要分析的语音"
+uiMessage$ ["ZH", "Corneri"] 		= "必"
+uiMessage$ ["ZH", "Corneru"] 		= "不"
+uiMessage$ ["ZH", "Cornera"] 		= "巴"
+uiMessage$ ["ZH", "DistanceTitle"] 	= "相对长度 (N)"
+uiMessage$ ["ZH", "AreaTitle"] 		= "相对表面"
+uiMessage$ ["ZH", "Area1"] 			= "1"
+uiMessage$ ["ZH", "Area2"] 			= "2"
+uiMessage$ ["ZH", "AreaN"] 			= "N"
+uiMessage$ ["ZH", "VTL"] 			= "声道"
 
 uiMessage$ ["ZH", "LogFile"] 		= "将日志写入表格 (""-"" 写入信息窗口)"
 uiMessage$ ["ZH", "CommentContinue"] = "点击 ""继续"" 如果你想分析更多的语音样本"
@@ -398,15 +403,15 @@ uiMessage$ ["ZH", "No readable recording selected "] = "没有选择可读的录
 
 uiMessage$ ["ZH", "Interface Language"] = "语言 (Language)"
 uiMessage$ ["ZH", "Speaker is a"]	= "演讲者是"
-uiMessage$ ["ZH", "Male"] = "男性 ♂"
-uiMessage$ ["ZH", "Female"] = "女性 ♀"
+uiMessage$ ["ZH", "Male"] 			= "男性 ♂"
+uiMessage$ ["ZH", "Female"] 		= "女性 ♀"
 uiMessage$ ["ZH", "Experimental"] 	= "实验：使用现实的共振峰值"
-uiMessage$ ["ZH", "Continue"] = "继续"
-uiMessage$ ["ZH", "Done"] = "准备"
-uiMessage$ ["ZH", "Stop"] = "结束"
-uiMessage$ ["ZH", "Open"] = "打开录音"
-uiMessage$ ["ZH", "Record"] = "录制演讲"
-uiMessage$ ["ZH", "untitled"] = "无标题"
+uiMessage$ ["ZH", "Continue"] 		= "继续"
+uiMessage$ ["ZH", "Done"] 			= "准备"
+uiMessage$ ["ZH", "Stop"] 			= "结束"
+uiMessage$ ["ZH", "Open"] 			= "打开录音"
+uiMessage$ ["ZH", "Record"] 		= "录制演讲"
+uiMessage$ ["ZH", "untitled"] 		= "无标题"
 uiMessage$ ["ZH", "Title"] 			= "标题"
 
 # Spanish
@@ -424,6 +429,7 @@ uiMessage$ ["ES", "AreaTitle"]		= "Superficie relativa"
 uiMessage$ ["ES", "Area1"]			= "1"
 uiMessage$ ["ES", "Area2"]			= "2"
 uiMessage$ ["ES", "AreaN"]			= "N"
+uiMessage$ ["ES", "VTL"] 			= "Tracto vocal"
                                       
 uiMessage$ ["ES", "LogFile"]		= "Escribir un archivo de registro en una tabla (""-"" escribir en la ventana de información)"
 uiMessage$ ["ES", "CommentContinue"]= "Haga clic en ""Continúa"" si desea analizar más muestras de voz"
@@ -468,6 +474,7 @@ uiMessage$ ["PT", "AreaTitle"]		= "Superfície relativa"
 uiMessage$ ["PT", "Area1"]			= "1"
 uiMessage$ ["PT", "Area2"]			= "2"
 uiMessage$ ["PT", "AreaN"]			= "N"
+uiMessage$ ["PT", "VTL"] 			= "Trato vocal"
                                                                             
 uiMessage$ ["PT", "LogFile"]		= "Escreva um arquivo de registro em uma tabela (""-"" escreva na janela de informações)"
 uiMessage$ ["PT", "CommentContinue"]= "Clique em ""Continuar"" se quiser analisar mais amostras de voz"
@@ -512,6 +519,7 @@ uiMessage$ ["IT", "AreaTitle"]		= "Superficie relativa"
 uiMessage$ ["IT", "Area1"]			= "1"
 uiMessage$ ["IT", "Area2"]			= "2"
 uiMessage$ ["IT", "AreaN"]			= "N"
+uiMessage$ ["IT", "VTL"] 			= "Tratto vocale"
                                                                             
 uiMessage$ ["IT", "LogFile"]		= "Scrivi un file di registrazione in una tabella (""-"" scrivi nella finestra delle informazioni)"
 uiMessage$ ["IT", "CommentContinue"]= "Clicca su ""Continua"" se vuoi analizzare più campioni vocali"
@@ -1029,7 +1037,7 @@ if input_table > 0
 			log = 1
 			output_table$ = .log$
 			if not fileReadable(output_table$)
-				writeFileLine: output_table$, "Name", tab$, "Speaker", tab$, "N", tab$, "Area2", tab$, "Area1", tab$, "i.dist", tab$, "u.dist", tab$, "a.dist", tab$, "Duration", tab$, "Intensity"
+				writeFileLine: output_table$, "Name", tab$, "Speaker", tab$, "N", tab$, "Area2", tab$, "Area1", tab$, "i.dist", tab$, "u.dist", tab$, "a.dist", tab$, "VTL", tab$, "Duration", tab$, "Intensity"
 			endif
 		else
 			log = 0
@@ -1104,7 +1112,7 @@ if input_table > 0
 			Text special... 0.5 Centre 1.05 bottom Helvetica 18 0 ##'title$'#
 		endif
 		@plot_vowels: .plotVowels, .sp$, .sound
-		@print_output_line: title$, .sp$, plot_vowels.numVowelIntervals, plot_vowels.area2perc, plot_vowels.area1perc, plot_vowels.relDist_i, plot_vowels.relDist_u, plot_vowels.relDist_a, .duration, .intensity
+		@print_output_line: title$, .sp$, plot_vowels.numVowelIntervals, plot_vowels.area2perc, plot_vowels.area1perc, plot_vowels.relDist_i, plot_vowels.relDist_u, plot_vowels.relDist_a, plot_vowels.vocalTractLength, .duration, .intensity
 
 		if index_regex(.plotFile$, "\w")
 			Save as 300-dpi PNG file: .plotFile$
@@ -1256,9 +1264,9 @@ while .continue
 		# Print output
 		if output_table$ = "-"
 			clearinfo
-			appendInfoLine: "Name", tab$, "Speaker", tab$, "N", tab$, "Area2", tab$, "Area1", tab$, "i.dist", tab$, "u.dist", tab$, "a.dist", tab$, "Duration", tab$, "Intensity"
+			appendInfoLine: "Name", tab$, "Speaker", tab$, "N", tab$, "Area2", tab$, "Area1", tab$, "i.dist", tab$, "u.dist", tab$, "a.dist", tab$, "VTL", tab$,"Duration", tab$, "Intensity"
 		elsif index_regex(output_table$, "\w") and not fileReadable(output_table$)
-			writeFileLine: output_table$, "Name", tab$, "Speaker", tab$, "N", tab$, "Area2", tab$, "Area1", tab$, "i.dist", tab$, "u.dist", tab$, "a.dist", tab$, "Duration", tab$, "Intensity"
+			writeFileLine: output_table$, "Name", tab$, "Speaker", tab$, "N", tab$, "Area2", tab$, "Area1", tab$, "i.dist", tab$, "u.dist", tab$, "a.dist", tab$, "VTL", tab$, "Duration", tab$, "Intensity"
 		endif
 	endif
 	
@@ -1301,7 +1309,7 @@ while .continue
 	if .intensity > 50
 		#@plot_vowels: targetFormantAlgorithm$, 1, .sp$, .sound, 
 		@plot_vowels: 1, .sp$, .sound, 
-		@print_output_line: title$, .sp$, plot_vowels.numVowelIntervals, plot_vowels.area2perc, plot_vowels.area1perc, plot_vowels.relDist_i, plot_vowels.relDist_u, plot_vowels.relDist_a, .duration, .intensity
+		@print_output_line: title$, .sp$, plot_vowels.numVowelIntervals, plot_vowels.area2perc, plot_vowels.area1perc, plot_vowels.relDist_i, plot_vowels.relDist_u, plot_vowels.relDist_a, plot_vowels.vocalTractLength, .duration, .intensity
 	endif
 	
 	selectObject: .sound
@@ -1489,7 +1497,7 @@ procedure plot_vowels .plot .sp$ .sound
 
 	# Get Vocal Track Length
 	@estimate_Vocal_Tract_Length: .formantsPlot, .syllableKernels, .targetTier
-printline ['estimate_Vocal_Tract_Length.meanPhi']
+	.vocalTractLength = estimate_Vocal_Tract_Length.vtl
 	
 	# Set new @_center
 	phonemes [plotFormantAlgorithm$, .sp$, "@_center", "F1"] = (phonemes [plotFormantAlgorithm$, .sp$, "a", "F1"] * phonemes [plotFormantAlgorithm$, .sp$, "i", "F1"] * phonemes [plotFormantAlgorithm$, .sp$, "u", "F1"]) ** (1/3) 
@@ -1700,34 +1708,36 @@ printline ['estimate_Vocal_Tract_Length.meanPhi']
 	# Print areas as percentage
 	if .plot
 		.shift = Text width (world coordinates): " ('plotFormantAlgorithm$')"
-		Text special: 1+.shift, "right", 0.07, "bottom", "Helvetica", 16, "0", uiMessage$ [uiLanguage$, "AreaTitle"]+" ('plotFormantAlgorithm$')"
-		Text special: 0.9, "right", 0.02, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "Area1"]
-		Text special: 0.9, "left", 0.02, "bottom", "Helvetica", 14, "0", ": '.area1perc:0'\% "
-		Text special: 0.9, "right", -0.03, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "Area2"]
-		Text special: 0.9, "left", -0.03, "bottom", "Helvetica", 14, "0", ": '.area2perc:0'\% "
-		Text special: 0.9, "right", -0.08, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "AreaN"]
-		Text special: 0.9, "left", -0.08, "bottom", "Helvetica", 14, "0", ": '.numVowelIntervals' ('.duration:0' s)"
+		Text special: 1+.shift, "right", 0.12, "bottom", "Helvetica", 16, "0", uiMessage$ [uiLanguage$, "AreaTitle"]+" ('plotFormantAlgorithm$')"
+		Text special: 0.9, "right", 0.07, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "Area1"]
+		Text special: 0.9, "left", 0.07, "bottom", "Helvetica", 14, "0", ": '.area1perc:0'\% "
+		Text special: 0.9, "right", 0.02, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "Area2"]
+		Text special: 0.9, "left", 0.02, "bottom", "Helvetica", 14, "0", ": '.area2perc:0'\% "
+		Text special: 0.9, "right", -0.03, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "AreaN"]
+		Text special: 0.9, "left", -0.03, "bottom", "Helvetica", 14, "0", ": '.numVowelIntervals' ('.duration:0' s)"
+		Text special: 0.9, "right", -0.08, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "VTL"]
+		Text special: 0.9, "left", -0.08, "bottom", "Helvetica", 14, "0", ": '.vocalTractLength:1' cm"
 
 		# Relative distance to corners
-		Text special: -0.1, "left", 0.07, "bottom", "Helvetica", 16, "0", uiMessage$ [uiLanguage$, "DistanceTitle"]
-		Text special: 0.0, "right", 0.02, "bottom", "Helvetica", 14, "0", "/i/:"
-		Text special: 0.16, "right", 0.02, "bottom", "Helvetica", 14, "0", " '.relDist_i:0'\%  ('.num_i_Intervals')"
-		Text special: 0.0, "right", -0.03, "bottom", "Helvetica", 14, "0", "/u/:"
-		Text special: 0.16, "right", -0.03, "bottom", "Helvetica", 14, "0", " '.relDist_u:0'\%  ('.num_u_Intervals')"
-		Text special: 0.0, "right", -0.08, "bottom", "Helvetica", 14, "0", "/a/:"
-		Text special: 0.16, "right", -0.08, "bottom", "Helvetica", 14, "0", " '.relDist_a:0'\%  ('.num_a_Intervals')"
+		Text special: -0.1, "left", 0.12, "bottom", "Helvetica", 16, "0", uiMessage$ [uiLanguage$, "DistanceTitle"]
+		Text special: 0.0, "right", 0.07, "bottom", "Helvetica", 14, "0", "/i/:"
+		Text special: 0.16, "right", 0.07, "bottom", "Helvetica", 14, "0", " '.relDist_i:0'\%  ('.num_i_Intervals')"
+		Text special: 0.0, "right", 0.02, "bottom", "Helvetica", 14, "0", "/u/:"
+		Text special: 0.16, "right", 0.02, "bottom", "Helvetica", 14, "0", " '.relDist_u:0'\%  ('.num_u_Intervals')"
+		Text special: 0.0, "right", -0.03, "bottom", "Helvetica", 14, "0", "/a/:"
+		Text special: 0.16, "right", -0.03, "bottom", "Helvetica", 14, "0", " '.relDist_a:0'\%  ('.num_a_Intervals')"
 	endif
 	
 	selectObject: .formants, .formantsBandwidth, .syllableKernels
 	Remove
 endproc
 
-procedure print_output_line .title$, .sp$, .numVowelIntervals, .area2perc, .area1perc, .relDist_i, .relDist_u, .relDist_a, .duration, .intensity
+procedure print_output_line .title$, .sp$, .numVowelIntervals, .area2perc, .area1perc, .relDist_i, .relDist_u, .relDist_a, .vtl, .duration, .intensity
 	# Uses global variable
 	if output_table$ = "-"
-		appendInfoLine: title$, tab$, .sp$, tab$, .numVowelIntervals, tab$, fixed$(.area2perc, 1), tab$, fixed$(.area1perc, 1), tab$, fixed$(.relDist_i, 1), tab$, fixed$(.relDist_u, 1), tab$, fixed$(.relDist_a, 1), tab$, fixed$(.duration,0), tab$, fixed$(.intensity,1)
+		appendInfoLine: title$, tab$, .sp$, tab$, .numVowelIntervals, tab$, fixed$(.area2perc, 1), tab$, fixed$(.area1perc, 1), tab$, fixed$(.relDist_i, 1), tab$, fixed$(.relDist_u, 1), tab$, fixed$(.relDist_a, 1), tab$, fixed$(.vtl, 2), tab$, fixed$(.duration,0), tab$, fixed$(.intensity,1)
 	elsif index_regex(output_table$, "\w")
-		appendFileLine: output_table$, title$, tab$, .sp$, tab$, .numVowelIntervals, tab$, fixed$(.area2perc, 1), tab$, fixed$(.area1perc, 1), tab$, fixed$(.relDist_i, 1), tab$, fixed$(.relDist_u, 1), tab$, fixed$(.relDist_a, 1), tab$, fixed$(.duration,0), tab$, fixed$(.intensity,1)
+		appendFileLine: output_table$, title$, tab$, .sp$, tab$, .numVowelIntervals, tab$, fixed$(.area2perc, 1), tab$, fixed$(.area1perc, 1), tab$, fixed$(.relDist_i, 1), tab$, fixed$(.relDist_u, 1), tab$, fixed$(.relDist_a, 1), tab$, fixed$(.vtl, 2), tab$, fixed$(.duration,0), tab$, fixed$(.intensity,1)
 	endif	
 endproc
 
@@ -2570,8 +2580,11 @@ procedure estimate_Vocal_Tract_Length .formant .textGrid .targetTier
 	endfor
 	
 	.meanPhi = -1
+	.vtl = -1
 	if .n > 0
 		.meanPhi = .sumPhi / .n
+		# L = c / (4*Phi) (cm)
+		.vtl = 100 * 352.95 / (4*.meanPhi)
 	endif
 endproc
 

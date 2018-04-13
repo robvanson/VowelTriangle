@@ -2587,32 +2587,33 @@ procedure estimate_Vocal_Tract_Length .formant .textGrid .targetTier
 	selectObject: .textGrid
 	.numTargets = Get number of points: .targetTier
 	.n = 0
-	.sumPhi = 0
+	.sumVTL = 0
 	for .p to .numTargets
 		selectObject: .textGrid
 		.t = Get time of point: .targetTier, .p
 		selectObject: .formant 
-		.phi = .beta[0]
+		.currentPhi = .beta[0]
 		for .i to 4
 			.f[.i] = Get value at time: .i, .t, "hertz", "Linear"
-			if .f[.i] <> undefined and .phi <> undefined
-				.phi += .beta[.i] * .f[.i] / (2*.i - 1)
+			if .f[.i] <> undefined and .currentPhi <> undefined
+				.currentPhi += .beta[.i] * .f[.i] / (2*.i - 1)
 			else
-				.phi = undefined
+				.currentPhi = undefined
 			endif
 		endfor
-		if .phi <> undefined
-			.sumPhi += .phi
+		if .currentPhi <> undefined
+			.currentVTL = 100 * 352.95 / (4*.currentPhi)
+			.sumVTL += .currentVTL
 			.n += 1
 		endif
 	endfor
 	
-	.meanPhi = -1
+	.phi = -1
 	.vtl = -1
 	if .n > 0
-		.meanPhi = .sumPhi / .n
+		.vtl = .sumVTL / .n
 		# L = c / (4*Phi) (cm)
-		.vtl = 100 * 352.95 / (4*.meanPhi)
+		.phi = 100 * 352.95 / (4*.vtl)
 	endif
 endproc
 

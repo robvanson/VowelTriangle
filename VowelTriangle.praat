@@ -702,6 +702,14 @@ phonemes ["SL", "F", "u_corner", "F2"] = phonemes ["SL", "F", "u", "F2"]/(2^(1/1
 phonemes ["SL", "F", "@_center", "F1"] =(phonemes ["SL", "F", "i_corner", "F1"]*phonemes ["SL", "F", "u_corner", "F1"]*phonemes ["SL", "F", "a_corner", "F1"])^(1/3)
 phonemes ["SL", "F", "@_center", "F2"] = (phonemes ["SL", "F", "i_corner", "F2"]*phonemes ["SL", "F", "u_corner", "F2"]*phonemes ["SL", "F", "a_corner", "F2"])^(1/3)
 
+# Vocal Tract Length
+# Sex  VTL   Phi
+# F    16.47 535.77
+# M    17.35 508.54
+averagePhi_VTL["SL", "F"] = 535.77
+averagePhi_VTL["SL", "M"] = 508.54
+
+
 ###############################################
 #
 # Burg's method formant algorithm (Burg)
@@ -802,6 +810,13 @@ phonemes ["Burg", "F", "u_corner", "F2"] = phonemes ["Burg", "F", "u", "F2"]/(2^
 # @_center is not fixed but derived from current corners
 phonemes ["Burg", "F", "@_center", "F1"] =(phonemes ["Burg", "F", "i_corner", "F1"]*phonemes ["Burg", "F", "u_corner", "F1"]*phonemes ["Burg", "F", "a_corner", "F1"])^(1/3)
 phonemes ["Burg", "F", "@_center", "F2"] = (phonemes ["Burg", "F", "i_corner", "F2"]*phonemes ["Burg", "F", "u_corner", "F2"]*phonemes ["Burg", "F", "a_corner", "F2"])^(1/3)
+
+# Vocal Tract Length
+# Sex  VTL   Phi
+# F    15.63 564.67
+# M    16.73 527.29
+averagePhi_VTL["Burg", "F"] = 564.67
+averagePhi_VTL["Burg", "M"] = 527.29
 
 
 ###############################################
@@ -905,6 +920,13 @@ phonemes ["Robust", "F", "u_corner", "F2"] = phonemes ["Robust", "F", "u", "F2"]
 phonemes ["Robust", "F", "@_center", "F1"] =(phonemes ["Robust", "F", "i_corner", "F1"]*phonemes ["Robust", "F", "u_corner", "F1"]*phonemes ["Robust", "F", "a_corner", "F1"])^(1/3)
 phonemes ["Robust", "F", "@_center", "F2"] = (phonemes ["Robust", "F", "i_corner", "F2"]*phonemes ["Robust", "F", "u_corner", "F2"]*phonemes ["Robust", "F", "a_corner", "F2"])^(1/3)
 
+# Vocal Tract Length
+# Sex  VTL   Phi
+# F    15.45 570.98
+# M    16.60 531.70
+averagePhi_VTL["Robust", "F"] = 570.98
+averagePhi_VTL["Robust", "M"] = 531.70
+
 
 ###############################################
 #
@@ -1007,6 +1029,12 @@ phonemes ["KeepAll", "F", "u_corner", "F2"] = phonemes ["KeepAll", "F", "u", "F2
 phonemes ["KeepAll", "F", "@_center", "F1"] =(phonemes ["KeepAll", "F", "i_corner", "F1"]*phonemes ["KeepAll", "F", "u_corner", "F1"]*phonemes ["KeepAll", "F", "a_corner", "F1"])^(1/3)
 phonemes ["KeepAll", "F", "@_center", "F2"] = (phonemes ["KeepAll", "F", "i_corner", "F2"]*phonemes ["KeepAll", "F", "u_corner", "F2"]*phonemes ["KeepAll", "F", "a_corner", "F2"])^(1/3)
 
+# Vocal Tract Length
+# Sex  VTL   Phi
+# F    15.63 564.67
+# M    16.73 527.29
+averagePhi_VTL["KeepAll", "F"] = 564.67
+averagePhi_VTL["KeepAll", "M"] = 527.29
 
 
 ###############################################

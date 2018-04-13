@@ -1904,7 +1904,7 @@ procedure get_closest_vowels .cutoff .sp$ .formants .formantsPlot .textgrid .f1_
 	.f2 = 0
 	
 	# Convert to coordinates
-	@vowel2point: .correction, targetFormantAlgorithm$, .sp$, .f1_o, .f2_o
+	@vowel2point: 1, targetFormantAlgorithm$, .sp$, .f1_o, .f2_o
 	.st_o1 = vowel2point.x
 	.st_o2 = vowel2point.y
 	

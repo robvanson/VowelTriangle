@@ -706,8 +706,8 @@ phonemes ["SL", "F", "@_center", "F2"] = (phonemes ["SL", "F", "i_corner", "F2"]
 # Sex  VTL		Phi
 # F    15.92	554.18
 # M    17.09	516.20
-averagePhi_VTL["SL", "F"] = 554.18
-averagePhi_VTL["SL", "M"] = 516.20
+averagePhi_VTL ["SL", "F"] = 554.18
+averagePhi_VTL ["SL", "M"] = 516.20
 
 
 ###############################################
@@ -815,8 +815,8 @@ phonemes ["Burg", "F", "@_center", "F2"] = (phonemes ["Burg", "F", "i_corner", "
 # Sex  VTL   Phi
 # F    15.23	579.27
 # M    16.44	536.82
-averagePhi_VTL["Burg", "F"] = 579.27
-averagePhi_VTL["Burg", "M"] = 536.82
+averagePhi_VTL ["Burg", "F"] = 579.27
+averagePhi_VTL ["Burg", "M"] = 536.82
 
 
 ###############################################
@@ -924,8 +924,8 @@ phonemes ["Robust", "F", "@_center", "F2"] = (phonemes ["Robust", "F", "i_corner
 # Sex  VTL   Phi
 # F    15.10	584.19
 # M    16.28	542.10
-averagePhi_VTL["Robust", "F"] = 584.19
-averagePhi_VTL["Robust", "M"] = 542.10
+averagePhi_VTL ["Robust", "F"] = 584.19
+averagePhi_VTL ["Robust", "M"] = 542.10
 
 
 ###############################################
@@ -1033,8 +1033,8 @@ phonemes ["KeepAll", "F", "@_center", "F2"] = (phonemes ["KeepAll", "F", "i_corn
 # Sex  VTL   Phi
 # F    15.23	579.27
 # M    16.44	536.82
-averagePhi_VTL["Burg", "F"] = 579.27
-averagePhi_VTL["Burg", "M"] = 536.82
+averagePhi_VTL ["Burg", "F"] = 579.27
+averagePhi_VTL ["Burg", "M"] = 536.82
 
 
 ###############################################
@@ -1526,7 +1526,7 @@ procedure plot_vowels .plot .sp$ .sound
 	# Get Vocal Track Length
 	@estimate_Vocal_Tract_Length: .formantsPlot, .syllableKernels, .targetTier
 	.vocalTractLength = estimate_Vocal_Tract_Length.vtl
-	.vtlCorrection = averagePhi_VTL[plotFormantAlgorithm$, .sp$] / estimate_Vocal_Tract_Length.phi
+	.vtlCorrection = averagePhi_VTL [plotFormantAlgorithm$, .sp$] / estimate_Vocal_Tract_Length.phi
 	
 	# Set new @_center
 	phonemes [plotFormantAlgorithm$, .sp$, "@_center", "F1"] = (phonemes [plotFormantAlgorithm$, .sp$, "a", "F1"] * phonemes [plotFormantAlgorithm$, .sp$, "i", "F1"] * phonemes [plotFormantAlgorithm$, .sp$, "u", "F1"]) ** (1/3) 

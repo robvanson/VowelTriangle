@@ -703,11 +703,11 @@ phonemes ["SL", "F", "@_center", "F1"] =(phonemes ["SL", "F", "i_corner", "F1"]*
 phonemes ["SL", "F", "@_center", "F2"] = (phonemes ["SL", "F", "i_corner", "F2"]*phonemes ["SL", "F", "u_corner", "F2"]*phonemes ["SL", "F", "a_corner", "F2"])^(1/3)
 
 # Vocal Tract Length
-# Sex  VTL   Phi
-# F    16.47 535.77
-# M    17.35 508.54
-averagePhi_VTL["SL", "F"] = 535.77
-averagePhi_VTL["SL", "M"] = 508.54
+# Sex  VTL		Phi
+# F    15.92	554.18
+# M    17.09	516.20
+averagePhi_VTL["SL", "F"] = 554.18
+averagePhi_VTL["SL", "M"] = 516.20
 
 
 ###############################################
@@ -813,10 +813,10 @@ phonemes ["Burg", "F", "@_center", "F2"] = (phonemes ["Burg", "F", "i_corner", "
 
 # Vocal Tract Length
 # Sex  VTL   Phi
-# F    15.63 564.67
-# M    16.73 527.29
-averagePhi_VTL["Burg", "F"] = 564.67
-averagePhi_VTL["Burg", "M"] = 527.29
+# F    15.23	579.27
+# M    16.44	536.82
+averagePhi_VTL["Burg", "F"] = 579.27
+averagePhi_VTL["Burg", "M"] = 536.82
 
 
 ###############################################
@@ -922,10 +922,10 @@ phonemes ["Robust", "F", "@_center", "F2"] = (phonemes ["Robust", "F", "i_corner
 
 # Vocal Tract Length
 # Sex  VTL   Phi
-# F    15.45 570.98
-# M    16.60 531.70
-averagePhi_VTL["Robust", "F"] = 570.98
-averagePhi_VTL["Robust", "M"] = 531.70
+# F    15.10	584.19
+# M    16.28	542.10
+averagePhi_VTL["Robust", "F"] = 584.19
+averagePhi_VTL["Robust", "M"] = 542.10
 
 
 ###############################################
@@ -1031,10 +1031,10 @@ phonemes ["KeepAll", "F", "@_center", "F2"] = (phonemes ["KeepAll", "F", "i_corn
 
 # Vocal Tract Length
 # Sex  VTL   Phi
-# F    15.63 564.67
-# M    16.73 527.29
-averagePhi_VTL["KeepAll", "F"] = 564.67
-averagePhi_VTL["KeepAll", "M"] = 527.29
+# F    15.23	579.27
+# M    16.44	536.82
+averagePhi_VTL["Burg", "F"] = 579.27
+averagePhi_VTL["Burg", "M"] = 536.82
 
 
 ###############################################

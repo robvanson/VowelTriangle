@@ -713,10 +713,10 @@ phonemes ["SL", "F", "@_center", "F2"] = (phonemes ["SL", "F", "i_corner", "F2"]
 
 # Vocal Tract Length
 # Sex  VTL		Phi
-# F    15.92	554.18
-# M    17.09	516.20
-averagePhi_VTL ["SL", "F"] = 554.18
-averagePhi_VTL ["SL", "M"] = 516.20
+# F    15.94	553.42
+# M    17.11	515.59
+averagePhi_VTL ["SL", "F"] = 553.42
+averagePhi_VTL ["SL", "M"] = 515.59
 
 
 ###############################################
@@ -822,10 +822,10 @@ phonemes ["Burg", "F", "@_center", "F2"] = (phonemes ["Burg", "F", "i_corner", "
 
 # Vocal Tract Length
 # Sex  VTL   Phi
-# F    15.23	579.27
-# M    16.44	536.82
-averagePhi_VTL ["Burg", "F"] = 579.27
-averagePhi_VTL ["Burg", "M"] = 536.82
+# F    15.39	573.26
+# M    16.62	531.02
+averagePhi_VTL ["Burg", "F"] = 573.26
+averagePhi_VTL ["Burg", "M"] = 531.02
 
 
 ###############################################
@@ -931,8 +931,8 @@ phonemes ["Robust", "F", "@_center", "F2"] = (phonemes ["Robust", "F", "i_corner
 
 # Vocal Tract Length
 # Sex  VTL   Phi
-# F    15.10	584.19
-# M    16.28	542.10
+# F    15.24	579.11
+# M    16.29	541.51
 averagePhi_VTL ["Robust", "F"] = 584.19
 averagePhi_VTL ["Robust", "M"] = 542.10
 
@@ -1040,10 +1040,10 @@ phonemes ["KeepAll", "F", "@_center", "F2"] = (phonemes ["KeepAll", "F", "i_corn
 
 # Vocal Tract Length
 # Sex  VTL   Phi
-# F    15.23	579.27
-# M    16.44	536.82
-averagePhi_VTL ["Burg", "F"] = 579.27
-averagePhi_VTL ["Burg", "M"] = 536.82
+# F    15.39	573.26
+# M    16.62	531.02
+averagePhi_VTL ["KeepAll", "F"] = 573.26
+averagePhi_VTL ["KeepAll", "M"] = 531.02
 
 
 ###############################################
@@ -1544,7 +1544,7 @@ procedure plot_vowels .plot .sp$ .sound
 	if vtl_normalization
 		@estimate_Vocal_Tract_Length: .formantsPlot, .syllableKernels, .targetTier
 		.vocalTractLength = estimate_Vocal_Tract_Length.vtl
-		.vtlCorrection = averagePhi_VTL [plotFormantAlgorithm$, .sp$] / estimate_Vocal_Tract_Length.phi
+		.vtlCorrection = estimate_Vocal_Tract_Length.phi / averagePhi_VTL [plotFormantAlgorithm$, .sp$]
 		.sp$ = "F"
 		if estimate_Vocal_Tract_Length.phi < 2/(1/averagePhi_VTL [plotFormantAlgorithm$, "M"] + 1/averagePhi_VTL [plotFormantAlgorithm$, "F"])
 			.sp$ = "M"

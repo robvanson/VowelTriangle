@@ -111,6 +111,7 @@ endif
 
 .sp_default = 1
 output_table$ = ""
+vtl_normalization = 0
 
 default_Dot_Radius = 0.01
 dot_Radius_Cutoff = 300
@@ -225,6 +226,7 @@ uiMessage$ ["EN", "Interface Language"] = "Language"
 uiMessage$ ["EN", "Speaker is a"] = "Speaker is a"
 uiMessage$ ["EN", "Male"] = "Male ♂"
 uiMessage$ ["EN", "Female"] = "Female ♀"
+uiMessage$ ["EN", "Automatic"] = "Automatic"
 uiMessage$ ["EN", "Experimental"] = "Experimental: Select formant tracking method"
 uiMessage$ ["EN", "Continue"] = "Continue"
 uiMessage$ ["EN", "Done"] = "Done"
@@ -270,6 +272,7 @@ uiMessage$ ["NL", "Interface Language"] = "Taal (Language)"
 uiMessage$ ["NL", "Speaker is a"] 	= "De Spreker is een"
 uiMessage$ ["NL", "Male"] 			= "Man ♂"
 uiMessage$ ["NL", "Female"] 		= "Vrouw ♀"
+uiMessage$ ["NL", "Automatic"] 		= "Automatic"
 uiMessage$ ["NL", "Experimental"] 	= "Experimenteel: Kies methode om formanten te berekenen"
 uiMessage$ ["NL", "Continue"] 		= "Doorgaan"
 uiMessage$ ["NL", "Done"] 			= "Klaar"
@@ -315,6 +318,7 @@ uiMessage$ ["DE", "Interface Language"] = "Sprache (Language)"
 uiMessage$ ["DE", "Speaker is a"] 	= "Der Sprecher ist ein(e)"
 uiMessage$ ["DE", "Male"] 			= "Man ♂"
 uiMessage$ ["DE", "Female"] 		= "Frau ♀"
+uiMessage$ ["DE", "Automatic"] 		= "Automatic"
 uiMessage$ ["DE", "Experimental"] 	= "Experimentell: Wählen Sie die Formant-Berechnungsmethode"
 uiMessage$ ["DE", "Continue"] 		= "Weitergehen"
 uiMessage$ ["DE", "Done"] 			= "Fertig"
@@ -360,6 +364,7 @@ uiMessage$ ["FR", "Interface Language"] = "Langue (Language)"
 uiMessage$ ["FR", "Speaker is a"]	= "Le locuteur est un(e)"
 uiMessage$ ["FR", "Male"] 			= "Homme ♂"
 uiMessage$ ["FR", "Female"] 		= "Femme ♀"
+uiMessage$ ["FR", "Automatic"] 		= "Automatic"
 uiMessage$ ["FR", "Experimental"] 	= "Expérimental: Sélectionner la méthode de calcul du formant"
 uiMessage$ ["FR", "Continue"]		= "Continuer"
 uiMessage$ ["FR", "Done"]			= "Terminé"
@@ -405,6 +410,7 @@ uiMessage$ ["ZH", "Interface Language"] = "语言 (Language)"
 uiMessage$ ["ZH", "Speaker is a"]	= "演讲者是"
 uiMessage$ ["ZH", "Male"] 			= "男性 ♂"
 uiMessage$ ["ZH", "Female"] 		= "女性 ♀"
+uiMessage$ ["ZH", "Automatic"] 		= "Automatic"
 uiMessage$ ["ZH", "Experimental"] 	= "实验：使用现实的共振峰值"
 uiMessage$ ["ZH", "Continue"] 		= "继续"
 uiMessage$ ["ZH", "Done"] 			= "准备"
@@ -450,6 +456,7 @@ uiMessage$ ["ES", "Interface Language"] = "Idioma (Language)"
 uiMessage$ ["ES", "Speaker is a"]	= "El hablante es un(a)"
 uiMessage$ ["ES", "Male"] 			= "Hombre ♂"
 uiMessage$ ["ES", "Female"] 		= "Mujer ♀"
+uiMessage$ ["ES", "Automatic"] 		= "Automatic"
 uiMessage$ ["ES", "Experimental"] 	= "Experimental: seleccione el método de seguimiento de formantes"
 uiMessage$ ["ES", "Continue"]		= "Continúa"
 uiMessage$ ["ES", "Done"]			= "Terminado"
@@ -495,6 +502,7 @@ uiMessage$ ["PT", "Interface Language"] = "Idioma (Language)"
 uiMessage$ ["PT", "Speaker is a"]	= "O falante é um(a)"
 uiMessage$ ["PT", "Male"] 			= "Homem ♂"
 uiMessage$ ["PT", "Female"] 		= "Mulher ♀"
+uiMessage$ ["PT", "Automatic"] 		= "Automatic"
 uiMessage$ ["PT", "Experimental"] 	= "Experimental: Selecione o método de rastreamento formant"
 uiMessage$ ["PT", "Continue"]		= "Continuar"
 uiMessage$ ["PT", "Done"]			= "Terminado"
@@ -540,6 +548,7 @@ uiMessage$ ["IT", "Interface Language"] = "Lingua (Language)"
 uiMessage$ ["IT", "Speaker is a"]	= "L‘oratore è un(a)"
 uiMessage$ ["IT", "Male"] 			= "Uomo ♂"
 uiMessage$ ["IT", "Female"] 		= "Donna ♀"
+uiMessage$ ["IT", "Automatic"] 		= "Automatic"
 uiMessage$ ["IT", "Experimental"] 	= "Sperimentale: seleziona il metodo di tracciamento dei formanti"
 uiMessage$ ["IT", "Continue"]		= "Continua"
 uiMessage$ ["IT", "Done"]			= "Finito"
@@ -1186,6 +1195,7 @@ while .continue
 		choice: .speakerIsA$, .sp_default
 			option: uiMessage$ [uiLanguage$, "Female"]
 			option: uiMessage$ [uiLanguage$, "Male"]
+			option: uiMessage$ [uiLanguage$, "Automatic"]
 		optionMenu: .languageInput$, .defaultLanguage
 			option: "English"
 			option: "Nederlands"
@@ -1218,10 +1228,15 @@ while .continue
 	endif
 	
 	.sp$ = "M"
+	vtl_normalization = 0
 	.sp_default = 2
 	if uiMessage$ [uiLanguage$, "Female"] = '.speakerIsAVar$'$
 		.sp$ = "F"
 		.sp_default = 1
+	elsif uiMessage$ [uiLanguage$, "Automatic"] = '.speakerIsAVar$'$
+		.sp$ = "F"
+		.sp_default = 3
+		vtl_normalization = 1
 	endif
 	
 	uiLanguage$ = "EN"
@@ -1524,9 +1539,17 @@ procedure plot_vowels .plot .sp$ .sound
 	endif
 
 	# Get Vocal Track Length
-	@estimate_Vocal_Tract_Length: .formantsPlot, .syllableKernels, .targetTier
-	.vocalTractLength = estimate_Vocal_Tract_Length.vtl
-	.vtlCorrection = averagePhi_VTL [plotFormantAlgorithm$, .sp$] / estimate_Vocal_Tract_Length.phi
+	.vtlCorrection = 1
+	.vocalTractLength = -1
+	if vtl_normalization
+		@estimate_Vocal_Tract_Length: .formantsPlot, .syllableKernels, .targetTier
+		.vocalTractLength = estimate_Vocal_Tract_Length.vtl
+		.vtlCorrection = averagePhi_VTL [plotFormantAlgorithm$, .sp$] / estimate_Vocal_Tract_Length.phi
+		.sp$ = "F"
+		if estimate_Vocal_Tract_Length.phi < 2/(1/averagePhi_VTL [plotFormantAlgorithm$, "M"] + 1/averagePhi_VTL [plotFormantAlgorithm$, "F"])
+			.sp$ = "M"
+		endif
+	endif
 	
 	# Set new @_center
 	phonemes [plotFormantAlgorithm$, .sp$, "@_center", "F1"] = (phonemes [plotFormantAlgorithm$, .sp$, "a", "F1"] * phonemes [plotFormantAlgorithm$, .sp$, "i", "F1"] * phonemes [plotFormantAlgorithm$, .sp$, "u", "F1"]) ** (1/3) 
@@ -1736,25 +1759,31 @@ procedure plot_vowels .plot .sp$ .sound
 
 	# Print areas as percentage
 	if .plot
+		.dY = 0
+		if vtl_normalization
+			.dY = 0.05
+		endif
 		.shift = Text width (world coordinates): " ('plotFormantAlgorithm$')"
-		Text special: 1+.shift, "right", 0.12, "bottom", "Helvetica", 16, "0", uiMessage$ [uiLanguage$, "AreaTitle"]+" ('plotFormantAlgorithm$')"
-		Text special: 0.9, "right", 0.07, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "Area1"]
-		Text special: 0.9, "left", 0.07, "bottom", "Helvetica", 14, "0", ": '.area1perc:0'\% "
-		Text special: 0.9, "right", 0.02, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "Area2"]
-		Text special: 0.9, "left", 0.02, "bottom", "Helvetica", 14, "0", ": '.area2perc:0'\% "
-		Text special: 0.9, "right", -0.03, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "AreaN"]
-		Text special: 0.9, "left", -0.03, "bottom", "Helvetica", 14, "0", ": '.numVowelIntervals' ('.duration:0' s)"
-		Text special: 0.9, "right", -0.08, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "VTL"]
-		Text special: 0.9, "left", -0.08, "bottom", "Helvetica", 14, "0", ": '.vocalTractLength:1' cm"
+		Text special: 1+.shift, "right", 0.07 + .dY, "bottom", "Helvetica", 16, "0", uiMessage$ [uiLanguage$, "AreaTitle"]+" ('plotFormantAlgorithm$')"
+		Text special: 0.9, "right", 0.02 + .dY, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "Area1"]
+		Text special: 0.9, "left", 0.02 + .dY, "bottom", "Helvetica", 14, "0", ": '.area1perc:0'\% "
+		Text special: 0.9, "right", -0.03 + .dY, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "Area2"]
+		Text special: 0.9, "left", -0.03 + .dY, "bottom", "Helvetica", 14, "0", ": '.area2perc:0'\% "
+		Text special: 0.9, "right", -0.08 + .dY, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "AreaN"]
+		Text special: 0.9, "left", -0.08 + .dY, "bottom", "Helvetica", 14, "0", ": '.numVowelIntervals' ('.duration:0' s)"
+		if vtl_normalization
+			Text special: 0.9, "right", -0.08, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "VTL"]
+			Text special: 0.9, "left", -0.08, "bottom", "Helvetica", 14, "0", ": '.vocalTractLength:1' cm"
+		endif
 
 		# Relative distance to corners
-		Text special: -0.1, "left", 0.12, "bottom", "Helvetica", 16, "0", uiMessage$ [uiLanguage$, "DistanceTitle"]
-		Text special: 0.0, "right", 0.07, "bottom", "Helvetica", 14, "0", "/i/:"
-		Text special: 0.16, "right", 0.07, "bottom", "Helvetica", 14, "0", " '.relDist_i:0'\%  ('.num_i_Intervals')"
-		Text special: 0.0, "right", 0.02, "bottom", "Helvetica", 14, "0", "/u/:"
-		Text special: 0.16, "right", 0.02, "bottom", "Helvetica", 14, "0", " '.relDist_u:0'\%  ('.num_u_Intervals')"
-		Text special: 0.0, "right", -0.03, "bottom", "Helvetica", 14, "0", "/a/:"
-		Text special: 0.16, "right", -0.03, "bottom", "Helvetica", 14, "0", " '.relDist_a:0'\%  ('.num_a_Intervals')"
+		Text special: -0.1, "left", 0.07 + .dY, "bottom", "Helvetica", 16, "0", uiMessage$ [uiLanguage$, "DistanceTitle"]
+		Text special: 0.0, "right", 0.02 + .dY, "bottom", "Helvetica", 14, "0", "/i/:"
+		Text special: 0.16, "right", 0.02 + .dY, "bottom", "Helvetica", 14, "0", " '.relDist_i:0'\%  ('.num_i_Intervals')"
+		Text special: 0.0, "right", -0.03 + .dY, "bottom", "Helvetica", 14, "0", "/u/:"
+		Text special: 0.16, "right", -0.03 + .dY, "bottom", "Helvetica", 14, "0", " '.relDist_u:0'\%  ('.num_u_Intervals')"
+		Text special: 0.0, "right", -0.08 + .dY, "bottom", "Helvetica", 14, "0", "/a/:"
+		Text special: 0.16, "right", -0.08 + .dY, "bottom", "Helvetica", 14, "0", " '.relDist_a:0'\%  ('.num_a_Intervals')"
 	endif
 	
 	selectObject: .formants, .formantsBandwidth, .syllableKernels

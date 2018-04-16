@@ -713,10 +713,10 @@ phonemes ["SL", "F", "@_center", "F2"] = (phonemes ["SL", "F", "i_corner", "F2"]
 
 # Vocal Tract Length
 # Sex  VTL		Phi
-# F    15.94	553.42
-# M    17.11	515.59
-averagePhi_VTL ["SL", "F"] = 553.42
-averagePhi_VTL ["SL", "M"] = 515.59
+# F    15.94	553.52
+# M    17.11	516.05
+averagePhi_VTL ["SL", "F"] = 553.52
+averagePhi_VTL ["SL", "M"] = 516.05
 
 
 ###############################################
@@ -822,10 +822,10 @@ phonemes ["Burg", "F", "@_center", "F2"] = (phonemes ["Burg", "F", "i_corner", "
 
 # Vocal Tract Length
 # Sex  VTL   Phi
-# F    15.39	573.26
-# M    16.62	531.02
-averagePhi_VTL ["Burg", "F"] = 573.26
-averagePhi_VTL ["Burg", "M"] = 531.02
+# F    15.39	573.59
+# M    16.62	531.65
+averagePhi_VTL ["Burg", "F"] = 573.59
+averagePhi_VTL ["Burg", "M"] = 531.65
 
 
 ###############################################
@@ -931,10 +931,10 @@ phonemes ["Robust", "F", "@_center", "F2"] = (phonemes ["Robust", "F", "i_corner
 
 # Vocal Tract Length
 # Sex  VTL   Phi
-# F    15.24	579.11
-# M    16.29	541.51
-averagePhi_VTL ["Robust", "F"] = 584.19
-averagePhi_VTL ["Robust", "M"] = 542.10
+# F    15.24	579.27
+# M    16.29	542.28
+averagePhi_VTL ["Robust", "F"] = 579.27
+averagePhi_VTL ["Robust", "M"] = 542.28
 
 
 ###############################################
@@ -1040,10 +1040,10 @@ phonemes ["KeepAll", "F", "@_center", "F2"] = (phonemes ["KeepAll", "F", "i_corn
 
 # Vocal Tract Length
 # Sex  VTL   Phi
-# F    15.39	573.26
-# M    16.62	531.02
-averagePhi_VTL ["KeepAll", "F"] = 573.26
-averagePhi_VTL ["KeepAll", "M"] = 531.02
+# F    15.39	573.59
+# M    16.62	531.65
+averagePhi_VTL ["KeepAll", "F"] = 573.59
+averagePhi_VTL ["KeepAll", "M"] = 531.65
 
 
 ###############################################
@@ -1064,6 +1064,12 @@ if input_table > 0
 			goto NEXTROW
 		endif
 		.sp$ = Get value: .r, "Speaker"
+		if .sp$ = "A"
+			.sp$ = "F"
+			vtl_normalization = 1
+		else
+			vtl_normalization = 0
+		endif
 		file$ = Get value: .r, "File"
 		tmp$ = Get value: .r, "Language"
 		if index(tmp$, "[A-Z]{2}")
@@ -1074,7 +1080,7 @@ if input_table > 0
 			log = 1
 			output_table$ = .log$
 			if not fileReadable(output_table$)
-				writeFileLine: output_table$, "Name", tab$, "Speaker", tab$, "N", tab$, "Area2", tab$, "Area1", tab$, "i.dist", tab$, "u.dist", tab$, "a.dist", tab$, "VTL", tab$, "Duration", tab$, "Intensity"
+				writeFileLine: output_table$, "Name", tab$, "Speaker", tab$, "N", tab$, "Area2", tab$, "Area1", tab$, "i.dist", tab$, "u.dist", tab$, "a.dist", tab$, "VTL", tab$, "Duration", tab$, "Intensity", tab$, "Formant"
 			endif
 		else
 			log = 0
@@ -1087,6 +1093,13 @@ if input_table > 0
 			.plotFile$ = ""
 		else
 			.plotVowels = 1
+		endif
+		
+		# Get the formant algorithm, if given
+		.formantAlgorithm$ = Get value: .r, "Formant"
+		if index_regex(.formantAlgorithm$, "\w") > 0 and index(" SL Burg Robust KeepAll ", .formantAlgorithm$)
+			targetFormantAlgorithm$ = .formantAlgorithm$
+			plotFormantAlgorithm$ = targetFormantAlgorithm$
 		endif
 
 		# Handle cases where there is a wildcard
@@ -1145,11 +1158,11 @@ if input_table > 0
 		if .plotVowels
 			Erase all
 			call set_up_Canvas
-			@plot_vowel_triangle:, .sp$
+			#@plot_vowel_triangle: .sp$
 			Text special... 0.5 Centre 1.05 bottom Helvetica 18 0 ##'title$'#
 		endif
 		@plot_vowels: .plotVowels, .sp$, .sound
-		@print_output_line: title$, .sp$, plot_vowels.numVowelIntervals, plot_vowels.area2perc, plot_vowels.area1perc, plot_vowels.relDist_i, plot_vowels.relDist_u, plot_vowels.relDist_a, plot_vowels.vocalTractLength, .duration, .intensity
+		@print_output_line: title$, plot_vowels.sp$, plot_vowels.numVowelIntervals, plot_vowels.area2perc, plot_vowels.area1perc, plot_vowels.relDist_i, plot_vowels.relDist_u, plot_vowels.relDist_a, plot_vowels.vocalTractLength, .duration, .intensity
 
 		if index_regex(.plotFile$, "\w")
 			Save as 300-dpi PNG file: .plotFile$
@@ -1307,9 +1320,9 @@ while .continue
 		# Print output
 		if output_table$ = "-"
 			clearinfo
-			appendInfoLine: "Name", tab$, "Speaker", tab$, "N", tab$, "Area2", tab$, "Area1", tab$, "i.dist", tab$, "u.dist", tab$, "a.dist", tab$, "VTL", tab$,"Duration", tab$, "Intensity"
+			appendInfoLine: "Name", tab$, "Speaker", tab$, "N", tab$, "Area2", tab$, "Area1", tab$, "i.dist", tab$, "u.dist", tab$, "a.dist", tab$, "VTL", tab$,"Duration", tab$, "Intensity", tab$, "Formant"
 		elsif index_regex(output_table$, "\w") and not fileReadable(output_table$)
-			writeFileLine: output_table$, "Name", tab$, "Speaker", tab$, "N", tab$, "Area2", tab$, "Area1", tab$, "i.dist", tab$, "u.dist", tab$, "a.dist", tab$, "VTL", tab$, "Duration", tab$, "Intensity"
+			writeFileLine: output_table$, "Name", tab$, "Speaker", tab$, "N", tab$, "Area2", tab$, "Area1", tab$, "i.dist", tab$, "u.dist", tab$, "a.dist", tab$, "VTL", tab$, "Duration", tab$, "Intensity", tab$, "Formant"
 		endif
 	endif
 	
@@ -1343,16 +1356,15 @@ while .continue
 	# Draw vowel triangle
 	Erase all
 	call set_up_Canvas
-	@plot_vowel_triangle: .sp$
+	#@plot_vowel_triangle: .sp$
 	Text special... 0.5 Centre 1.05 bottom Helvetica 18 0 ##'title$'#
 	
 	selectObject: .sound
 	.duration = Get total duration
 	.intensity = Get intensity (dB)
 	if .intensity > 50
-		#@plot_vowels: targetFormantAlgorithm$, 1, .sp$, .sound, 
 		@plot_vowels: 1, .sp$, .sound, 
-		@print_output_line: title$, .sp$, plot_vowels.numVowelIntervals, plot_vowels.area2perc, plot_vowels.area1perc, plot_vowels.relDist_i, plot_vowels.relDist_u, plot_vowels.relDist_a, plot_vowels.vocalTractLength, .duration, .intensity
+		@print_output_line: title$, plot_vowels.sp$, plot_vowels.numVowelIntervals, plot_vowels.area2perc, plot_vowels.area1perc, plot_vowels.relDist_i, plot_vowels.relDist_u, plot_vowels.relDist_a, plot_vowels.vocalTractLength, .duration, .intensity
 	endif
 	
 	selectObject: .sound
@@ -1490,6 +1502,7 @@ procedure plot_vowels .plot .sp$ .sound
 	endif
 	
 	# Targets
+	# Calculate formants
 	selectObject: .sound
 	if targetFormantAlgorithm$ = "Burg"
 		.formants = noprogress To Formant (burg): 0, 5, .maxFormant, 0.025, 50
@@ -1510,7 +1523,6 @@ procedure plot_vowels .plot .sp$ .sound
 		.formantsBandwidth = noprogress To Formant (burg): 0, 5, .maxFormant, 0.025, 50
 	endif
 	
-	# Plot
 	if targetFormantAlgorithm$ = plotFormantAlgorithm$
 		.formantsPlot = .formants
 	else
@@ -1529,6 +1541,7 @@ procedure plot_vowels .plot .sp$ .sound
 		endif
 	endif
 	
+	# Plot
 	@select_vowel_target: .sp$, .sound, .formants, .formantsBandwidth, .syllableKernels
 	.vowelTier = select_vowel_target.vowelTier
 	.targetTier = select_vowel_target.targetTier
@@ -1552,6 +1565,11 @@ procedure plot_vowels .plot .sp$ .sound
 		.vtlScaling = averagePhi_VTL [plotFormantAlgorithm$, .sp$] / estimate_Vocal_Tract_Length.phi
 	endif
 	
+	# Draw new vowel triangle
+	if .plot
+		@plot_vowel_triangle: .sp$
+	endif
+
 	# Set new @_center
 	phonemes [plotFormantAlgorithm$, .sp$, "@_center", "F1"] = (phonemes [plotFormantAlgorithm$, .sp$, "a", "F1"] * phonemes [plotFormantAlgorithm$, .sp$, "i", "F1"] * phonemes [plotFormantAlgorithm$, .sp$, "u", "F1"]) ** (1/3) 
 	phonemes [plotFormantAlgorithm$, .sp$, "@_center", "F2"] = (phonemes [plotFormantAlgorithm$, .sp$, "a", "F2"] * phonemes [plotFormantAlgorithm$, .sp$, "i", "F2"] * phonemes [plotFormantAlgorithm$, .sp$, "u", "F2"]) ** (1/3) 
@@ -1794,9 +1812,9 @@ endproc
 procedure print_output_line .title$, .sp$, .numVowelIntervals, .area2perc, .area1perc, .relDist_i, .relDist_u, .relDist_a, .vtl, .duration, .intensity
 	# Uses global variable
 	if output_table$ = "-"
-		appendInfoLine: title$, tab$, .sp$, tab$, .numVowelIntervals, tab$, fixed$(.area2perc, 1), tab$, fixed$(.area1perc, 1), tab$, fixed$(.relDist_i, 1), tab$, fixed$(.relDist_u, 1), tab$, fixed$(.relDist_a, 1), tab$, fixed$(.vtl, 2), tab$, fixed$(.duration,0), tab$, fixed$(.intensity,1)
+		appendInfoLine: title$, tab$, .sp$, tab$, .numVowelIntervals, tab$, fixed$(.area2perc, 1), tab$, fixed$(.area1perc, 1), tab$, fixed$(.relDist_i, 1), tab$, fixed$(.relDist_u, 1), tab$, fixed$(.relDist_a, 1), tab$, fixed$(.vtl, 2), tab$, fixed$(.duration,0), tab$, fixed$(.intensity,1), tab$, plotFormantAlgorithm$
 	elsif index_regex(output_table$, "\w")
-		appendFileLine: output_table$, title$, tab$, .sp$, tab$, .numVowelIntervals, tab$, fixed$(.area2perc, 1), tab$, fixed$(.area1perc, 1), tab$, fixed$(.relDist_i, 1), tab$, fixed$(.relDist_u, 1), tab$, fixed$(.relDist_a, 1), tab$, fixed$(.vtl, 2), tab$, fixed$(.duration,0), tab$, fixed$(.intensity,1)
+		appendFileLine: output_table$, title$, tab$, .sp$, tab$, .numVowelIntervals, tab$, fixed$(.area2perc, 1), tab$, fixed$(.area1perc, 1), tab$, fixed$(.relDist_i, 1), tab$, fixed$(.relDist_u, 1), tab$, fixed$(.relDist_a, 1), tab$, fixed$(.vtl, 2), tab$, fixed$(.duration,0), tab$, fixed$(.intensity,1), tab$, plotFormantAlgorithm$
 	endif	
 endproc
 

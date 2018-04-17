@@ -120,9 +120,9 @@ dot_Radius_Cutoff = 300
 # 
 # Enter valid file path in input_file$ to run non-interactive
 #
-#input_file$ = "concatlist.tsv"
+input_file$ = "concatlist.tsv"
 #input_file$ = "chunkslist.tsv"
-input_file$ = ""
+#input_file$ = ""
 
 input_table = -1
 .continue = 1
@@ -717,6 +717,8 @@ phonemes ["SL", "F", "@_center", "F2"] = (phonemes ["SL", "F", "i_corner", "F2"]
 # M    17.11	516.05
 averagePhi_VTL ["SL", "F"] = 553.52
 averagePhi_VTL ["SL", "M"] = 516.05
+# Classification boundary
+averagePhi_VTL ["SL", "A"] = 529.80
 
 
 ###############################################
@@ -826,6 +828,8 @@ phonemes ["Burg", "F", "@_center", "F2"] = (phonemes ["Burg", "F", "i_corner", "
 # M    16.62	531.65
 averagePhi_VTL ["Burg", "F"] = 573.59
 averagePhi_VTL ["Burg", "M"] = 531.65
+# Classification boundary
+averagePhi_VTL ["Burg", "A"] = 529.48
 
 
 ###############################################
@@ -935,7 +939,8 @@ phonemes ["Robust", "F", "@_center", "F2"] = (phonemes ["Robust", "F", "i_corner
 # M    16.29	542.28
 averagePhi_VTL ["Robust", "F"] = 579.27
 averagePhi_VTL ["Robust", "M"] = 542.28
-
+# Classification boundary
+averagePhi_VTL ["Robust", "A"] = 540.51
 
 ###############################################
 #
@@ -1044,6 +1049,8 @@ phonemes ["KeepAll", "F", "@_center", "F2"] = (phonemes ["KeepAll", "F", "i_corn
 # M    16.62	531.65
 averagePhi_VTL ["KeepAll", "F"] = 573.59
 averagePhi_VTL ["KeepAll", "M"] = 531.65
+# Classification boundary
+averagePhi_VTL ["KeepAll", "A"] = 529.48
 
 
 ###############################################
@@ -1096,10 +1103,13 @@ if input_table > 0
 		endif
 		
 		# Get the formant algorithm, if given
-		.formantAlgorithm$ = Get value: .r, "Formant"
-		if index_regex(.formantAlgorithm$, "\w") > 0 and index(" SL Burg Robust KeepAll ", .formantAlgorithm$)
-			targetFormantAlgorithm$ = .formantAlgorithm$
-			plotFormantAlgorithm$ = targetFormantAlgorithm$
+		.idx = Get column index: "Formant"
+		if .idx > 0
+			.formantAlgorithm$ = Get value: .r, "Formant"
+			if index_regex(.formantAlgorithm$, "\w") > 0 and index(" SL Burg Robust KeepAll ", .formantAlgorithm$)
+				targetFormantAlgorithm$ = .formantAlgorithm$
+				plotFormantAlgorithm$ = targetFormantAlgorithm$
+			endif
 		endif
 
 		# Handle cases where there is a wildcard
@@ -1558,7 +1568,7 @@ procedure plot_vowels .plot .sp$ .sound
 		@estimate_Vocal_Tract_Length: .formantsPlot, .syllableKernels, .targetTier
 		.vocalTractLength = estimate_Vocal_Tract_Length.vtl
 		.sp$ = "F"
-		if estimate_Vocal_Tract_Length.phi < 2/(1/averagePhi_VTL [plotFormantAlgorithm$, "M"] + 1/averagePhi_VTL [plotFormantAlgorithm$, "F"])
+		if estimate_Vocal_Tract_Length.phi < averagePhi_VTL [plotFormantAlgorithm$, "A"]
 			.sp$ = "M"
 		endif
 		# Watch out .sp$ must be set BEFORE the scaling

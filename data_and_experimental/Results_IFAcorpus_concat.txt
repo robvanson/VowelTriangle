@@ -1,0 +1,32 @@
+
+Determine speaker sex: VTL
+Formant analysis: SL
+
+Report Concat
+# Concatenated: 100, Mean (sd): 90.8 (19.1)
+
+R^2 adjusted
+Area2 ~ Speaker R^2 =0.404 (aic=833, p=4.55e-09)
+Area2 ~ Speaker + Style R^2 =0.703 (aic=766.9, p=5.01e-20)
+Area2 ~ Speaker*Style R^2 =0.766 (aic=760.7, p=1.65e-11)
+Area2 ~ Speaker*Style + Session R^2 =0.763 (aic=761.9, p=3.93e-11)
+Area2 ~ Speaker*Style + Speaker*Session R^2 =0.837 (aic=722.1, p=7.8e-12)
+Area2 ~ Speaker*Style + Speaker*Session + Style*Session R^2 =0.905 (aic=665.4, p=1.53e-14)
+Area2 ~ Speaker*Style*Session R^2 =NaN (aic=-Inf, p=NaN)
+
+Leave-One-Out predictions of linear models: Concat
+
+Area2 ~ Mean
+RMSE: 19.2
+MAE: 15
+
+Area2 ~ Speaker*Style
+RMSE: 13 (r^2=0.537)
+MAE: 9.91 (0.66)
+
+Area2 ~ Speaker*Style + Speaker*Session + Style*Session
+RMSE: 9.78 (r^2=0.74)
+MAE: 7.59 (0.506)
+
+
+> 

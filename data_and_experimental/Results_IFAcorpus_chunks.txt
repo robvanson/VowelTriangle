@@ -1,0 +1,179 @@
+Determine speaker sex: FM
+Formant analysis: SL
+
+Report Chunks
+# Chunks: 1161, Mean (sd): 94.7 (19.8)
+
+R^2 adjusted
+Area2 ~ Speaker R^2 =0.367 (aic=9711, p=7.74e-110)
+Area2 ~ Speaker + Style R^2 =0.59 (aic=9211, p=2.03e-213)
+Area2 ~ Speaker*Style R^2 =0.623 (aic=9158, p=1.74e-203)
+Area2 ~ Speaker*Style + Session R^2 =0.625 (aic=9153, p=3.4e-204)
+Area2 ~ Speaker*Style + Speaker*Session R^2 =0.644 (aic=9100, p=1.98e-211)
+Area2 ~ Speaker*Style + Speaker*Session + Style*Session R^2 =0.662 (aic=9044, p=1.56e-221)
+Area2 ~ Speaker*Style*Session R^2 =0.67 (aic=9040, p=5.07e-213)
+
+Leave-One-Out predictions of linear models: Chunks
+
+Area2 ~ Mean
+RMSE: 20.1
+MAE: 15.4
+
+Area2 ~ Speaker*Style
+RMSE: 13 (r^2=0.583)
+MAE: 9.55 (0.621)
+
+Area2 ~ Speaker*Style*Session
+RMSE: 12.4 (r^2=0.62)
+MAE: 8.84 (0.575)
+
+
+Determine speaker sex: FM
+Formant analysis: Burg
+
+Report Chunks
+# Chunks: 1161, Mean (sd): 104 (23.6)
+
+R^2 adjusted
+Area2 ~ Speaker R^2 =0.293 (aic=1.024e+04, p=2.1e-82)
+Area2 ~ Speaker + Style R^2 =0.476 (aic=9898, p=9.75e-153)
+Area2 ~ Speaker*Style R^2 =0.509 (aic=9865, p=5.09e-143)
+Area2 ~ Speaker*Style + Session R^2 =0.509 (aic=9866, p=1.47e-142)
+Area2 ~ Speaker*Style + Speaker*Session R^2 =0.532 (aic=9821, p=6.07e-149)
+Area2 ~ Speaker*Style + Speaker*Session + Style*Session R^2 =0.559 (aic=9753, p=2.6e-161)
+Area2 ~ Speaker*Style*Session R^2 =0.568 (aic=9754, p=3.71e-154)
+
+Leave-One-Out predictions of linear models: Chunks
+
+Area2 ~ Mean
+RMSE: 24.4
+MAE: 17.3
+
+Area2 ~ Speaker*Style
+RMSE: 17.7 (r^2=0.474)
+MAE: 11.3 (0.656)
+
+Area2 ~ Speaker*Style*Session
+RMSE: 16.9 (r^2=0.521)
+MAE: 10.6 (0.612)
+
+
+Determine speaker sex: FM
+Formant analysis: Robust
+
+Report Chunks
+# Chunks: 1161, Mean (sd): 90 (18.7)
+
+R^2 adjusted
+Area2 ~ Speaker R^2 =0.284 (aic=9723, p=2.71e-79)
+Area2 ~ Speaker + Style R^2 =0.499 (aic=9313, p=1.09e-163)
+Area2 ~ Speaker*Style R^2 =0.568 (aic=9185, p=5.56e-172)
+Area2 ~ Speaker*Style + Session R^2 =0.567 (aic=9187, p=2.87e-171)
+Area2 ~ Speaker*Style + Speaker*Session R^2 =0.601 (aic=9103, p=4.16e-185)
+Area2 ~ Speaker*Style + Speaker*Session + Style*Session R^2 =0.625 (aic=9031, p=3.52e-198)
+Area2 ~ Speaker*Style*Session R^2 =0.629 (aic=9046, p=4.12e-187)
+
+Leave-One-Out predictions of linear models: Chunks
+
+Area2 ~ Mean
+RMSE: 19.2
+MAE: 14.5
+
+Area2 ~ Speaker*Style
+RMSE: 13.1 (r^2=0.535)
+MAE: 9.85 (0.68)
+
+Area2 ~ Speaker*Style*Session
+RMSE: 12.3 (r^2=0.585)
+MAE: 9.07 (0.626)
+
+
+
+Determine speaker sex: VTL
+Formant analysis: SL
+
+Report Chunks
+# Chunks: 1157, Mean (sd): 90.6 (23.4)
+
+R^2 adjusted
+Area2 ~ Speaker R^2 =0.246 (aic=1.026e+04, p=1.25e-66)
+Area2 ~ Speaker + Style R^2 =0.437 (aic=9931, p=1.78e-134)
+Area2 ~ Speaker*Style R^2 =0.472 (aic=9900, p=1.16e-125)
+Area2 ~ Speaker*Style + Session R^2 =0.472 (aic=9900, p=2.32e-125)
+Area2 ~ Speaker*Style + Speaker*Session R^2 =0.498 (aic=9851, p=9.78e-133)
+Area2 ~ Speaker*Style + Speaker*Session + Style*Session R^2 =0.506 (aic=9836, p=5.73e-135)
+Area2 ~ Speaker*Style*Session R^2 =0.514 (aic=9841, p=5.04e-128)
+
+Leave-One-Out predictions of linear models: Chunks
+
+Area2 ~ Mean
+RMSE: 24.1
+MAE: 17.2
+
+Area2 ~ Speaker*Style
+RMSE: 18.2 (r^2=0.427)
+MAE: 11.8 (0.683)
+
+Area2 ~ Speaker*Style*Session
+RMSE: 17.7 (r^2=0.459)
+MAE: 11.3 (0.655)
+
+
+Determine speaker sex: VTL
+Formant analysis: Burg
+
+Report Chunks
+# Chunks: 1161, Mean (sd): 107 (25.4)
+
+R^2 adjusted
+Area2 ~ Speaker R^2 =0.298 (aic=1.041e+04, p=3.5e-84)
+Area2 ~ Speaker + Style R^2 =0.42 (aic=1.019e+04, p=1.19e-127)
+Area2 ~ Speaker*Style R^2 =0.464 (aic=1.014e+04, p=9.23e-123)
+Area2 ~ Speaker*Style + Session R^2 =0.465 (aic=1.014e+04, p=9.12e-123)
+Area2 ~ Speaker*Style + Speaker*Session R^2 =0.493 (aic=1.009e+04, p=3.76e-131)
+Area2 ~ Speaker*Style + Speaker*Session + Style*Session R^2 =0.524 (aic=1.002e+04, p=7.01e-144)
+Area2 ~ Speaker*Style*Session R^2 =0.527 (aic=1.003e+04, p=2.49e-134)
+
+Leave-One-Out predictions of linear models: Chunks
+
+Area2 ~ Mean
+RMSE: 26
+MAE: 18.9
+
+Area2 ~ Speaker*Style
+RMSE: 19.8 (r^2=0.42)
+MAE: 13.1 (0.691)
+
+Area2 ~ Speaker*Style*Session
+RMSE: 18.9 (r^2=0.471)
+MAE: 12.1 (0.641)
+
+
+Determine speaker sex: VTL
+Formant analysis: Robust
+
+Report Chunks
+# Chunks: 1161, Mean (sd): 91.3 (21)
+
+R^2 adjusted
+Area2 ~ Speaker R^2 =0.26 (aic=1.002e+04, p=2.97e-71)
+Area2 ~ Speaker + Style R^2 =0.382 (aic=9816, p=2.09e-112)
+Area2 ~ Speaker*Style R^2 =0.425 (aic=9777, p=5.64e-107)
+Area2 ~ Speaker*Style + Session R^2 =0.426 (aic=9775, p=3.57e-107)
+Area2 ~ Speaker*Style + Speaker*Session R^2 =0.469 (aic=9695, p=1.24e-120)
+Area2 ~ Speaker*Style + Speaker*Session + Style*Session R^2 =0.481 (aic=9669, p=7.87e-125)
+Area2 ~ Speaker*Style*Session R^2 =0.48 (aic=9697, p=2.11e-114)
+
+Leave-One-Out predictions of linear models: Chunks
+
+Area2 ~ Mean
+RMSE: 21.4
+MAE: 15.2
+
+Area2 ~ Speaker*Style
+RMSE: 16.8 (r^2=0.38)
+MAE: 11.3 (0.744)
+
+Area2 ~ Speaker*Style*Session
+RMSE: 16.2 (r^2=0.425)
+MAE: 10.5 (0.694)

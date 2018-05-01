@@ -123,28 +123,58 @@ Determine speaker sex: VTL
 Formant analysis: Burg
 
 Report Concat
-# Concatenated: 100, Mean (sd): 105 (21)
+# Concatenated: 100, Mean (sd): 109 (21.6)
 
 R^2 adjusted
-Area2 ~ Speaker R^2 =0.483 (aic=838.3, p=1.25e-11)
-Area2 ~ Speaker + Style R^2 =0.712 (aic=783.1, p=1.33e-20)
-Area2 ~ Speaker*Style R^2 =0.645 (aic=822.1, p=1.18e-07)
-Area2 ~ Speaker*Style + Session R^2 =0.644 (aic=822.2, p=1.79e-07)
-Area2 ~ Speaker*Style + Speaker*Session R^2 =0.725 (aic=794.3, p=7.65e-08)
-Area2 ~ Speaker*Style + Speaker*Session + Style*Session R^2 =0.875 (aic=712.8, p=1.66e-12)
+Area2 ~ Speaker R^2 =0.519 (aic=836.3, p=5.86e-13)
+Area2 ~ Speaker + Style R^2 =0.744 (aic=776.9, p=1.12e-22)
+Area2 ~ Speaker*Style R^2 =0.711 (aic=806.6, p=1.61e-09)
+Area2 ~ Speaker*Style + Session R^2 =0.708 (aic=807.9, p=3.44e-09)
+Area2 ~ Speaker*Style + Speaker*Session R^2 =0.779 (aic=777.6, p=1.84e-09)
+Area2 ~ Speaker*Style + Speaker*Session + Style*Session R^2 =0.893 (aic=702.7, p=1.26e-13)
 Area2 ~ Speaker*Style*Session R^2 =NaN (aic=-Inf, p=NaN)
 
 Leave-One-Out predictions of linear models: Concat
 
 Area2 ~ Mean
-RMSE: 21.1
-MAE: 16.7
+RMSE: 21.7
+MAE: 17
 
 Area2 ~ Speaker*Style
-RMSE: 17.7 (r^2=0.296)
-MAE: 12.7 (0.763)
+RMSE: 16.4 (r^2=0.428)
+MAE: 12.3 (0.723)
 
 Area2 ~ Speaker*Style + Speaker*Session + Style*Session
-RMSE: 12.4 (r^2=0.656)
-MAE: 9.18 (0.551)
+RMSE: 11.8 (r^2=0.705)
+MAE: 8.93 (0.525)
+
+
+Determine speaker sex: VTL
+Formant analysis: Robust
+
+Report Concat
+# Concatenated: 100, Mean (sd): 92.9 (17)
+
+R^2 adjusted
+Area2 ~ Speaker R^2 =0.465 (aic=798.8, p=5.23e-11)
+Area2 ~ Speaker + Style R^2 =0.677 (aic=751.7, p=1.49e-18)
+Area2 ~ Speaker*Style R^2 =0.621 (aic=785.5, p=4.24e-07)
+Area2 ~ Speaker*Style + Session R^2 =0.629 (aic=783.5, p=4.16e-07)
+Area2 ~ Speaker*Style + Speaker*Session R^2 =0.75 (aic=741.6, p=1.5e-08)
+Area2 ~ Speaker*Style + Speaker*Session + Style*Session R^2 =0.899 (aic=648.7, p=4.79e-14)
+Area2 ~ Speaker*Style*Session R^2 =NaN (aic=-Inf, p=NaN)
+
+Leave-One-Out predictions of linear models: Concat
+
+Area2 ~ Mean
+RMSE: 17
+MAE: 13.3
+
+Area2 ~ Speaker*Style
+RMSE: 14.8 (r^2=0.25)
+MAE: 11.9 (0.893)
+
+Area2 ~ Speaker*Style + Speaker*Session + Style*Session
+RMSE: 8.99 (r^2=0.722)
+MAE: 7.17 (0.539)
 

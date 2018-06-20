@@ -120,9 +120,9 @@ dot_Radius_Cutoff = 300
 # 
 # Enter valid file path in input_file$ to run non-interactive
 #
-input_file$ = "concatlist.tsv"
+#input_file$ = "concatlist.tsv"
 #input_file$ = "chunkslist.tsv"
-#input_file$ = ""
+input_file$ = ""
 
 input_table = -1
 .continue = 1
@@ -1130,7 +1130,27 @@ if input_table > 0
 					exitScript: uiMessage$ [uiLanguage$, "ErrorSound"]
 				endif
 				name$ = selected$("Sound")
-				.soundPart = Convert to mono
+				.numChannels = Get number of channels
+				if .numChannels > 1
+					.maxInt = -10000
+					.bestChannel = 1
+					for .c to .numChannels
+						selectObject: .tmp
+						.tmpChannel = Extract one channel: .c
+						.currentInt = Get intensity (dB)
+						if .currentInt > .maxInt
+							.maxInt = .currentInt
+							.bestChannel = .c
+						endif
+						selectObject: .tmpChannel
+						Remove
+					endfor
+					selectObject: .tmp
+					.soundPart = Extract one channel: .bestChannel
+				else
+					selectObject: .tmp
+					.soundPart = Copy: name$
+				endif
 				selectObject: .tmp
 				Remove
 				
@@ -1155,7 +1175,28 @@ if input_table > 0
 				exitScript: uiMessage$ [uiLanguage$, "ErrorSound"]
 			endif
 			name$ = selected$("Sound")
-			.sound = Convert to mono
+			.numChannels = Get number of channels
+			if .numChannels > 1
+				.maxInt = -10000
+				.bestChannel = 1
+				for .c to .numChannels
+					selectObject: tmp
+					.tmpChannel = Extract one channel: .c
+					.currentInt = Get intensity (dB)
+					if .currentInt > .maxInt
+						.maxInt = .currentInt
+						.bestChannel = .c
+					endif
+					selectObject: .tmpChannel
+					Remove
+				endfor
+				selectObject: tmp
+				.sound = Extract one channel: .bestChannel
+			else
+				selectObject: tmp
+				.sound = Copy: name$
+			endif
+			selectObject: .sound
 			.duration = Get total duration
 			.intensity = Get intensity (dB)
 			Rename: name$
@@ -1471,7 +1512,30 @@ procedure read_and_select_audio .type .message1$ .message2$
 	
 	# Recordings can be in Stereo, change to mono
 	selectObject: .tmp
-	.sound = Convert to mono
+	.numChannels = Get number of channels
+	if .numChannels > 1
+		.maxInt = -10000
+		.bestChannel = 1
+		for .c to .numChannels
+			selectObject: .tmp
+			.tmpChannel = Extract one channel: .c
+			.currentInt = Get intensity (dB)
+			if .currentInt > .maxInt
+				.maxInt = .currentInt
+				.bestChannel = .c
+			endif
+			selectObject: .tmpChannel
+			Remove
+		endfor
+		selectObject: .tmp
+		.sound = Extract one channel: .bestChannel
+		Rename: .filename$
+	else
+		selectObject: .tmp
+		.sound = Copy: .filename$
+	endif
+
+pause
 	selectObject: .tmp, .source
 	Remove
 

@@ -1535,7 +1535,6 @@ procedure read_and_select_audio .type .message1$ .message2$
 		.sound = Copy: .filename$
 	endif
 
-pause
 	selectObject: .tmp, .source
 	Remove
 
@@ -2069,6 +2068,9 @@ procedure get_closest_vowels .cutoff .sp$ .formants .formantsPlot .textgrid .f1_
 					.numF1 = .ftmp1
 					.numF2 = .ftmp2
 					.num_t = .t
+					.numF3 = Get value at time: 3, .num_t, "Hertz", "Linear"
+					.numF4 = Get value at time: 4, .num_t, "Hertz", "Linear"
+					.numF5 = Get value at time: 5, .num_t, "Hertz", "Linear"
 				endif
 				.t += 0.005
 			endwhile
@@ -2078,6 +2080,9 @@ procedure get_closest_vowels .cutoff .sp$ .formants .formantsPlot .textgrid .f1_
 				selectObject: .formantsPlot
 				.numF1 = Get value at time: 1, .num_t, "Hertz", "Linear"
 				.numF2 = Get value at time: 2, .num_t, "Hertz", "Linear"
+				.numF3 = Get value at time: 3, .num_t, "Hertz", "Linear"
+				.numF4 = Get value at time: 4, .num_t, "Hertz", "Linear"
+				.numF5 = Get value at time: 5, .num_t, "Hertz", "Linear"
 			endif
 			
 			# Calculate the distance along the line between the 
@@ -2098,6 +2103,9 @@ procedure get_closest_vowels .cutoff .sp$ .formants .formantsPlot .textgrid .f1_
 				.distance_list [.vowelNum] = sqrt(.numDistance)
 				.f1_list [.vowelNum] = .numF1
 				.f2_list [.vowelNum] = .numF2
+				.f3_list [.vowelNum] = .numF3
+				.f4_list [.vowelNum] = .numF4
+				.f5_list [.vowelNum] = .numF5
 				.t_list [.vowelNum] = .num_t
 	
 				if .tableDistances <= 0
@@ -2705,7 +2713,9 @@ endproc
 # Edited by Charles R Larson. PLOS ONE 10, no. 7 (July 15, 2015): e0132193. 
 # https://doi.org/10.1371/journal.pone.0132193.
 #
-procedure estimate_Vocal_Tract_Length .formant .textGrid .targetTier
+# Iteratively, uses closest approach to (F1, F2) = (Phi, 3*Phi)
+# 
+procedure estimate_Vocal_Tract_Length .formants .syllableKernels .targetTier
 	# Coefficients
 	.beta[0] = 229
 	.beta[1] = 0.030
@@ -2713,38 +2723,47 @@ procedure estimate_Vocal_Tract_Length .formant .textGrid .targetTier
 	.beta[3] = 0.124
 	.beta[4] = 0.354
 	
-	selectObject: .textGrid
-	.numTargets = Get number of points: .targetTier
-	.n = 0
-	.sumVTL = 0
-	for .p to .numTargets
-		selectObject: .textGrid
-		.t = Get time of point: .targetTier, .p
-		selectObject: .formant 
-		.currentPhi = .beta[0]
-		for .i to 4
-			.f[.i] = Get value at time: .i, .t, "hertz", "Linear"
-			if .f[.i] <> undefined and .currentPhi <> undefined
-				.currentPhi += .beta[.i] * .f[.i] / (2*.i - 1)
-			else
-				.currentPhi = undefined
+	.sp$ = "F"
+	.phi = 500
+	.vtl = -1
+	
+	.numTargets = -1
+	for .iteration to 5
+		@get_closest_vowels: -24, .sp$, .formants, .formants, .syllableKernels, .phi, 3*.phi, 1
+		
+		.numTargets = get_closest_vowels.vowelNum
+		.n = 0
+		.sumVTL = 0
+		for .p to .numTargets
+			.currentPhi = .beta[0]
+			for .i to 4
+				.f[.i] =  get_closest_vowels.f'.i'_list [.p]
+				if .f[.i] <> undefined and .currentPhi <> undefined
+					.currentPhi += .beta[.i] * .f[.i] / (2*.i - 1)
+				else
+					.currentPhi = undefined
+				endif
+			endfor
+			if .currentPhi <> undefined
+				.currentVTL = 100 * 352.95 / (4*.currentPhi)
+				.sumVTL += .currentVTL
+				.n += 1
 			endif
 		endfor
-		if .currentPhi <> undefined
-			.currentVTL = 100 * 352.95 / (4*.currentPhi)
-			.sumVTL += .currentVTL
-			.n += 1
+		
+		if .n > 0
+			.vtl = .sumVTL / .n
+			# L = c / (4*Phi) (cm)
+			.phi = 100 * 352.95 / (4*.vtl)
+			
+			.sp$ = "F"
+			if .phi < averagePhi_VTL [plotFormantAlgorithm$, "A"]
+				.sp$ = "M"
+			endif
 		endif
 	endfor
-	
-	.phi = -1
-	.vtl = -1
-	if .n > 0
-		.vtl = .sumVTL / .n
-		# L = c / (4*Phi) (cm)
-		.phi = 100 * 352.95 / (4*.vtl)
-	endif
 endproc
+
 
 # 
 # Determine COG as an intensity

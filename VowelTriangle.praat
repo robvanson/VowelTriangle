@@ -940,7 +940,7 @@ phonemes ["Robust", "F", "@_center", "F2"] = (phonemes ["Robust", "F", "i_corner
 averagePhi_VTL ["Robust", "F"] = 579.27
 averagePhi_VTL ["Robust", "M"] = 542.28
 # Classification boundary
-averagePhi_VTL ["Robust", "A"] = 540.51
+averagePhi_VTL ["Robust", "A"] = 546.36
 
 ###############################################
 #

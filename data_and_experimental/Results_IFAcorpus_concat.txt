@@ -1,3 +1,4 @@
+
 Determine speaker sex: FM
 Formant analysis: SL
 
@@ -153,28 +154,30 @@ Determine speaker sex: VTL
 Formant analysis: Robust
 
 Report Concat
-# Concatenated: 100, Mean (sd): 92.9 (17)
+# Concatenated: 100, Mean (sd): 98.4 (15)
 
 R^2 adjusted
-Area2 ~ Speaker R^2 =0.465 (aic=798.8, p=5.23e-11)
-Area2 ~ Speaker + Style R^2 =0.677 (aic=751.7, p=1.49e-18)
-Area2 ~ Speaker*Style R^2 =0.621 (aic=785.5, p=4.24e-07)
-Area2 ~ Speaker*Style + Session R^2 =0.629 (aic=783.5, p=4.16e-07)
-Area2 ~ Speaker*Style + Speaker*Session R^2 =0.75 (aic=741.6, p=1.5e-08)
-Area2 ~ Speaker*Style + Speaker*Session + Style*Session R^2 =0.899 (aic=648.7, p=4.79e-14)
+Area2 ~ Speaker R^2 =0.468 (aic=773.1, p=4.19e-11)
+Area2 ~ Speaker + Style R^2 =0.732 (aic=708.2, p=7.85e-22)
+Area2 ~ Speaker*Style R^2 =0.71 (aic=733.6, p=1.75e-09)
+Area2 ~ Speaker*Style + Session R^2 =0.704 (aic=735.5, p=4.29e-09)
+Area2 ~ Speaker*Style + Speaker*Session R^2 =0.78 (aic=703.9, p=1.74e-09)
+Area2 ~ Speaker*Style + Speaker*Session + Style*Session R^2 =0.929 (aic=588.1, p=1.14e-16)
 Area2 ~ Speaker*Style*Session R^2 =NaN (aic=-Inf, p=NaN)
 
 Leave-One-Out predictions of linear models: Concat
 
 Area2 ~ Mean
-RMSE: 17
-MAE: 13.3
+RMSE: 15
+MAE: 12.2
 
 Area2 ~ Speaker*Style
-RMSE: 14.8 (r^2=0.25)
-MAE: 11.9 (0.893)
+RMSE: 11.4 (r^2=0.426)
+MAE: 8.97 (0.736)
 
 Area2 ~ Speaker*Style + Speaker*Session + Style*Session
-RMSE: 8.99 (r^2=0.722)
-MAE: 7.17 (0.539)
+RMSE: 6.64 (r^2=0.805)
+MAE: 5.14 (0.422)
 
+
+> 

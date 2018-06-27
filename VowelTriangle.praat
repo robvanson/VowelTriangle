@@ -1083,7 +1083,7 @@ if input_table > 0
 			uiLanguage$ = tmp$
 		endif
 		.log$ = Get value: .r, "Log"
-		if index_regex(.log$, "[\w]")
+		if index_regex(.log$, "\w")
 			log = 1
 			output_table$ = .log$
 			if not fileReadable(output_table$)

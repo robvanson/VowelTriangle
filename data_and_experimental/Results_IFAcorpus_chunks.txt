@@ -154,30 +154,30 @@ Determine speaker sex: VTL
 Formant analysis: Robust
 
 Report Chunks
-# Chunks: 1161, Mean (sd): 91.3 (21)
+# Chunks: 1161, Mean (sd): 101 (20.8)
 
 R^2 adjusted
-Area2 ~ Speaker R^2 =0.26 (aic=1.002e+04, p=2.97e-71)
-Area2 ~ Speaker + Style R^2 =0.382 (aic=9816, p=2.09e-112)
-Area2 ~ Speaker*Style R^2 =0.425 (aic=9777, p=5.64e-107)
-Area2 ~ Speaker*Style + Session R^2 =0.426 (aic=9775, p=3.57e-107)
-Area2 ~ Speaker*Style + Speaker*Session R^2 =0.469 (aic=9695, p=1.24e-120)
-Area2 ~ Speaker*Style + Speaker*Session + Style*Session R^2 =0.481 (aic=9669, p=7.87e-125)
-Area2 ~ Speaker*Style*Session R^2 =0.48 (aic=9697, p=2.11e-114)
+Area2 ~ Speaker R^2 =0.203 (aic=1.009e+04, p=3.21e-53)
+Area2 ~ Speaker + Style R^2 =0.322 (aic=9912, p=1.52e-89)
+Area2 ~ Speaker*Style R^2 =0.397 (aic=9819, p=1.94e-96)
+Area2 ~ Speaker*Style + Session R^2 =0.397 (aic=9821, p=6.38e-96)
+Area2 ~ Speaker*Style + Speaker*Session R^2 =0.409 (aic=9806, p=5.07e-97)
+Area2 ~ Speaker*Style + Speaker*Session + Style*Session R^2 =0.446 (aic=9734, p=3.97e-110)
+Area2 ~ Speaker*Style*Session R^2 =0.444 (aic=9763, p=3.99e-100)
 
 Leave-One-Out predictions of linear models: Chunks
 
 Area2 ~ Mean
-RMSE: 21.4
-MAE: 15.2
+RMSE: 21
+MAE: 14.8
 
 Area2 ~ Speaker*Style
-RMSE: 16.8 (r^2=0.38)
-MAE: 11.3 (0.744)
+RMSE: 17.2 (r^2=0.331)
+MAE: 11.2 (0.757)
 
 Area2 ~ Speaker*Style*Session
-RMSE: 16.2 (r^2=0.425)
-MAE: 10.5 (0.694)
+RMSE: 16.8 (r^2=0.36)
+MAE: 11 (0.742)
 
 
 > 

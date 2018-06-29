@@ -45,7 +45,7 @@ VowelTable$Style <- factor(VowelTable$Style, levels=c("I", "R", "T", "S", "W", "
 VowelTable$StyleNum <- factor(VowelTable$Style, levels=c("I", "R", "T", "S", "W", "Y"), ordered=T);
 
 # Plot figure
-#pdf(filename, width=OutputWidth, height=OutputHeight, useDingbats=FALSE);
+pdf(filename, width=OutputWidth, height=OutputHeight, useDingbats=FALSE);
 
 SpeakerList <- c("N","I","G","L","E","R","K","H", "D", "O")
 colorlist <- c("darkgreen", "darkred", "darkblue", "deeppink4", "green", "blue", "red", "deeppink", "gold4", "darkolivegreen")
@@ -69,4 +69,4 @@ segments(x-0.1, AverageAllVowels$Area2-CiAllVowels$Area2/2, x+0.1 , AverageAllVo
 legend("topleft", c("Chunks", "Average over speakers (normalized)", "95% confidence intervals"), pch=c(26, 21, 124), pt.bg=colorlist[3], col=c("black", colorlist[3], colorlist[3]), bty="n", cex=1.5, pt.cex=1, lty=c(0, 2, 0), lwd=3)
 
 
-#dev.off(dev.cur())
+dev.off(dev.cur())

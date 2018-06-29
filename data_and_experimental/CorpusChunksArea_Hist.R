@@ -9,12 +9,12 @@ library(ggplot2)
 OutputWidth <-  11.692;
 OutputHeight <- 7.5;
 #
-filename <- "CorpusConcatArea_hist.pdf"
+filename <- "CorpusChunksArea_hist.pdf"
 
 se <- function(x) sqrt(var(x)/length(x))
 ci <- function(x) {if(length(x)>3) {t <- t.test(x); (t$conf.int[[2]]- t$conf.int[[1]])/2} else 0 }
 
-VowelTable <- read.table("IFA_concat_dataFM_Robust.tsv", header = TRUE, sep = "\t", na.strings = "-");
+VowelTable <- read.table("IFA_chunks_dataFM_Robust.tsv", header = TRUE, sep = "\t", na.strings = "-");
 VowelTable$VowelDensity <- VowelTable$N/VowelTable$Duration
 AverageVowels <- aggregate(cbind(Area1, Area2, N, i.dist, u.dist, a.dist, Duration, VowelDensity)~Speaker+Sex+Style+Session, data=VowelTable, mean);
 SdevVowels <- aggregate(cbind(Area1, Area2, N, i.dist, u.dist, a.dist, Duration, VowelDensity)~Speaker+Sex+Style+Session, data=VowelTable, sd);
@@ -57,6 +57,6 @@ text(x, 5, cex=3, col="black", labels=AverageSpeakerVowels$Symbol,vfont=c("sans 
 
 axis(side=1, labels=as.character(AverageSpeakerVowels[order(AverageSpeakerVowels$Area2),"Speaker"]), at=x, cex.axis=1.5)
 abline(h=0, lwd=3)
-legend("topleft", c("Concatenated", "95% confidence intervals"), pch=c(26, 124), pt.bg="white", col=c("black"), bty="n", cex=1.5, pt.cex=1.5, lty=c(0), lwd=4)
+legend("topleft", c("Chunks", "95% confidence intervals"), pch=c(26, 124), pt.bg="white", col=c("black"), bty="n", cex=1.5, pt.cex=1.5, lty=c(0), lwd=4)
 
 dev.off(dev.cur())

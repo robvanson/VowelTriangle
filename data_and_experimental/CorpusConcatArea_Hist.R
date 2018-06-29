@@ -25,7 +25,7 @@ SerrSpeakerVowels <- aggregate(cbind(Area1, Area2, N, i.dist, u.dist, a.dist, Du
 CintSpeakerVowels <- aggregate(cbind(Area1, Area2, N, i.dist, u.dist, a.dist, Duration, VowelDensity)~Speaker, data=VowelTable, ci);
 NSpeakerVowels <- aggregate(cbind(Area1, Area2, N, i.dist, u.dist, a.dist, Duration, VowelDensity)~Speaker, data=VowelTable, length);
 AverageSpeakerVowels$Symbol = '\\VE'
-AverageSpeakerVowels[AverageSpeakerVowels$Speaker %in% c(), ]$Symbol = '\\MA'
+AverageSpeakerVowels[AverageSpeakerVowels$Speaker %in% c("R", "K", "H", "D", "O"), ]$Symbol = '\\MA'
 
 AverageAllVowels <- aggregate(cbind(Area1, Area2, N, i.dist, u.dist, a.dist, Duration, VowelDensity)~Style, data=VowelTable, mean);
 SdAllVowels <- aggregate(cbind(Area1, Area2, N, i.dist, u.dist, a.dist, Duration, VowelDensity)~Style, data=VowelTable, sd);
@@ -45,8 +45,18 @@ colorlist <- c("darkgreen", "darkred", "darkblue", "deeppink4", "green", "blue",
 i <- 1
 
 # Average
+par(mai=c(1.02,1.02,0.2,0.42))
 par(family="Helvetica")
-barplot(sort(AverageSpeakerVowels$Area2), names.arg=as.character(AverageSpeakerVowels[order(AverageSpeakerVowels$Area2),"Speaker"]))
-text(1:10, 10, labels=VowelTable$Symbol)
+x <- barplot(sort(AverageSpeakerVowels$Area2), ylim=c(0, 120), ylab="Mean vowel space area (2SD) %", xlab="Speaker", cex.lab=2, col="gray90")
+
+segments(x, AverageSpeakerVowels[order(AverageSpeakerVowels$Area2),]$Area2-CintSpeakerVowels[order(AverageSpeakerVowels$Area2),]$Area2/2, x, AverageSpeakerVowels[order(AverageSpeakerVowels$Area2),]$Area2+CintSpeakerVowels[order(AverageSpeakerVowels$Area2),]$Area2/2)
+segments(x-0.1, AverageSpeakerVowels[order(AverageSpeakerVowels$Area2),]$Area2+CintSpeakerVowels[order(AverageSpeakerVowels$Area2),]$Area2/2, x+0.1, AverageSpeakerVowels[order(AverageSpeakerVowels$Area2),]$Area2+CintSpeakerVowels[order(AverageSpeakerVowels$Area2),]$Area2/2)
+segments(x-0.1, AverageSpeakerVowels[order(AverageSpeakerVowels$Area2),]$Area2-CintSpeakerVowels[order(AverageSpeakerVowels$Area2),]$Area2/2, x+0.1, AverageSpeakerVowels[order(AverageSpeakerVowels$Area2),]$Area2-CintSpeakerVowels[order(AverageSpeakerVowels$Area2),]$Area2/2)
+
+text(x, 5, cex=3, col="black", labels=AverageSpeakerVowels$Symbol,vfont=c("sans serif","bold"))
+
+axis(side=1, labels=as.character(AverageSpeakerVowels[order(AverageSpeakerVowels$Area2),"Speaker"]), at=x, cex.axis=1.5)
+abline(h=0, lwd=3)
+legend("topleft", c("95% confidence intervals"), pch=c(124), pt.bg="white", col=c("black"), bty="n", cex=1.5, pt.cex=1.5, lty=c(0), lwd=4)
 
 dev.off(dev.cur())

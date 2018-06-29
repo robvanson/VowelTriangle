@@ -24,6 +24,8 @@ SdevSpeakerVowels <- aggregate(cbind(Area1, Area2, N, i.dist, u.dist, a.dist, Du
 SerrSpeakerVowels <- aggregate(cbind(Area1, Area2, N, i.dist, u.dist, a.dist, Duration, VowelDensity)~Speaker, data=VowelTable, se);
 CintSpeakerVowels <- aggregate(cbind(Area1, Area2, N, i.dist, u.dist, a.dist, Duration, VowelDensity)~Speaker, data=VowelTable, ci);
 NSpeakerVowels <- aggregate(cbind(Area1, Area2, N, i.dist, u.dist, a.dist, Duration, VowelDensity)~Speaker, data=VowelTable, length);
+AverageSpeakerVowels$Symbol = '\\VE'
+AverageSpeakerVowels[AverageSpeakerVowels$Speaker %in% c(), ]$Symbol = '\\MA'
 
 AverageAllVowels <- aggregate(cbind(Area1, Area2, N, i.dist, u.dist, a.dist, Duration, VowelDensity)~Style, data=VowelTable, mean);
 SdAllVowels <- aggregate(cbind(Area1, Area2, N, i.dist, u.dist, a.dist, Duration, VowelDensity)~Style, data=VowelTable, sd);
@@ -45,6 +47,6 @@ i <- 1
 # Average
 par(family="Helvetica")
 barplot(sort(AverageSpeakerVowels$Area2), names.arg=as.character(AverageSpeakerVowels[order(AverageSpeakerVowels$Area2),"Speaker"]))
-
+text(1:10, 10, labels=VowelTable$Symbol)
 
 dev.off(dev.cur())

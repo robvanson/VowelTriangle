@@ -61,9 +61,9 @@ Axis(side=1, labels=c("Informal", "Retold", "Text", "Sentences", "Words", "Sylla
 Axis(side=2, labels=TRUE, cex.axis=1.5)
 
 x <- as.numeric(AverageAllVowels$Style)
-segments(x, AverageAllVowels$Area2-CiAllVowels$Area2/2, x , AverageAllVowels$Area2+CiAllVowels$Area2/2, col=colorlist[3], lwd=3)
-segments(x-0.1, AverageAllVowels$Area2+CiAllVowels$Area2/2, x+0.1 , AverageAllVowels$Area2+CiAllVowels$Area2/2, col=colorlist[3], lwd=3)
-segments(x-0.1, AverageAllVowels$Area2-CiAllVowels$Area2/2, x+0.1 , AverageAllVowels$Area2-CiAllVowels$Area2/2, col=colorlist[3], lwd=3)
+segments(x, AverageAllVowels$Area2-CiAllVowels$Area2, x , AverageAllVowels$Area2+CiAllVowels$Area2, col=colorlist[3], lwd=3)
+segments(x-0.1, AverageAllVowels$Area2+CiAllVowels$Area2, x+0.1 , AverageAllVowels$Area2+CiAllVowels$Area2, col=colorlist[3], lwd=3)
+segments(x-0.1, AverageAllVowels$Area2-CiAllVowels$Area2, x+0.1 , AverageAllVowels$Area2-CiAllVowels$Area2, col=colorlist[3], lwd=3)
 
 
 legend("topleft", c("Chunks", "Average over speakers (normalized)", "95% confidence intervals"), pch=c(26, 21, 124), pt.bg=colorlist[3], col=c("black", colorlist[3], colorlist[3]), bty="n", cex=1.5, pt.cex=1, lty=c(0, 2, 0), lwd=3)

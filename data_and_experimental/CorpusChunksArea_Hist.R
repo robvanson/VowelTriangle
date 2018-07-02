@@ -49,9 +49,9 @@ par(mai=c(1.02,1.02,0.2,0.42))
 par(family="Helvetica")
 x <- barplot(sort(AverageSpeakerVowels$Area2), ylim=c(0, 120), ylab="Mean vowel space area (2SD) %", xlab="Speaker", cex.lab=2, col="gray90")
 
-segments(x, AverageSpeakerVowels[order(AverageSpeakerVowels$Area2),]$Area2-CintSpeakerVowels[order(AverageSpeakerVowels$Area2),]$Area2/2, x, AverageSpeakerVowels[order(AverageSpeakerVowels$Area2),]$Area2+CintSpeakerVowels[order(AverageSpeakerVowels$Area2),]$Area2/2)
-segments(x-0.1, AverageSpeakerVowels[order(AverageSpeakerVowels$Area2),]$Area2+CintSpeakerVowels[order(AverageSpeakerVowels$Area2),]$Area2/2, x+0.1, AverageSpeakerVowels[order(AverageSpeakerVowels$Area2),]$Area2+CintSpeakerVowels[order(AverageSpeakerVowels$Area2),]$Area2/2)
-segments(x-0.1, AverageSpeakerVowels[order(AverageSpeakerVowels$Area2),]$Area2-CintSpeakerVowels[order(AverageSpeakerVowels$Area2),]$Area2/2, x+0.1, AverageSpeakerVowels[order(AverageSpeakerVowels$Area2),]$Area2-CintSpeakerVowels[order(AverageSpeakerVowels$Area2),]$Area2/2)
+segments(x, AverageSpeakerVowels[order(AverageSpeakerVowels$Area2),]$Area2-CintSpeakerVowels[order(AverageSpeakerVowels$Area2),]$Area2, x, AverageSpeakerVowels[order(AverageSpeakerVowels$Area2),]$Area2+CintSpeakerVowels[order(AverageSpeakerVowels$Area2),]$Area2)
+segments(x-0.1, AverageSpeakerVowels[order(AverageSpeakerVowels$Area2),]$Area2+CintSpeakerVowels[order(AverageSpeakerVowels$Area2),]$Area2, x+0.1, AverageSpeakerVowels[order(AverageSpeakerVowels$Area2),]$Area2+CintSpeakerVowels[order(AverageSpeakerVowels$Area2),]$Area2)
+segments(x-0.1, AverageSpeakerVowels[order(AverageSpeakerVowels$Area2),]$Area2-CintSpeakerVowels[order(AverageSpeakerVowels$Area2),]$Area2, x+0.1, AverageSpeakerVowels[order(AverageSpeakerVowels$Area2),]$Area2-CintSpeakerVowels[order(AverageSpeakerVowels$Area2),]$Area2)
 
 text(x, 5, cex=3, col="black", labels=AverageSpeakerVowels$Symbol,vfont=c("sans serif","bold"))
 

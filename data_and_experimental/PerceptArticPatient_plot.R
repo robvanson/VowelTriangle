@@ -11,6 +11,7 @@ library("lmtest")
 OutputWidth <-  11.692;
 OutputHeight <- 7.5;
 #
+filenameTextWords <- "PerceptualArtRateVSA_hist_TextWords.pdf"
 filenameText <- "PerceptualArtRateVSA_hist_Text.pdf"
 filenameWords <- "PerceptualArtRateVSA_hist_Words.pdf"
 
@@ -70,6 +71,253 @@ TimeTable$Idx.u.dist.T1 <- 100 * TimeTable$u.dist.T1 / TimeTable$u.dist.T0
 TimeTable$Idx.u.dist.T2 <- 100 * TimeTable$u.dist.T2 / TimeTable$u.dist.T0
 
 
+# Mean values and CI 
+ci <- function(x) {if(length(x)>3) {t <- t.test(x, na.rm=TRUE); (t$conf.int[[2]]- t$conf.int[[1]])/2} else 0 }
+
+# Plot figure
+pdf(filenameTextWords, width=OutputWidth, height=OutputHeight, useDingbats=FALSE);
+
+indexLabels <- c("Perc.", "A. Rate", "VSA", "a-dist", "i-dist", "u-dist")
+indexSpace <- c(0, 0.5, 0.7, 0.5, 0.5, 0.5)
+
+combinedTable <- merge(TimeTable[TimeTable$Task=="Words",], TimeTable[TimeTable$Task=="Dapre",], by=c("Speaker", "Sex"))
+IndexedValues.T1 <- c(
+mean(TimeTable[TimeTable$Task=="Dapre",]$IdxNormRating.T1, na.rm=TRUE),
+mean(TimeTable[TimeTable$Task=="Dapre",]$Idxart.rate.T1, na.rm=TRUE),
+mean((combinedTable$IdxArea2.T1.x+combinedTable$IdxArea2.T1.y)/2, na.rm=TRUE),
+mean((combinedTable$Idx.a.dist.T1.x+combinedTable$Idx.a.dist.T1.y)/2, na.rm=TRUE),
+mean((combinedTable$Idx.i.dist.T1.x+combinedTable$Idx.i.dist.T1.y)/2, na.rm=TRUE),
+mean((combinedTable$Idx.u.dist.T1.x+combinedTable$Idx.u.dist.T1.y)/2, na.rm=TRUE)
+)
+IndexedValues.T1.CI <- c(
+ci(TimeTable[TimeTable$Task=="Dapre",]$IdxNormRating.T1),
+ci(TimeTable[TimeTable$Task=="Dapre",]$Idxart.rate.T1),
+ci((combinedTable$IdxArea2.T1.x+combinedTable$IdxArea2.T1.y)/2),
+ci((combinedTable$Idx.a.dist.T1.x+combinedTable$Idx.a.dist.T1.y)/2),
+ci((combinedTable$Idx.i.dist.T1.x+combinedTable$Idx.i.dist.T1.y)/2),
+ci((combinedTable$Idx.u.dist.T1.x+combinedTable$Idx.u.dist.T1.y)/2)
+)
+IndexedValues.T2 <- c(
+mean(TimeTable[TimeTable$Task=="Dapre",]$IdxNormRating.T2, na.rm=TRUE),
+mean(TimeTable[TimeTable$Task=="Dapre",]$Idxart.rate.T2, na.rm=TRUE),
+mean((combinedTable$IdxArea2.T2.x+combinedTable$IdxArea2.T2.y)/2, na.rm=TRUE),
+mean((combinedTable$Idx.a.dist.T2.x+combinedTable$Idx.a.dist.T2.y)/2, na.rm=TRUE),
+mean((combinedTable$Idx.i.dist.T2.x+combinedTable$Idx.i.dist.T2.y)/2, na.rm=TRUE),
+mean((combinedTable$Idx.u.dist.T2.x+combinedTable$Idx.u.dist.T2.y)/2, na.rm=TRUE)
+)
+IndexedValues.T2.CI <- c(
+ci(TimeTable[TimeTable$Task=="Dapre",]$IdxNormRating.T2),
+ci(TimeTable[TimeTable$Task=="Dapre",]$Idxart.rate.T2),
+ci((combinedTable$IdxArea2.T2.x+combinedTable$IdxArea2.T2.y)/2),
+ci((combinedTable$Idx.a.dist.T2.x+combinedTable$Idx.a.dist.T2.y)/2),
+ci((combinedTable$Idx.i.dist.T2.x+combinedTable$Idx.i.dist.T2.y)/2),
+ci((combinedTable$Idx.u.dist.T2.x+combinedTable$Idx.u.dist.T2.y)/2)
+)
+
+par(mai=c(1.04,1.02,0.3,0.42))
+par(family="Helvetica")
+colorlist <- c("green1", "red1", "darkblue", "deeppink4", "gold4", "darkolivegreen", "blue", "red", "deeppink", "green")
+
+x <- barplot(c(IndexedValues.T1, 0, IndexedValues.T2), ylim=c(0, 120), ylab="Indexed value: T0 = 100", cex.lab=2, cex.axis=1.5, col=c(colorlist[1:6], "grey", colorlist[1:6]), space=c(indexSpace, 0.5, indexSpace))
+abline(h=100, lty=2)
+abline(h=0, lty=1, lwd=3)
+axis(side=1, labels=c(indexLabels, " ", indexLabels), at=x, cex.axis=1.5, las=3, tick=FALSE)
+axis(at=c(2.5, 10.9), tick=TRUE, side=1, labels=FALSE)
+mtext("T1:", at=c(-0.5), line=2, side=1, cex=2)
+mtext("T2:", at=c(9.65), line=2, side=1, cex=2)
+
+segments(x, c(IndexedValues.T1, 0, IndexedValues.T2), x, c(IndexedValues.T1, 0, IndexedValues.T2)+c(IndexedValues.T1.CI, 0, IndexedValues.T2.CI), lwd=2)
+segments(x-0.1, c(IndexedValues.T1, 0, IndexedValues.T2)+c(IndexedValues.T1.CI, 0, IndexedValues.T2.CI), x+0.1, c(IndexedValues.T1, 0, IndexedValues.T2)+c(IndexedValues.T1.CI, 0, IndexedValues.T2.CI), lwd=2)
+
+
+text(9.5, 120, labels="Words + Text", pos=1, cex=2)
+text(x[13]+1, 100, labels="T0", pos=3, cex=1)
+
+rect(((x[1]+x[2])/2 - 0.35), 19, ((x[1]+x[2])/2 + 0.4), 61, col="white", border="white", lty=0)
+rect(((x[8]+x[9])/2 - 0.35), 19, ((x[8]+x[9])/2 + 0.4), 61, col="white", border="white", lty=0)
+rect(((x[4]+x[5])/2 - 0.35), 19, ((x[4]+x[5])/2 + 0.4), 61, col="white", border="white", lty=0)
+rect(((x[11]+x[12])/2 - 0.35), 19, ((x[11]+x[12])/2 + 0.4), 61, col="white", border="white", lty=0)
+
+text((x[1]+x[2])/2, 40, labels="Articulation", adj=c(0.5, 0.5), cex=2, srt=90)
+text((x[8]+x[9])/2, 40, labels="Articulation", adj=c(0.5, 0.5), cex=2, srt=90)
+text((x[4]+x[5])/2, 40, labels="Vowel Space", adj=c(0.5, 0.5), cex=2, srt=90)
+text((x[11]+x[12])/2, 40, labels="Vowel Space", adj=c(0.5, 0.5), cex=2, srt=90)
+
+text(x[3], 5, labels="Area", adj=c(0, 0.5), cex=1.5, srt=90, col="white")
+text(x[4], 5, labels="a", adj=c(0.5, 0), cex=2, col="white")
+text(x[5], 5, labels="i", adj=c(0.5, 0), cex=2, col="white")
+text(x[6], 5, labels="u", adj=c(0.5, 0), cex=2, col="white")
+text(x[10], 5, labels="Area", adj=c(0, 0.5), cex=1.5, srt=90, col="white")
+text(x[11], 5, labels="a", adj=c(0.5, 0), cex=2, col="white")
+text(x[12], 5, labels="i", adj=c(0.5, 0), cex=2, col="white")
+text(x[13], 5, labels="u", adj=c(0.5, 0), cex=2, col="white")
+
+dev.off(dev.cur())
+
+# Text Mean values and CI 
+
+# Plot figure
+pdf(filenameText, width=OutputWidth, height=OutputHeight, useDingbats=FALSE);
+
+indexLabels <- c("Perc.", "A. Rate", "VSA", "a-dist", "i-dist", "u-dist")
+indexSpace <- c(0, 0.5, 0.7, 0.5, 0.5, 0.5)
+
+combinedTable <- TimeTable[TimeTable$Task=="Dapre",]
+IndexedValues.T1 <- c(
+mean(TimeTable[TimeTable$Task=="Dapre",]$IdxNormRating.T1, na.rm=TRUE),
+mean(TimeTable[TimeTable$Task=="Dapre",]$Idxart.rate.T1, na.rm=TRUE),
+mean(combinedTable$IdxArea2.T1, na.rm=TRUE),
+mean(combinedTable$Idx.a.dist.T1, na.rm=TRUE),
+mean(combinedTable$Idx.i.dist.T1, na.rm=TRUE),
+mean(combinedTable$Idx.u.dist.T1, na.rm=TRUE)
+)
+IndexedValues.T1.CI <- c(
+ci(TimeTable[TimeTable$Task=="Dapre",]$IdxNormRating.T1),
+ci(TimeTable[TimeTable$Task=="Dapre",]$Idxart.rate.T1),
+ci(combinedTable$IdxArea2.T1),
+ci(combinedTable$Idx.a.dist.T1),
+ci(combinedTable$Idx.i.dist.T1),
+ci(combinedTable$Idx.u.dist.T1)
+)
+IndexedValues.T2 <- c(
+mean(TimeTable[TimeTable$Task=="Dapre",]$IdxNormRating.T2, na.rm=TRUE),
+mean(TimeTable[TimeTable$Task=="Dapre",]$Idxart.rate.T2, na.rm=TRUE),
+mean(combinedTable$IdxArea2.T2, na.rm=TRUE),
+mean(combinedTable$Idx.a.dist.T2, na.rm=TRUE),
+mean(combinedTable$Idx.i.dist.T2, na.rm=TRUE),
+mean(combinedTable$Idx.u.dist.T2, na.rm=TRUE)
+)
+IndexedValues.T2.CI <- c(
+ci(TimeTable[TimeTable$Task=="Dapre",]$IdxNormRating.T2),
+ci(TimeTable[TimeTable$Task=="Dapre",]$Idxart.rate.T2),
+ci(combinedTable$IdxArea2.T2),
+ci(combinedTable$Idx.a.dist.T2),
+ci(combinedTable$Idx.i.dist.T2),
+ci(combinedTable$Idx.u.dist.T2)
+)
+
+par(mai=c(1.04,1.02,0.3,0.42))
+par(family="Helvetica")
+colorlist <- c("green1", "red1", "darkblue", "deeppink4", "gold4", "darkolivegreen", "blue", "red", "deeppink", "green")
+
+x <- barplot(c(IndexedValues.T1, 0, IndexedValues.T2), ylim=c(0, 120), ylab="Indexed value: T0 = 100", cex.lab=2, cex.axis=1.5, col=c(colorlist[1:6], "grey", colorlist[1:6]), space=c(indexSpace, 0.5, indexSpace))
+abline(h=100, lty=2)
+abline(h=0, lty=1, lwd=3)
+axis(side=1, labels=c(indexLabels, " ", indexLabels), at=x, cex.axis=1.5, las=3, tick=FALSE)
+axis(at=c(2.85, 10.9), tick=TRUE, side=1, labels=FALSE)
+segments(c(2.85, 13.05), c(0,0), c(2.85, 13.059), c(40,40), lty=2)
+mtext("T1:", at=c(-0.5), line=2, side=1, cex=2)
+mtext("T2:", at=c(9.65), line=2, side=1, cex=2)
+
+segments(x, c(IndexedValues.T1, 0, IndexedValues.T2), x, c(IndexedValues.T1, 0, IndexedValues.T2)+c(IndexedValues.T1.CI, 0, IndexedValues.T2.CI), lwd=2)
+segments(x-0.1, c(IndexedValues.T1, 0, IndexedValues.T2)+c(IndexedValues.T1.CI, 0, IndexedValues.T2.CI), x+0.1, c(IndexedValues.T1, 0, IndexedValues.T2)+c(IndexedValues.T1.CI, 0, IndexedValues.T2.CI), lwd=2)
+
+text(9.5, 120, labels="Text", pos=1, cex=2)
+text(x[13]+1, 100, labels="T0", pos=3, cex=1)
+
+rect(((x[1]+x[2])/2 - 0.35), 19, ((x[1]+x[2])/2 + 0.4), 61, col="white", border="white", lty=0)
+rect(((x[8]+x[9])/2 - 0.35), 19, ((x[8]+x[9])/2 + 0.4), 61, col="white", border="white", lty=0)
+rect(((x[4]+x[5])/2 - 0.35), 19, ((x[4]+x[5])/2 + 0.4), 61, col="white", border="white", lty=0)
+rect(((x[11]+x[12])/2 - 0.35), 19, ((x[11]+x[12])/2 + 0.4), 61, col="white", border="white", lty=0)
+
+text((x[1]+x[2])/2, 40, labels="Articulation", adj=c(0.5, 0.5), cex=2, srt=90)
+text((x[8]+x[9])/2, 40, labels="Articulation", adj=c(0.5, 0.5), cex=2, srt=90)
+text((x[4]+x[5])/2, 40, labels="Vowel Space", adj=c(0.5, 0.5), cex=2, srt=90)
+text((x[11]+x[12])/2, 40, labels="Vowel Space", adj=c(0.5, 0.5), cex=2, srt=90)
+
+text(x[3], 5, labels="Area", adj=c(0, 0.5), cex=1.5, srt=90, col="white")
+text(x[4], 5, labels="a", adj=c(0.5, 0), cex=2, col="white")
+text(x[5], 5, labels="i", adj=c(0.5, 0), cex=2, col="white")
+text(x[6], 5, labels="u", adj=c(0.5, 0), cex=2, col="white")
+text(x[10], 5, labels="Area", adj=c(0, 0.5), cex=1.5, srt=90, col="white")
+text(x[11], 5, labels="a", adj=c(0.5, 0), cex=2, col="white")
+text(x[12], 5, labels="i", adj=c(0.5, 0), cex=2, col="white")
+text(x[13], 5, labels="u", adj=c(0.5, 0), cex=2, col="white")
+
+dev.off(dev.cur())
+
+# Words Mean values and CI 
+pdf(filenameWords, width=OutputWidth, height=OutputHeight, useDingbats=FALSE);
+
+indexLabels <- c("Perc.", "A. Rate", "VSA", "a-dist", "i-dist", "u-dist")
+
+combinedTable <- TimeTable[TimeTable$Task=="Words",]
+IndexedValues.T1 <- c(
+mean(TimeTable[TimeTable$Task=="Words",]$IdxNormRating.T1, na.rm=TRUE),
+mean(TimeTable[TimeTable$Task=="Words",]$Idxart.rate.T1, na.rm=TRUE),
+mean(combinedTable$IdxArea2.T1, na.rm=TRUE),
+mean(combinedTable$Idx.a.dist.T1, na.rm=TRUE),
+mean(combinedTable$Idx.i.dist.T1, na.rm=TRUE),
+mean(combinedTable$Idx.u.dist.T1, na.rm=TRUE)
+)
+IndexedValues.T1.CI <- c(
+ci(TimeTable[TimeTable$Task=="Words",]$IdxNormRating.T1),
+ci(TimeTable[TimeTable$Task=="Words",]$Idxart.rate.T1),
+ci(combinedTable$IdxArea2.T1),
+ci(combinedTable$Idx.a.dist.T1),
+ci(combinedTable$Idx.i.dist.T1),
+ci(combinedTable$Idx.u.dist.T1)
+)
+IndexedValues.T2 <- c(
+mean(TimeTable[TimeTable$Task=="Words",]$IdxNormRating.T2, na.rm=TRUE),
+mean(TimeTable[TimeTable$Task=="Words",]$Idxart.rate.T2, na.rm=TRUE),
+mean(combinedTable$IdxArea2.T2, na.rm=TRUE),
+mean(combinedTable$Idx.a.dist.T2, na.rm=TRUE),
+mean(combinedTable$Idx.i.dist.T2, na.rm=TRUE),
+mean(combinedTable$Idx.u.dist.T2, na.rm=TRUE)
+)
+IndexedValues.T2.CI <- c(
+ci(TimeTable[TimeTable$Task=="Words",]$IdxNormRating.T2),
+ci(TimeTable[TimeTable$Task=="Words",]$Idxart.rate.T2),
+ci(combinedTable$IdxArea2.T2),
+ci(combinedTable$Idx.a.dist.T2),
+ci(combinedTable$Idx.i.dist.T2),
+ci(combinedTable$Idx.u.dist.T2)
+)
+
+par(mai=c(1.04,1.02,0.3,0.42))
+par(family="Helvetica")
+colorlist <- c("green1", "red1", "darkblue", "deeppink4", "gold4", "darkolivegreen", "blue", "red", "deeppink", "green")
+
+x <- barplot(c(IndexedValues.T1, 0, IndexedValues.T2), ylim=c(0, 120), ylab="Indexed value: T0 = 100", cex.lab=2, cex.axis=1.5, col=c(colorlist[1:6], "grey", colorlist[1:6]), space=c(indexSpace, 0.5, indexSpace))
+abline(h=100, lty=2)
+abline(h=0, lty=1, lwd=3)
+axis(side=1, labels=c(indexLabels, " ", indexLabels), at=x, cex.axis=1.5, las=3, tick=FALSE)
+axis(at=c(2.85, 13.05), tick=TRUE, side=1, labels=FALSE)
+segments(c(2.85, 13.05), c(0,0), c(2.85, 13.05), c(40,40), lty=2)
+mtext("T1:", at=c(-0.5), line=2, side=1, cex=2)
+mtext("T2:", at=c(9.65), line=2, side=1, cex=2)
+
+segments(x, c(IndexedValues.T1, 0, IndexedValues.T2), x, c(IndexedValues.T1, 0, IndexedValues.T2)+c(IndexedValues.T1.CI, 0, IndexedValues.T2.CI), lwd=2)
+segments(x-0.1, c(IndexedValues.T1, 0, IndexedValues.T2)+c(IndexedValues.T1.CI, 0, IndexedValues.T2.CI), x+0.1, c(IndexedValues.T1, 0, IndexedValues.T2)+c(IndexedValues.T1.CI, 0, IndexedValues.T2.CI), lwd=2)
+
+text(9.5, 120, labels="Words", pos=1, cex=2)
+text(x[13]+1, 100, labels="T0", pos=3, cex=1)
+
+rect(((x[1]+x[2])/2 - 0.35), 19, ((x[1]+x[2])/2 + 0.4), 61, col="white", border="white", lty=0)
+rect(((x[8]+x[9])/2 - 0.35), 19, ((x[8]+x[9])/2 + 0.4), 61, col="white", border="white", lty=0)
+rect(((x[4]+x[5])/2 - 0.35), 19, ((x[4]+x[5])/2 + 0.4), 61, col="white", border="white", lty=0)
+rect(((x[11]+x[12])/2 - 0.35), 19, ((x[11]+x[12])/2 + 0.4), 61, col="white", border="white", lty=0)
+
+text((x[1]+x[2])/2, 40, labels="Articulation", adj=c(0.5, 0.5), cex=2, srt=90)
+text((x[8]+x[9])/2, 40, labels="Articulation", adj=c(0.5, 0.5), cex=2, srt=90)
+text((x[4]+x[5])/2, 40, labels="Vowel Space", adj=c(0.5, 0.5), cex=2, srt=90)
+text((x[11]+x[12])/2, 40, labels="Vowel Space", adj=c(0.5, 0.5), cex=2, srt=90)
+
+text(x[3], 5, labels="Area", adj=c(0, 0.5), cex=1.5, srt=90, col="white")
+text(x[4], 5, labels="a", adj=c(0.5, 0), cex=2, col="white")
+text(x[5], 5, labels="i", adj=c(0.5, 0), cex=2, col="white")
+text(x[6], 5, labels="u", adj=c(0.5, 0), cex=2, col="white")
+text(x[10], 5, labels="Area", adj=c(0, 0.5), cex=1.5, srt=90, col="white")
+text(x[11], 5, labels="a", adj=c(0.5, 0), cex=2, col="white")
+text(x[12], 5, labels="i", adj=c(0.5, 0), cex=2, col="white")
+text(x[13], 5, labels="u", adj=c(0.5, 0), cex=2, col="white")
+
+dev.off(dev.cur())
+
+
+# Statistics
+
 # ArtRate
 cat(capture.output(t.test(TimeTable[TimeTable$Task=="Dapre",]$Idxart.rate.T1, mu=100, na.rm=TRUE)), sep = "\n", file = "", append = TRUE)
 cat(capture.output(t.test(TimeTable[TimeTable$Task=="Dapre",]$Idxart.rate.T2, mu=100, na.rm=TRUE)), sep = "\n", file = "", append = TRUE)
@@ -118,178 +366,3 @@ cat(capture.output(t.test(TimeTable[TimeTable$Task=="Words",]$Idx.a.dist.T2+Time
                                                                             
 cat(capture.output(t.test(TimeTable[TimeTable$Task=="Words",]$Idx.u.dist.T1+TimeTable[TimeTable$Task=="Dapre",]$Idx.u.dist.T1  , mu=200, na.rm=TRUE)), sep = "\n", file = "", append = TRUE)
 cat(capture.output(t.test(TimeTable[TimeTable$Task=="Words",]$Idx.u.dist.T2+TimeTable[TimeTable$Task=="Dapre",]$Idx.u.dist.T2   , mu=200, na.rm=TRUE)), sep = "\n", file = "", append = TRUE)
-
-
-# Mean values and CI 
-ci <- function(x) {if(length(x)>3) {t <- t.test(x, na.rm=TRUE); (t$conf.int[[2]]- t$conf.int[[1]])/2} else 0 }
-
-indexLabels <- c("Perc.", "A. Rate", "VSA", "a-dist", "i-dist", "u-dist")
-
-combinedTable <- merge(TimeTable[TimeTable$Task=="Words",], TimeTable[TimeTable$Task=="Dapre",], by=c("Speaker", "Sex"))
-IndexedValues.T1 <- c(
-mean(TimeTable[TimeTable$Task=="Dapre",]$IdxNormRating.T1, na.rm=TRUE),
-mean(TimeTable[TimeTable$Task=="Dapre",]$Idxart.rate.T1, na.rm=TRUE),
-mean((combinedTable$IdxArea2.T1.x+combinedTable$IdxArea2.T1.y)/2, na.rm=TRUE),
-mean((combinedTable$Idx.a.dist.T1.x+combinedTable$Idx.a.dist.T1.y)/2, na.rm=TRUE),
-mean((combinedTable$Idx.i.dist.T1.x+combinedTable$Idx.i.dist.T1.y)/2, na.rm=TRUE),
-mean((combinedTable$Idx.u.dist.T1.x+combinedTable$Idx.u.dist.T1.y)/2, na.rm=TRUE)
-)
-IndexedValues.T1.CI <- c(
-ci(TimeTable[TimeTable$Task=="Dapre",]$IdxNormRating.T1),
-ci(TimeTable[TimeTable$Task=="Dapre",]$Idxart.rate.T1),
-ci((combinedTable$IdxArea2.T1.x+combinedTable$IdxArea2.T1.y)/2),
-ci((combinedTable$Idx.a.dist.T1.x+combinedTable$Idx.a.dist.T1.y)/2),
-ci((combinedTable$Idx.i.dist.T1.x+combinedTable$Idx.i.dist.T1.y)/2),
-ci((combinedTable$Idx.u.dist.T1.x+combinedTable$Idx.u.dist.T1.y)/2)
-)
-IndexedValues.T2 <- c(
-mean(TimeTable[TimeTable$Task=="Dapre",]$IdxNormRating.T2, na.rm=TRUE),
-mean(TimeTable[TimeTable$Task=="Dapre",]$Idxart.rate.T2, na.rm=TRUE),
-mean((combinedTable$IdxArea2.T2.x+combinedTable$IdxArea2.T2.y)/2, na.rm=TRUE),
-mean((combinedTable$Idx.a.dist.T2.x+combinedTable$Idx.a.dist.T2.y)/2, na.rm=TRUE),
-mean((combinedTable$Idx.i.dist.T2.x+combinedTable$Idx.i.dist.T2.y)/2, na.rm=TRUE),
-mean((combinedTable$Idx.u.dist.T2.x+combinedTable$Idx.u.dist.T2.y)/2, na.rm=TRUE)
-)
-IndexedValues.T2.CI <- c(
-ci(TimeTable[TimeTable$Task=="Dapre",]$IdxNormRating.T2),
-ci(TimeTable[TimeTable$Task=="Dapre",]$Idxart.rate.T2),
-ci((combinedTable$IdxArea2.T2.x+combinedTable$IdxArea2.T2.y)/2),
-ci((combinedTable$Idx.a.dist.T2.x+combinedTable$Idx.a.dist.T2.y)/2),
-ci((combinedTable$Idx.i.dist.T2.x+combinedTable$Idx.i.dist.T2.y)/2),
-ci((combinedTable$Idx.u.dist.T2.x+combinedTable$Idx.u.dist.T2.y)/2)
-)
-
-par(mai=c(1.04,1.02,0.2,0.42))
-par(family="Helvetica")
-colorlist <- c("darkgreen", "darkred", "darkblue", "deeppink4", "gold4", "darkolivegreen", "blue", "red", "deeppink", "green")
-
-x <- barplot(c(IndexedValues.T1, 0, IndexedValues.T2), ylim=c(0, 120), ylab="Indexed value: T0 = 100", cex.lab=2, cex.axis=1.5, col=c(colorlist[1:6], "grey", colorlist[1:6]))
-abline(h=100, lty=2)
-abline(h=0, lty=1, lwd=3)
-axis(side=1, labels=c(indexLabels, " ", indexLabels), at=x, cex.axis=1.5, las=3, tick=FALSE)
-axis(at=c(2.5, 10.9), tick=TRUE, side=1, labels=FALSE)
-mtext("T1:", at=c(-0.5), line=1.5, side=1, cex=1.5)
-mtext("T2:", at=c(9), line=1.5, side=1, cex=1.5)
-
-segments(x, c(IndexedValues.T1, 0, IndexedValues.T2), x, c(IndexedValues.T1, 0, IndexedValues.T2)+c(IndexedValues.T1.CI, 0, IndexedValues.T2.CI))
-segments(x-0.1, c(IndexedValues.T1, 0, IndexedValues.T2)+c(IndexedValues.T1.CI, 0, IndexedValues.T2.CI), x+0.1, c(IndexedValues.T1, 0, IndexedValues.T2)+c(IndexedValues.T1.CI, 0, IndexedValues.T2.CI))
-
-
-# Text Mean values and CI 
-
-# Plot figure
-pdf(filenameText, width=OutputWidth, height=OutputHeight, useDingbats=FALSE);
-
-indexLabels <- c("Perc.", "A. Rate", "VSA", "a-dist", "i-dist", "u-dist")
-indexSpace <- c(0, 0.5, 0.7, 0.5, 0.5, 0.5)
-
-combinedTable <- TimeTable[TimeTable$Task=="Dapre",]
-IndexedValues.T1 <- c(
-mean(TimeTable[TimeTable$Task=="Dapre",]$IdxNormRating.T1, na.rm=TRUE),
-mean(TimeTable[TimeTable$Task=="Dapre",]$Idxart.rate.T1, na.rm=TRUE),
-mean(combinedTable$IdxArea2.T1, na.rm=TRUE),
-mean(combinedTable$Idx.a.dist.T1, na.rm=TRUE),
-mean(combinedTable$Idx.i.dist.T1, na.rm=TRUE),
-mean(combinedTable$Idx.u.dist.T1, na.rm=TRUE)
-)
-IndexedValues.T1.CI <- c(
-ci(TimeTable[TimeTable$Task=="Dapre",]$IdxNormRating.T1),
-ci(TimeTable[TimeTable$Task=="Dapre",]$Idxart.rate.T1),
-ci(combinedTable$IdxArea2.T1),
-ci(combinedTable$Idx.a.dist.T1),
-ci(combinedTable$Idx.i.dist.T1),
-ci(combinedTable$Idx.u.dist.T1)
-)
-IndexedValues.T2 <- c(
-mean(TimeTable[TimeTable$Task=="Dapre",]$IdxNormRating.T2, na.rm=TRUE),
-mean(TimeTable[TimeTable$Task=="Dapre",]$Idxart.rate.T2, na.rm=TRUE),
-mean(combinedTable$IdxArea2.T2, na.rm=TRUE),
-mean(combinedTable$Idx.a.dist.T2, na.rm=TRUE),
-mean(combinedTable$Idx.i.dist.T2, na.rm=TRUE),
-mean(combinedTable$Idx.u.dist.T2, na.rm=TRUE)
-)
-IndexedValues.T2.CI <- c(
-ci(TimeTable[TimeTable$Task=="Dapre",]$IdxNormRating.T2),
-ci(TimeTable[TimeTable$Task=="Dapre",]$Idxart.rate.T2),
-ci(combinedTable$IdxArea2.T2),
-ci(combinedTable$Idx.a.dist.T2),
-ci(combinedTable$Idx.i.dist.T2),
-ci(combinedTable$Idx.u.dist.T2)
-)
-
-par(mai=c(1.04,1.02,0.2,0.42))
-par(family="Helvetica")
-colorlist <- c("green1", "red1", "darkblue", "deeppink4", "gold4", "darkolivegreen", "blue", "red", "deeppink", "green")
-
-x <- barplot(c(IndexedValues.T1, 0, IndexedValues.T2), ylim=c(0, 120), ylab="Indexed value: T0 = 100", cex.lab=2, cex.axis=1.5, col=c(colorlist[1:6], "grey", colorlist[1:6]), space=c(indexSpace, 0.5, indexSpace))
-abline(h=100, lty=2)
-abline(h=0, lty=1, lwd=3)
-axis(side=1, labels=c(indexLabels, " ", indexLabels), at=x, cex.axis=1.5, las=3, tick=FALSE)
-axis(at=c(2.85, 10.9), tick=TRUE, side=1, labels=FALSE)
-segments(c(2.85, 13.05), c(0,0), c(2.85, 13.059), c(40,40), lty=2)
-mtext("T1:", at=c(-0.45), line=1.5, side=1, cex=1.5)
-mtext("T2:", at=c(9.75), line=1.5, side=1, cex=1.5)
-
-segments(x, c(IndexedValues.T1, 0, IndexedValues.T2), x, c(IndexedValues.T1, 0, IndexedValues.T2)+c(IndexedValues.T1.CI, 0, IndexedValues.T2.CI))
-segments(x-0.1, c(IndexedValues.T1, 0, IndexedValues.T2)+c(IndexedValues.T1.CI, 0, IndexedValues.T2.CI), x+0.1, c(IndexedValues.T1, 0, IndexedValues.T2)+c(IndexedValues.T1.CI, 0, IndexedValues.T2.CI))
-
-text(9.5, 120, labels="Text", pos=1, cex=2)
-dev.off(dev.cur())
-
-# Words Mean values and CI 
-pdf(filenameWords, width=OutputWidth, height=OutputHeight, useDingbats=FALSE);
-
-indexLabels <- c("Perc.", "A. Rate", "VSA", "a-dist", "i-dist", "u-dist")
-
-combinedTable <- TimeTable[TimeTable$Task=="Words",]
-IndexedValues.T1 <- c(
-mean(TimeTable[TimeTable$Task=="Words",]$IdxNormRating.T1, na.rm=TRUE),
-mean(TimeTable[TimeTable$Task=="Words",]$Idxart.rate.T1, na.rm=TRUE),
-mean(combinedTable$IdxArea2.T1, na.rm=TRUE),
-mean(combinedTable$Idx.a.dist.T1, na.rm=TRUE),
-mean(combinedTable$Idx.i.dist.T1, na.rm=TRUE),
-mean(combinedTable$Idx.u.dist.T1, na.rm=TRUE)
-)
-IndexedValues.T1.CI <- c(
-ci(TimeTable[TimeTable$Task=="Words",]$IdxNormRating.T1),
-ci(TimeTable[TimeTable$Task=="Words",]$Idxart.rate.T1),
-ci(combinedTable$IdxArea2.T1),
-ci(combinedTable$Idx.a.dist.T1),
-ci(combinedTable$Idx.i.dist.T1),
-ci(combinedTable$Idx.u.dist.T1)
-)
-IndexedValues.T2 <- c(
-mean(TimeTable[TimeTable$Task=="Words",]$IdxNormRating.T2, na.rm=TRUE),
-mean(TimeTable[TimeTable$Task=="Words",]$Idxart.rate.T2, na.rm=TRUE),
-mean(combinedTable$IdxArea2.T2, na.rm=TRUE),
-mean(combinedTable$Idx.a.dist.T2, na.rm=TRUE),
-mean(combinedTable$Idx.i.dist.T2, na.rm=TRUE),
-mean(combinedTable$Idx.u.dist.T2, na.rm=TRUE)
-)
-IndexedValues.T2.CI <- c(
-ci(TimeTable[TimeTable$Task=="Words",]$IdxNormRating.T2),
-ci(TimeTable[TimeTable$Task=="Words",]$Idxart.rate.T2),
-ci(combinedTable$IdxArea2.T2),
-ci(combinedTable$Idx.a.dist.T2),
-ci(combinedTable$Idx.i.dist.T2),
-ci(combinedTable$Idx.u.dist.T2)
-)
-
-par(mai=c(1.04,1.02,0.2,0.42))
-par(family="Helvetica")
-colorlist <- c("green1", "red1", "darkblue", "deeppink4", "gold4", "darkolivegreen", "blue", "red", "deeppink", "green")
-
-x <- barplot(c(IndexedValues.T1, 0, IndexedValues.T2), ylim=c(0, 120), ylab="Indexed value: T0 = 100", cex.lab=2, cex.axis=1.5, col=c(colorlist[1:6], "grey", colorlist[1:6]), space=c(indexSpace, 0.5, indexSpace))
-abline(h=100, lty=2)
-abline(h=0, lty=1, lwd=3)
-axis(side=1, labels=c(indexLabels, " ", indexLabels), at=x, cex.axis=1.5, las=3, tick=FALSE)
-axis(at=c(2.85, 13.05), tick=TRUE, side=1, labels=FALSE)
-segments(c(2.85, 13.05), c(0,0), c(2.85, 13.05), c(40,40), lty=2)
-mtext("T1:", at=c(-0.45), line=1.5, side=1, cex=1.5)
-mtext("T2:", at=c(9.75), line=1.5, side=1, cex=1.5)
-
-segments(x, c(IndexedValues.T1, 0, IndexedValues.T2), x, c(IndexedValues.T1, 0, IndexedValues.T2)+c(IndexedValues.T1.CI, 0, IndexedValues.T2.CI))
-segments(x-0.1, c(IndexedValues.T1, 0, IndexedValues.T2)+c(IndexedValues.T1.CI, 0, IndexedValues.T2.CI), x+0.1, c(IndexedValues.T1, 0, IndexedValues.T2)+c(IndexedValues.T1.CI, 0, IndexedValues.T2.CI))
-
-text(9.5, 120, labels="Words", pos=1, cex=2)
-dev.off(dev.cur())

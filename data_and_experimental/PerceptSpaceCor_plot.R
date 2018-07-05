@@ -80,6 +80,7 @@ Area2Corr <- c(Area2NormRatingText.T0$estimate[[1]], Area2NormRatingText.T1$esti
 Area2P.value <- c(Area2NormRatingText.T0$p.value[[1]], Area2NormRatingText.T1$p.value[[1]], Area2NormRatingText.T2$p.value[[1]])
 Area2Significance <- c("", "", "")
 Area2Significance[Area2P.value < 0.05] = "*"
+Area2Significance[Area2P.value < 0.01] = "**"
 
 i.dist.NormRatingText.T0 <- cor.test(TextData$NormRating.T0, TextData$i.dist.T0)
 i.dist.NormRatingText.T1 <- cor.test(TextData$NormRating.T1, TextData$i.dist.T1)
@@ -89,6 +90,7 @@ i.dist.Corr <- c(i.dist.NormRatingText.T0$estimate[[1]], i.dist.NormRatingText.T
 i.dist.P.value <- c(i.dist.NormRatingText.T0$p.value[[1]], i.dist.NormRatingText.T1$p.value[[1]], i.dist.NormRatingText.T2$p.value[[1]])
 i.dist.Significance <- c("", "", "")
 i.dist.Significance[i.dist.P.value < 0.05] = "*"
+i.dist.Significance[i.dist.P.value < 0.01] = "**"
 
 a.dist.NormRatingText.T0 <- cor.test(TextData$NormRating.T0, TextData$a.dist.T0)
 a.dist.NormRatingText.T1 <- cor.test(TextData$NormRating.T1, TextData$a.dist.T1)
@@ -98,6 +100,7 @@ a.dist.Corr <- c(a.dist.NormRatingText.T0$estimate[[1]], a.dist.NormRatingText.T
 a.dist.P.value <- c(a.dist.NormRatingText.T0$p.value[[1]], a.dist.NormRatingText.T1$p.value[[1]], a.dist.NormRatingText.T2$p.value[[1]])
 a.dist.Significance <- c("", "", "")
 a.dist.Significance[a.dist.P.value < 0.05] = "*"
+a.dist.Significance[a.dist.P.value < 0.05] = "**"
 
 u.dist.NormRatingText.T0 <- cor.test(TextData$NormRating.T0, TextData$u.dist.T0)
 u.dist.NormRatingText.T1 <- cor.test(TextData$NormRating.T1, TextData$u.dist.T1)
@@ -107,6 +110,7 @@ u.dist.Corr <- c(u.dist.NormRatingText.T0$estimate[[1]], u.dist.NormRatingText.T
 u.dist.P.value <- c(u.dist.NormRatingText.T0$p.value[[1]], u.dist.NormRatingText.T1$p.value[[1]], u.dist.NormRatingText.T2$p.value[[1]])
 u.dist.Significance <- c("", "", "")
 u.dist.Significance[u.dist.P.value < 0.05] = "*"
+u.dist.Significance[u.dist.P.value < 0.05] = "**"
 
 
 # Plot
@@ -147,7 +151,7 @@ text(1.5, (i.dist.Corr[2]+i.dist.Corr[3])/2, labels="i", cex=3, pos=3, col=color
 text(1.5, (a.dist.Corr[2]+a.dist.Corr[3])/2+0.05, labels="a", cex=3, pos=3, col=colorlist[4])
 text(1.5, (u.dist.Corr[2]+u.dist.Corr[3])/2, labels="u", cex=3, pos=1, col=colorlist[6])
 
-legend("topright", legend=c("*: p<0.05"), pch=c(21), bty="n", col=c(colorlist[3]), pt.bg=c(colorlist[3]), cex=2)
+legend("topright", legend=c("*: p<0.05", "**: p<0.01"), pch=c(21, 26), bty="n", col=c(colorlist[3]), pt.bg=c(colorlist[3]), cex=2, xjust=1)
 
 polygon(c(0, 0.35, 0.175), c(0.16, 0.131, 0.01), lwd=1, col="grey")
 segments(0.175, 0.1, 0, 0.16, lwd=2)

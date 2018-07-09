@@ -159,8 +159,8 @@ dev.off(dev.cur())
 # Plot figure
 pdf(filenameText, width=OutputWidth, height=OutputHeight, useDingbats=FALSE);
 
-indexLabels <- c("Perc.", "A. Rate", "VSA", "a-dist", "i-dist", "u-dist")
-indexSpace <- c(0, 0.5, 0.7, 0.5, 0.5, 0.5)
+indexLabels <- c("Perc.", "A. Rate", "VSA", "a-dist", "i-dist", "u-dist", "a/u-dist")
+indexSpace <- c(0, 0.5, 0.7, 0.5, 0.5, 0.5, 0.5)
 
 combinedTable <- TimeTable[TimeTable$Task=="Dapre",]
 IndexedValues.T1 <- c(
@@ -169,7 +169,8 @@ mean(TimeTable[TimeTable$Task=="Dapre",]$Idxart.rate.T1, na.rm=TRUE),
 mean(combinedTable$IdxArea2.T1, na.rm=TRUE),
 mean(combinedTable$Idx.a.dist.T1, na.rm=TRUE),
 mean(combinedTable$Idx.i.dist.T1, na.rm=TRUE),
-mean(combinedTable$Idx.u.dist.T1, na.rm=TRUE)
+mean(combinedTable$Idx.u.dist.T1, na.rm=TRUE),
+mean(100*combinedTable$Idx.a.dist.T1/combinedTable$Idx.u.dist.T1, na.rm=TRUE)
 )
 IndexedValues.T1.CI <- c(
 ci(TimeTable[TimeTable$Task=="Dapre",]$IdxNormRating.T1),
@@ -177,7 +178,8 @@ ci(TimeTable[TimeTable$Task=="Dapre",]$Idxart.rate.T1),
 ci(combinedTable$IdxArea2.T1),
 ci(combinedTable$Idx.a.dist.T1),
 ci(combinedTable$Idx.i.dist.T1),
-ci(combinedTable$Idx.u.dist.T1)
+ci(combinedTable$Idx.u.dist.T1),
+ci(100*combinedTable$Idx.a.dist.T1/combinedTable$Idx.u.dist.T1)
 )
 IndexedValues.T2 <- c(
 mean(TimeTable[TimeTable$Task=="Dapre",]$IdxNormRating.T2, na.rm=TRUE),
@@ -185,7 +187,8 @@ mean(TimeTable[TimeTable$Task=="Dapre",]$Idxart.rate.T2, na.rm=TRUE),
 mean(combinedTable$IdxArea2.T2, na.rm=TRUE),
 mean(combinedTable$Idx.a.dist.T2, na.rm=TRUE),
 mean(combinedTable$Idx.i.dist.T2, na.rm=TRUE),
-mean(combinedTable$Idx.u.dist.T2, na.rm=TRUE)
+mean(combinedTable$Idx.u.dist.T2, na.rm=TRUE),
+mean(100*combinedTable$Idx.a.dist.T2/combinedTable$Idx.u.dist.T2, na.rm=TRUE)
 )
 IndexedValues.T2.CI <- c(
 ci(TimeTable[TimeTable$Task=="Dapre",]$IdxNormRating.T2),
@@ -193,53 +196,56 @@ ci(TimeTable[TimeTable$Task=="Dapre",]$Idxart.rate.T2),
 ci(combinedTable$IdxArea2.T2),
 ci(combinedTable$Idx.a.dist.T2),
 ci(combinedTable$Idx.i.dist.T2),
-ci(combinedTable$Idx.u.dist.T2)
+ci(combinedTable$Idx.u.dist.T2),
+ci(100*combinedTable$Idx.a.dist.T2/combinedTable$Idx.u.dist.T2)
 )
 
-par(mai=c(1.04,1.02,0.3,0.42))
+par(mai=c(1.07,1.02,0.3,0.42))
 par(family="Helvetica")
 colorlist <- c("green1", "red1", "darkblue", "deeppink4", "gold4", "darkolivegreen", "blue", "red", "deeppink", "green")
 
-x <- barplot(c(IndexedValues.T1, 0, IndexedValues.T2), ylim=c(0, 120), ylab="Indexed value: T0 = 100", cex.lab=2, cex.axis=1.5, col=c(colorlist[1:6], "grey", colorlist[1:6]), space=c(indexSpace, 0.5, indexSpace))
+x <- barplot(c(IndexedValues.T1, 0, IndexedValues.T2), ylim=c(0, 150), ylab="Indexed value: T0 = 100", cex.lab=2, cex.axis=1.5, col=c(colorlist[1:7], "grey", colorlist[1:7]), space=c(indexSpace, 0.5, indexSpace))
 abline(h=100, lty=2)
 abline(h=0, lty=1, lwd=3)
 axis(side=1, labels=c(indexLabels, " ", indexLabels), at=x, cex.axis=1.5, las=3, tick=FALSE)
 axis(at=c(2.85, 10.9), tick=TRUE, side=1, labels=FALSE)
-segments(c(2.85, 13.05), c(0,0), c(2.85, 13.059), c(40,40), lty=2)
+segments(c(2.85, (x[10]+x[11])/2), c(0,0), c(2.85, (x[10]+x[11])/2), c(40,40), lty=2)
 mtext("T1:", at=c(-0.5), line=2, side=1, cex=2)
-mtext("T2:", at=c(9.65), line=2, side=1, cex=2)
+mtext("T2:", at=c(11.1), line=2, side=1, cex=2)
 
 segments(x, c(IndexedValues.T1, 0, IndexedValues.T2), x, c(IndexedValues.T1, 0, IndexedValues.T2)+c(IndexedValues.T1.CI, 0, IndexedValues.T2.CI), lwd=2)
 segments(x-0.1, c(IndexedValues.T1, 0, IndexedValues.T2)+c(IndexedValues.T1.CI, 0, IndexedValues.T2.CI), x+0.1, c(IndexedValues.T1, 0, IndexedValues.T2)+c(IndexedValues.T1.CI, 0, IndexedValues.T2.CI), lwd=2)
 
-text(9.5, 120, labels="Text", pos=1, cex=2)
-text(x[13]+1, 100, labels="T0", pos=3, cex=1)
+text(11.0, 150, labels="Text", pos=1, cex=2)
+text(-0.2, 100, labels="T0", pos=3, cex=2)
 
-rect(((x[1]+x[2])/2 - 0.35), 19, ((x[1]+x[2])/2 + 0.4), 61, col="white", border="white", lty=0)
-rect(((x[8]+x[9])/2 - 0.35), 19, ((x[8]+x[9])/2 + 0.4), 61, col="white", border="white", lty=0)
-rect(((x[4]+x[5])/2 - 0.35), 19, ((x[4]+x[5])/2 + 0.4), 61, col="white", border="white", lty=0)
-rect(((x[11]+x[12])/2 - 0.35), 19, ((x[11]+x[12])/2 + 0.4), 61, col="white", border="white", lty=0)
+rect(((x[1]+x[2])/2 - 0.35), 18, ((x[1]+x[2])/2 + 0.4), 62, col="white", border="white", lty=0)
+rect(((x[9]+x[10])/2 - 0.35), 18, ((x[9]+x[10])/2 + 0.4), 62, col="white", border="white", lty=0)
+rect(((x[4]+x[5])/2 - 0.35), 17, ((x[4]+x[5])/2 + 0.4), 63, col="white", border="white", lty=0)
+rect(((x[12]+x[13])/2 - 0.35), 17, ((x[12]+x[13])/2 + 0.4), 63, col="white", border="white", lty=0)
 
 text((x[1]+x[2])/2, 40, labels="Articulation", adj=c(0.5, 0.5), cex=2, srt=90)
-text((x[8]+x[9])/2, 40, labels="Articulation", adj=c(0.5, 0.5), cex=2, srt=90)
+text((x[9]+x[10])/2, 40, labels="Articulation", adj=c(0.5, 0.5), cex=2, srt=90)
 text((x[4]+x[5])/2, 40, labels="Vowel Space", adj=c(0.5, 0.5), cex=2, srt=90)
-text((x[11]+x[12])/2, 40, labels="Vowel Space", adj=c(0.5, 0.5), cex=2, srt=90)
+text((x[12]+x[13])/2, 40, labels="Vowel Space", adj=c(0.5, 0.5), cex=2, srt=90)
 
 text(x[3], 5, labels="Area", adj=c(0, 0.5), cex=1.5, srt=90, col="white")
 text(x[4], 5, labels="a", adj=c(0.5, 0), cex=2, col="white")
 text(x[5], 5, labels="i", adj=c(0.5, 0), cex=2, col="white")
 text(x[6], 5, labels="u", adj=c(0.5, 0), cex=2, col="white")
-text(x[10], 5, labels="Area", adj=c(0, 0.5), cex=1.5, srt=90, col="white")
-text(x[11], 5, labels="a", adj=c(0.5, 0), cex=2, col="white")
-text(x[12], 5, labels="i", adj=c(0.5, 0), cex=2, col="white")
-text(x[13], 5, labels="u", adj=c(0.5, 0), cex=2, col="white")
+text(x[7], 5, labels="a/u", adj=c(0.5, 0), cex=2, col="white")
+text(x[11], 5, labels="Area", adj=c(0, 0.5), cex=1.5, srt=90, col="white")
+text(x[12], 5, labels="a", adj=c(0.5, 0), cex=2, col="white")
+text(x[13], 5, labels="i", adj=c(0.5, 0), cex=2, col="white")
+text(x[14], 5, labels="u", adj=c(0.5, 0), cex=2, col="white")
+text(x[15], 5, labels="a/u", adj=c(0.5, 0), cex=2, col="white")
 
 dev.off(dev.cur())
 
 # Words Mean values and CI 
 pdf(filenameWords, width=OutputWidth, height=OutputHeight, useDingbats=FALSE);
 
-indexLabels <- c("Perc.", "A. Rate", "VSA", "a-dist", "i-dist", "u-dist")
+indexLabels <- c("Perc.", "A. Rate", "VSA", "a-dist", "i-dist", "u-dist", "a/u-dist")
 
 combinedTable <- TimeTable[TimeTable$Task=="Words",]
 IndexedValues.T1 <- c(
@@ -248,7 +254,8 @@ mean(TimeTable[TimeTable$Task=="Words",]$Idxart.rate.T1, na.rm=TRUE),
 mean(combinedTable$IdxArea2.T1, na.rm=TRUE),
 mean(combinedTable$Idx.a.dist.T1, na.rm=TRUE),
 mean(combinedTable$Idx.i.dist.T1, na.rm=TRUE),
-mean(combinedTable$Idx.u.dist.T1, na.rm=TRUE)
+mean(combinedTable$Idx.u.dist.T1, na.rm=TRUE),
+mean(100*combinedTable$Idx.a.dist.T1/combinedTable$Idx.u.dist.T1, na.rm=TRUE)
 )
 IndexedValues.T1.CI <- c(
 ci(TimeTable[TimeTable$Task=="Words",]$IdxNormRating.T1),
@@ -256,7 +263,8 @@ ci(TimeTable[TimeTable$Task=="Words",]$Idxart.rate.T1),
 ci(combinedTable$IdxArea2.T1),
 ci(combinedTable$Idx.a.dist.T1),
 ci(combinedTable$Idx.i.dist.T1),
-ci(combinedTable$Idx.u.dist.T1)
+ci(combinedTable$Idx.u.dist.T1),
+ci(100*combinedTable$Idx.a.dist.T1/combinedTable$Idx.u.dist.T1)
 )
 IndexedValues.T2 <- c(
 mean(TimeTable[TimeTable$Task=="Words",]$IdxNormRating.T2, na.rm=TRUE),
@@ -264,7 +272,8 @@ mean(TimeTable[TimeTable$Task=="Words",]$Idxart.rate.T2, na.rm=TRUE),
 mean(combinedTable$IdxArea2.T2, na.rm=TRUE),
 mean(combinedTable$Idx.a.dist.T2, na.rm=TRUE),
 mean(combinedTable$Idx.i.dist.T2, na.rm=TRUE),
-mean(combinedTable$Idx.u.dist.T2, na.rm=TRUE)
+mean(combinedTable$Idx.u.dist.T2, na.rm=TRUE),
+mean(100*combinedTable$Idx.a.dist.T2/combinedTable$Idx.u.dist.T2, na.rm=TRUE)
 )
 IndexedValues.T2.CI <- c(
 ci(TimeTable[TimeTable$Task=="Words",]$IdxNormRating.T2),
@@ -272,46 +281,49 @@ ci(TimeTable[TimeTable$Task=="Words",]$Idxart.rate.T2),
 ci(combinedTable$IdxArea2.T2),
 ci(combinedTable$Idx.a.dist.T2),
 ci(combinedTable$Idx.i.dist.T2),
-ci(combinedTable$Idx.u.dist.T2)
+ci(combinedTable$Idx.u.dist.T2),
+ci(100*combinedTable$Idx.a.dist.T2/combinedTable$Idx.u.dist.T2)
 )
 
-par(mai=c(1.04,1.02,0.3,0.42))
+par(mai=c(1.07,1.02,0.3,0.42))
 par(family="Helvetica")
 colorlist <- c("green1", "red1", "darkblue", "deeppink4", "gold4", "darkolivegreen", "blue", "red", "deeppink", "green")
 
-x <- barplot(c(IndexedValues.T1, 0, IndexedValues.T2), ylim=c(0, 120), ylab="Indexed value: T0 = 100", cex.lab=2, cex.axis=1.5, col=c(colorlist[1:6], "grey", colorlist[1:6]), space=c(indexSpace, 0.5, indexSpace))
+x <- barplot(c(IndexedValues.T1, 0, IndexedValues.T2), ylim=c(0, 150), ylab="Indexed value: T0 = 100", cex.lab=2, cex.axis=1.5, col=c(colorlist[1:7], "grey", colorlist[1:7]), space=c(indexSpace, 0.5, indexSpace))
 abline(h=100, lty=2)
 abline(h=0, lty=1, lwd=3)
 axis(side=1, labels=c(indexLabels, " ", indexLabels), at=x, cex.axis=1.5, las=3, tick=FALSE)
-axis(at=c(2.85, 13.05), tick=TRUE, side=1, labels=FALSE)
-segments(c(2.85, 13.05), c(0,0), c(2.85, 13.05), c(40,40), lty=2)
+axis(at=c(2.85, 10.9), tick=TRUE, side=1, labels=FALSE)
+segments(c(2.85, (x[10]+x[11])/2), c(0,0), c(2.85, (x[10]+x[11])/2), c(40,40), lty=2)
 mtext("T1:", at=c(-0.5), line=2, side=1, cex=2)
-mtext("T2:", at=c(9.65), line=2, side=1, cex=2)
+mtext("T2:", at=c(11.1), line=2, side=1, cex=2)
 
 segments(x, c(IndexedValues.T1, 0, IndexedValues.T2), x, c(IndexedValues.T1, 0, IndexedValues.T2)+c(IndexedValues.T1.CI, 0, IndexedValues.T2.CI), lwd=2)
 segments(x-0.1, c(IndexedValues.T1, 0, IndexedValues.T2)+c(IndexedValues.T1.CI, 0, IndexedValues.T2.CI), x+0.1, c(IndexedValues.T1, 0, IndexedValues.T2)+c(IndexedValues.T1.CI, 0, IndexedValues.T2.CI), lwd=2)
 
-text(9.5, 120, labels="Words", pos=1, cex=2)
-text(x[13]+1, 100, labels="T0", pos=3, cex=1)
+text(11.0, 150, labels="Words", pos=1, cex=2)
+text(-0.2, 100, labels="T0", pos=3, cex=2)
 
-rect(((x[1]+x[2])/2 - 0.35), 19, ((x[1]+x[2])/2 + 0.4), 61, col="white", border="white", lty=0)
-rect(((x[8]+x[9])/2 - 0.35), 19, ((x[8]+x[9])/2 + 0.4), 61, col="white", border="white", lty=0)
-rect(((x[4]+x[5])/2 - 0.35), 19, ((x[4]+x[5])/2 + 0.4), 61, col="white", border="white", lty=0)
-rect(((x[11]+x[12])/2 - 0.35), 19, ((x[11]+x[12])/2 + 0.4), 61, col="white", border="white", lty=0)
+rect(((x[1]+x[2])/2 - 0.35), 18, ((x[1]+x[2])/2 + 0.4), 62, col="white", border="white", lty=0)
+rect(((x[9]+x[10])/2 - 0.35), 18, ((x[9]+x[10])/2 + 0.4), 62, col="white", border="white", lty=0)
+rect(((x[4]+x[5])/2 - 0.35), 17, ((x[4]+x[5])/2 + 0.4), 63, col="white", border="white", lty=0)
+rect(((x[12]+x[13])/2 - 0.35), 17, ((x[12]+x[13])/2 + 0.4), 63, col="white", border="white", lty=0)
 
 text((x[1]+x[2])/2, 40, labels="Articulation", adj=c(0.5, 0.5), cex=2, srt=90)
-text((x[8]+x[9])/2, 40, labels="Articulation", adj=c(0.5, 0.5), cex=2, srt=90)
+text((x[9]+x[10])/2, 40, labels="Articulation", adj=c(0.5, 0.5), cex=2, srt=90)
 text((x[4]+x[5])/2, 40, labels="Vowel Space", adj=c(0.5, 0.5), cex=2, srt=90)
-text((x[11]+x[12])/2, 40, labels="Vowel Space", adj=c(0.5, 0.5), cex=2, srt=90)
+text((x[12]+x[13])/2, 40, labels="Vowel Space", adj=c(0.5, 0.5), cex=2, srt=90)
 
 text(x[3], 5, labels="Area", adj=c(0, 0.5), cex=1.5, srt=90, col="white")
 text(x[4], 5, labels="a", adj=c(0.5, 0), cex=2, col="white")
 text(x[5], 5, labels="i", adj=c(0.5, 0), cex=2, col="white")
 text(x[6], 5, labels="u", adj=c(0.5, 0), cex=2, col="white")
-text(x[10], 5, labels="Area", adj=c(0, 0.5), cex=1.5, srt=90, col="white")
-text(x[11], 5, labels="a", adj=c(0.5, 0), cex=2, col="white")
-text(x[12], 5, labels="i", adj=c(0.5, 0), cex=2, col="white")
-text(x[13], 5, labels="u", adj=c(0.5, 0), cex=2, col="white")
+text(x[7], 5, labels="a/u", adj=c(0.5, 0), cex=2, col="white")
+text(x[11], 5, labels="Area", adj=c(0, 0.5), cex=1.5, srt=90, col="white")
+text(x[12], 5, labels="a", adj=c(0.5, 0), cex=2, col="white")
+text(x[13], 5, labels="i", adj=c(0.5, 0), cex=2, col="white")
+text(x[14], 5, labels="u", adj=c(0.5, 0), cex=2, col="white")
+text(x[15], 5, labels="a/u", adj=c(0.5, 0), cex=2, col="white")
 
 dev.off(dev.cur())
 

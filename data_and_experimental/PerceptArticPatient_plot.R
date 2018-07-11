@@ -72,6 +72,7 @@ TimeTable$Idx.u.dist.T2 <- 100 * TimeTable$u.dist.T2 / TimeTable$u.dist.T0
 
 
 # Mean values and CI 
+p.value <- function(x) {if(length(x)>2) {t <- t.test(x, na.rm=TRUE); t$p.value} else 1 }
 ci <- function(x) {if(length(x)>3) {t <- t.test(x, na.rm=TRUE); (t$conf.int[[2]]- t$conf.int[[1]])/2} else 0 }
 
 # Plot figure
@@ -92,26 +93,26 @@ mean((combinedTable$Idx.u.dist.T1.x+combinedTable$Idx.u.dist.T1.y)/2, na.rm=TRUE
 IndexedValues.T1.CI <- c(
 ci(TimeTable[TimeTable$Task=="Dapre",]$IdxNormRating.T1),
 ci(TimeTable[TimeTable$Task=="Dapre",]$Idxart.rate.T1),
-ci((combinedTable$IdxArea2.T1.x+combinedTable$IdxArea2.T1.y)/2),
-ci((combinedTable$Idx.a.dist.T1.x+combinedTable$Idx.a.dist.T1.y)/2),
-ci((combinedTable$Idx.i.dist.T1.x+combinedTable$Idx.i.dist.T1.y)/2),
-ci((combinedTable$Idx.u.dist.T1.x+combinedTable$Idx.u.dist.T1.y)/2)
+ci((combinedTable$IdxArea2.T1.x+combinedTable$IdxArea2.T1.y)),
+ci((combinedTable$Idx.a.dist.T1.x+combinedTable$Idx.a.dist.T1.y)),
+ci((combinedTable$Idx.i.dist.T1.x+combinedTable$Idx.i.dist.T1.y)),
+ci((combinedTable$Idx.u.dist.T1.x+combinedTable$Idx.u.dist.T1.y))
 )
 IndexedValues.T2 <- c(
 mean(TimeTable[TimeTable$Task=="Dapre",]$IdxNormRating.T2, na.rm=TRUE),
 mean(TimeTable[TimeTable$Task=="Dapre",]$Idxart.rate.T2, na.rm=TRUE),
-mean((combinedTable$IdxArea2.T2.x+combinedTable$IdxArea2.T2.y)/2, na.rm=TRUE),
-mean((combinedTable$Idx.a.dist.T2.x+combinedTable$Idx.a.dist.T2.y)/2, na.rm=TRUE),
-mean((combinedTable$Idx.i.dist.T2.x+combinedTable$Idx.i.dist.T2.y)/2, na.rm=TRUE),
-mean((combinedTable$Idx.u.dist.T2.x+combinedTable$Idx.u.dist.T2.y)/2, na.rm=TRUE)
+mean((combinedTable$IdxArea2.T2.x+combinedTable$IdxArea2.T2.y), na.rm=TRUE),
+mean((combinedTable$Idx.a.dist.T2.x+combinedTable$Idx.a.dist.T2.y), na.rm=TRUE),
+mean((combinedTable$Idx.i.dist.T2.x+combinedTable$Idx.i.dist.T2.y), na.rm=TRUE),
+mean((combinedTable$Idx.u.dist.T2.x+combinedTable$Idx.u.dist.T2.y), na.rm=TRUE)
 )
 IndexedValues.T2.CI <- c(
 ci(TimeTable[TimeTable$Task=="Dapre",]$IdxNormRating.T2),
 ci(TimeTable[TimeTable$Task=="Dapre",]$Idxart.rate.T2),
-ci((combinedTable$IdxArea2.T2.x+combinedTable$IdxArea2.T2.y)/2),
-ci((combinedTable$Idx.a.dist.T2.x+combinedTable$Idx.a.dist.T2.y)/2),
-ci((combinedTable$Idx.i.dist.T2.x+combinedTable$Idx.i.dist.T2.y)/2),
-ci((combinedTable$Idx.u.dist.T2.x+combinedTable$Idx.u.dist.T2.y)/2)
+ci((combinedTable$IdxArea2.T2.x+combinedTable$IdxArea2.T2.y)),
+ci((combinedTable$Idx.a.dist.T2.x+combinedTable$Idx.a.dist.T2.y)),
+ci((combinedTable$Idx.i.dist.T2.x+combinedTable$Idx.i.dist.T2.y)),
+ci((combinedTable$Idx.u.dist.T2.x+combinedTable$Idx.u.dist.T2.y))
 )
 
 par(mai=c(1.04,1.02,0.3,0.42))
@@ -128,7 +129,6 @@ mtext("T2:", at=c(9.65), line=2, side=1, cex=2)
 
 segments(x, c(IndexedValues.T1, 0, IndexedValues.T2), x, c(IndexedValues.T1, 0, IndexedValues.T2)+c(IndexedValues.T1.CI, 0, IndexedValues.T2.CI), lwd=2)
 segments(x-0.1, c(IndexedValues.T1, 0, IndexedValues.T2)+c(IndexedValues.T1.CI, 0, IndexedValues.T2.CI), x+0.1, c(IndexedValues.T1, 0, IndexedValues.T2)+c(IndexedValues.T1.CI, 0, IndexedValues.T2.CI), lwd=2)
-
 
 text(9.5, 120, labels="Words + Text", pos=1, cex=2)
 text(x[13]+1, 100, labels="T0", pos=3, cex=1)
@@ -181,6 +181,15 @@ ci(combinedTable$Idx.i.dist.T1),
 ci(combinedTable$Idx.u.dist.T1),
 ci(100*combinedTable$Idx.a.dist.T1/combinedTable$Idx.u.dist.T1)
 )
+IndexedValues.T1.P <- c(
+p.value(TimeTable[TimeTable$Task=="Dapre",]$IdxNormRating.T1-100),
+p.value(TimeTable[TimeTable$Task=="Dapre",]$Idxart.rate.T1-100),
+p.value(combinedTable$IdxArea2.T1-100),
+p.value(combinedTable$Idx.a.dist.T1-100),
+p.value(combinedTable$Idx.i.dist.T1-100),
+p.value(combinedTable$Idx.u.dist.T1-100),
+p.value(100*combinedTable$Idx.a.dist.T1/combinedTable$Idx.u.dist.T1-100)
+)
 IndexedValues.T2 <- c(
 mean(TimeTable[TimeTable$Task=="Dapre",]$IdxNormRating.T2, na.rm=TRUE),
 mean(TimeTable[TimeTable$Task=="Dapre",]$Idxart.rate.T2, na.rm=TRUE),
@@ -199,6 +208,15 @@ ci(combinedTable$Idx.i.dist.T2),
 ci(combinedTable$Idx.u.dist.T2),
 ci(100*combinedTable$Idx.a.dist.T2/combinedTable$Idx.u.dist.T2)
 )
+IndexedValues.T2.P <- c(
+p.value(TimeTable[TimeTable$Task=="Dapre",]$IdxNormRating.T2-100),
+p.value(TimeTable[TimeTable$Task=="Dapre",]$Idxart.rate.T2-100),
+p.value(combinedTable$IdxArea2.T2-100),
+p.value(combinedTable$Idx.a.dist.T2-100),
+p.value(combinedTable$Idx.i.dist.T2-100),
+p.value(combinedTable$Idx.u.dist.T2-100),
+p.value(100*combinedTable$Idx.a.dist.T2/combinedTable$Idx.u.dist.T2-100)
+)
 
 par(mai=c(1.07,1.02,0.3,0.42))
 par(family="Helvetica")
@@ -215,6 +233,13 @@ mtext("T2:", at=c(11.1), line=2, side=1, cex=2)
 
 segments(x, c(IndexedValues.T1, 0, IndexedValues.T2), x, c(IndexedValues.T1, 0, IndexedValues.T2)+c(IndexedValues.T1.CI, 0, IndexedValues.T2.CI), lwd=2)
 segments(x-0.1, c(IndexedValues.T1, 0, IndexedValues.T2)+c(IndexedValues.T1.CI, 0, IndexedValues.T2.CI), x+0.1, c(IndexedValues.T1, 0, IndexedValues.T2)+c(IndexedValues.T1.CI, 0, IndexedValues.T2.CI), lwd=2)
+
+p.Texts <- c()
+p.Texts[1:15] <- ""
+p.Texts[c(IndexedValues.T1.P <= 0.025, FALSE, IndexedValues.T2.P <= 0.025)] <- "*"
+text(x, c(IndexedValues.T1, 0, IndexedValues.T2), labels=p.Texts, pos=1, cex=2, col="white")
+print(c(IndexedValues.T1.P, FALSE, IndexedValues.T2.P))
+print(p.Texts)
 
 text(11.5, 150, labels="Text", pos=1, cex=2)
 text(-0.2, 100, labels="T0", pos=3, cex=2)
@@ -239,6 +264,9 @@ text(x[12], 5, labels="a", adj=c(0.5, 0), cex=2, col="white")
 text(x[13], 5, labels="i", adj=c(0.5, 0), cex=2, col="white")
 text(x[14], 5, labels="u", adj=c(0.5, 0), cex=2, col="white")
 text(x[15], 2, labels=expression(over(a, u)), adj=c(0.5, 0), cex=2, col="black")
+
+legend("topleft", legend=c("|: 95% CI", "*: p<0.025 (FDR adj.)"), bty="n", cex=1.5, xjust=1)
+
 
 dev.off(dev.cur())
 
@@ -266,6 +294,15 @@ ci(combinedTable$Idx.i.dist.T1),
 ci(combinedTable$Idx.u.dist.T1),
 ci(100*combinedTable$Idx.a.dist.T1/combinedTable$Idx.u.dist.T1)
 )
+IndexedValues.T1.P <- c(
+p.value(TimeTable[TimeTable$Task=="Words",]$IdxNormRating.T1-100),
+p.value(TimeTable[TimeTable$Task=="Words",]$Idxart.rate.T1-100),
+p.value(combinedTable$IdxArea2.T1-100),
+p.value(combinedTable$Idx.a.dist.T1-100),
+p.value(combinedTable$Idx.i.dist.T1-100),
+p.value(combinedTable$Idx.u.dist.T1-100),
+p.value(100*combinedTable$Idx.a.dist.T1/combinedTable$Idx.u.dist.T1-100)
+)
 IndexedValues.T2 <- c(
 mean(TimeTable[TimeTable$Task=="Words",]$IdxNormRating.T2, na.rm=TRUE),
 mean(TimeTable[TimeTable$Task=="Words",]$Idxart.rate.T2, na.rm=TRUE),
@@ -283,6 +320,15 @@ ci(combinedTable$Idx.a.dist.T2),
 ci(combinedTable$Idx.i.dist.T2),
 ci(combinedTable$Idx.u.dist.T2),
 ci(100*combinedTable$Idx.a.dist.T2/combinedTable$Idx.u.dist.T2)
+)
+IndexedValues.T2.P <- c(
+p.value(TimeTable[TimeTable$Task=="Words",]$IdxNormRating.T2-100),
+p.value(TimeTable[TimeTable$Task=="Words",]$Idxart.rate.T2-100),
+p.value(combinedTable$IdxArea2.T2-100),
+p.value(combinedTable$Idx.a.dist.T2-100),
+p.value(combinedTable$Idx.i.dist.T2-100),
+p.value(combinedTable$Idx.u.dist.T2-100),
+p.value(100*combinedTable$Idx.a.dist.T2/combinedTable$Idx.u.dist.T2-100)
 )
 
 par(mai=c(1.07,1.02,0.3,0.42))

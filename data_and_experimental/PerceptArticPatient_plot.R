@@ -265,7 +265,7 @@ text(x[13], 5, labels="i", adj=c(0.5, 0), cex=2, col="white")
 text(x[14], 5, labels="u", adj=c(0.5, 0), cex=2, col="white")
 text(x[15], 2, labels=expression(over(a, u)), adj=c(0.5, 0), cex=2, col="black")
 
-legend("topleft", legend=c("|: 95% CI", "*: p<0.025 (FDR adj.)"), bty="n", cex=1.5, xjust=1)
+legend("topleft", legend=c("|: 95% CI", "*: p<0.05 (FDR adj.)"), bty="n", cex=1.5, xjust=1)
 
 
 dev.off(dev.cur())

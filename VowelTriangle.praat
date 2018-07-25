@@ -1294,6 +1294,8 @@ while .continue
 	.sp$ = "M"
 	vtl_normalization = 0
 	.sp_default = 2
+	.speakerIsAVar$ = replace_regex$(.speakerIsAVar$, " ", "_", 0)
+	.speakerIsAVar$ = replace_regex$(.speakerIsAVar$, "^([A-Z])", "\l\1", 0)
 	if uiMessage$ [uiLanguage$, "Female"] = '.speakerIsAVar$'$
 		.sp$ = "F"
 		.sp_default = 1

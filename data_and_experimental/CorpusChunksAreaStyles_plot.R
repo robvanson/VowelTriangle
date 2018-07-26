@@ -54,11 +54,12 @@ i <- 1
 # Draw lines with breaks
 # Average
 par(mai=c(1.02,1.02,0.1,0.42))
-plot(as.numeric(AverageAllVowels$Style), AverageAllVowels$Area2, type="b", col=colorlist[3], pch=21, ylab="Normalized vowel space area", cex.lab=2.5, xlab="Speaking style", ylim=c(-0.5,1.5), bg="white", lty=2, lwd=6, cex=1, axes=FALSE, frame.plot=TRUE)
+plot(as.numeric(AverageAllVowels$Style), AverageAllVowels$Area2, type="b", col=colorlist[3], pch=21, ylab="Normalized vowel space area", cex.lab=2.5, xlab="Speaking style", ylim=c(-0.5,1.5), bg="white", lty=2, lwd=6, cex=1, axes=FALSE, frame.plot=FALSE)
 text(x=3.5, y=140, label="Chunks", cex=2.5, pos=3)
-
 Axis(side=1, labels=c("Informal", "Retold", "Text", "Sentences", "Words", "Syllables"), at=1:length(c("Inf", "Ret", "Txt", "Sent", "Words", "Syll")), cex.axis=2)
 Axis(side=2, labels=TRUE, cex.axis=1.5)
+abline(h=-0.58, lwd=4)
+abline(v=0.8, lwd=4)
 
 x <- as.numeric(AverageAllVowels$Style)
 segments(x, AverageAllVowels$Area2-CiAllVowels$Area2, x , AverageAllVowels$Area2+CiAllVowels$Area2, col=colorlist[3], lwd=3)

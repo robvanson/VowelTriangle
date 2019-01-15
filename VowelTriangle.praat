@@ -62,18 +62,18 @@ if .preferencesLang$ <> ""
 	.locale$ = .preferencesLang$
 else
 	if macintosh
-		.scratch$ = replace_regex$(temporaryDirectory$+"/scratch"+date$()+".txt", "[^\w.]", "_", 0)
+		.scratch$ = replace_regex$(temporaryDirectory$+"/scratch"+date$()+".txt", "\W", "_", 0)
 		runSystem_nocheck: "defaults read -g AppleLocale | cut -c 1-2 - > ",.scratch$
 		.locale$ = readFile$(.scratch$)
 		deleteFile: .scratch$
 	elsif unix
 		.locale$ = environment$("LANG")
 	elsif windows
-		.scratch$ = replace_regex$(temporaryDirectory$+"/scratch"+date$()+".txt", "[^\w.]", "_", 0)
+		.scratch$ = replace_regex$(temporaryDirectory$+"/scratch"+date$()+".txt", "\W", "_", 0)
 		runSystem_nocheck: "dism /online /get-intl > ",.scratch$
 		.locale$ = readFile$(.scratch$)
 		.locale$ = replace_regex$(.locale$, "\n", " ", 0)	
-		.locale$ = replace_regex$(.locale$, "^.*Default System UI language : ([^\s]+).*", "\1", 0)
+		.locale$ = replace_regex$(.locale$, "^.*Default System UI language : (\S+).*", "\1", 0)
 		deleteFile: .scratch$	
 	endif
 	.locale$ = replace_regex$(.preferencesLang$, "(.)", "\U\1", 0)

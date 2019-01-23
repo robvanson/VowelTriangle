@@ -1585,8 +1585,24 @@ procedure plot_vowels .plot .sp$ .sound
 	
 	# Calculate Slope
 	selectObject: .sound
+	# Use only voiced intervals
+	.pp = noprogress To PointProcess (periodic, cc): 50, 600
+	.vuv = To TextGrid (vuv): 0.02, 0.01
+	selectObject: .sound, .vuv
+	Extract intervals where: 1, "no", "is equal to", "V"
+	.numIntervals = numberOfSelected ()
+	.sounds# = selected#("Sound")
+	.voicedIntervals = Concatenate
+	# Determine Ltas and slope
 	.ltas = To Ltas: 100
 	.slope = Get slope: 0, 1000, 1000, 10000, "dB"
+	# Remove all intermediate objects
+	selectObject: .ltas, .vuv
+	for i to .numIntervals
+		plusObject: .sounds#[i]
+		Remove
+	endfor
+	plusObject: .voicedIntervals, .pp
 	Remove
 
 	# Targets

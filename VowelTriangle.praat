@@ -2,6 +2,8 @@
 # 
 # Plot vowels into a vowel triangle
 #
+# We acknowledge Xinyu Zhang for the Chinese translation (2019).
+#
 # Unless specified otherwise:
 #
 # Copyright: 2017-2018, R.J.J.H. van Son and the Netherlands Cancer Institute
@@ -1088,7 +1090,7 @@ if input_table > 0
 			log = 1
 			output_table$ = .log$
 			if not fileReadable(output_table$)
-				writeFileLine: output_table$, "Name", tab$, "Speaker", tab$, "N", tab$, "Area2", tab$, "Area1", tab$, "i.dist", tab$, "u.dist", tab$, "a.dist", tab$, "VTL", tab$, "Duration", tab$, "Intensity", tab$, "Formant"
+				writeFileLine: output_table$, "Name", tab$, "Speaker", tab$, "N", tab$, "Area2", tab$, "Area1", tab$, "i.dist", tab$, "u.dist", tab$, "a.dist", tab$, "VTL", tab$, "Duration", tab$, "Intensity", tab$, "Slope", tab$, "Formant"
 			endif
 		else
 			log = 0
@@ -1214,7 +1216,7 @@ if input_table > 0
 			Text special... 0.5 Centre 1.05 bottom Helvetica 18 0 ##'title$'#
 		endif
 		@plot_vowels: .plotVowels, .sp$, .sound
-		@print_output_line: title$, plot_vowels.sp$, plot_vowels.numVowelIntervals, plot_vowels.area2perc, plot_vowels.area1perc, plot_vowels.relDist_i, plot_vowels.relDist_u, plot_vowels.relDist_a, plot_vowels.vocalTractLength, .duration, .intensity
+		@print_output_line: title$, plot_vowels.sp$, plot_vowels.numVowelIntervals, plot_vowels.area2perc, plot_vowels.area1perc, plot_vowels.relDist_i, plot_vowels.relDist_u, plot_vowels.relDist_a, plot_vowels.vocalTractLength, .duration, .intensity, plot_vowels.slope
 
 		if index_regex(.plotFile$, "\w")
 			Select outer viewport: 0, 8, 0, 8
@@ -1376,9 +1378,9 @@ while .continue
 		# Print output
 		if output_table$ = "-"
 			clearinfo
-			appendInfoLine: "Name", tab$, "Speaker", tab$, "N", tab$, "Area2", tab$, "Area1", tab$, "i.dist", tab$, "u.dist", tab$, "a.dist", tab$, "VTL", tab$,"Duration", tab$, "Intensity", tab$, "Formant"
+			appendInfoLine: "Name", tab$, "Speaker", tab$, "N", tab$, "Area2", tab$, "Area1", tab$, "i.dist", tab$, "u.dist", tab$, "a.dist", tab$, "VTL", tab$,"Duration", tab$, "Intensity", tab$, "Slope", tab$, "Formant"
 		elsif index_regex(output_table$, "\w") and not fileReadable(output_table$)
-			writeFileLine: output_table$, "Name", tab$, "Speaker", tab$, "N", tab$, "Area2", tab$, "Area1", tab$, "i.dist", tab$, "u.dist", tab$, "a.dist", tab$, "VTL", tab$, "Duration", tab$, "Intensity", tab$, "Formant"
+			writeFileLine: output_table$, "Name", tab$, "Speaker", tab$, "N", tab$, "Area2", tab$, "Area1", tab$, "i.dist", tab$, "u.dist", tab$, "a.dist", tab$, "VTL", tab$, "Duration", tab$, "Intensity", tab$, "Slope", tab$, "Formant"
 		endif
 	endif
 	
@@ -1421,7 +1423,7 @@ while .continue
 	.intensity = Get intensity (dB)
 	if .intensity > 50
 		@plot_vowels: 1, .sp$, .sound, 
-		@print_output_line: title$, plot_vowels.sp$, plot_vowels.numVowelIntervals, plot_vowels.area2perc, plot_vowels.area1perc, plot_vowels.relDist_i, plot_vowels.relDist_u, plot_vowels.relDist_a, plot_vowels.vocalTractLength, .duration, .intensity
+		@print_output_line: title$, plot_vowels.sp$, plot_vowels.numVowelIntervals, plot_vowels.area2perc, plot_vowels.area1perc, plot_vowels.relDist_i, plot_vowels.relDist_u, plot_vowels.relDist_a, plot_vowels.vocalTractLength, .duration, .intensity, plot_vowels.slope
 	endif
 	
 	selectObject: .sound
@@ -1581,6 +1583,12 @@ procedure plot_vowels .plot .sp$ .sound
 		.maxFormant = 5500
 	endif
 	
+	# Calculate Slope
+	selectObject: .sound
+	.ltas = To Ltas: 100
+	.slope = Get slope: 0, 1000, 1000, 10000, "dB"
+	Remove
+
 	# Targets
 	# Calculate formants
 	selectObject: .sound
@@ -1869,7 +1877,7 @@ procedure plot_vowels .plot .sp$ .sound
 		Text special: 0.9, "right", -0.03 + .dY, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "Area2"]
 		Text special: 0.9, "left", -0.03 + .dY, "bottom", "Helvetica", 14, "0", ": '.area2perc:0'\% "
 		Text special: 0.9, "right", -0.08 + .dY, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "AreaN"]
-		Text special: 0.9, "left", -0.08 + .dY, "bottom", "Helvetica", 14, "0", ": '.numVowelIntervals' ('.duration:0' s)"
+		Text special: 0.9, "left", -0.08 + .dY, "bottom", "Helvetica", 14, "0", ": '.numVowelIntervals' ('.duration:0' s, '.slope:1' dB)"
 		if vtl_normalization
 			Text special: 0.9, "right", -0.08, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "VTL"]
 			Text special: 0.9, "left", -0.08, "bottom", "Helvetica", 14, "0", ": '.vocalTractLength:1' cm"
@@ -1889,12 +1897,12 @@ procedure plot_vowels .plot .sp$ .sound
 	Remove
 endproc
 
-procedure print_output_line .title$, .sp$, .numVowelIntervals, .area2perc, .area1perc, .relDist_i, .relDist_u, .relDist_a, .vtl, .duration, .intensity
+procedure print_output_line .title$, .sp$, .numVowelIntervals, .area2perc, .area1perc, .relDist_i, .relDist_u, .relDist_a, .vtl, .duration, .intensity, .slope
 	# Uses global variable
 	if output_table$ = "-"
-		appendInfoLine: title$, tab$, .sp$, tab$, .numVowelIntervals, tab$, fixed$(.area2perc, 1), tab$, fixed$(.area1perc, 1), tab$, fixed$(.relDist_i, 1), tab$, fixed$(.relDist_u, 1), tab$, fixed$(.relDist_a, 1), tab$, fixed$(.vtl, 2), tab$, fixed$(.duration,0), tab$, fixed$(.intensity,1), tab$, plotFormantAlgorithm$
+		appendInfoLine: title$, tab$, .sp$, tab$, .numVowelIntervals, tab$, fixed$(.area2perc, 1), tab$, fixed$(.area1perc, 1), tab$, fixed$(.relDist_i, 1), tab$, fixed$(.relDist_u, 1), tab$, fixed$(.relDist_a, 1), tab$, fixed$(.vtl, 2), tab$, fixed$(.duration,0), tab$, fixed$(.intensity,1), tab$, fixed$(.slope,1), tab$, plotFormantAlgorithm$
 	elsif index_regex(output_table$, "\w")
-		appendFileLine: output_table$, title$, tab$, .sp$, tab$, .numVowelIntervals, tab$, fixed$(.area2perc, 1), tab$, fixed$(.area1perc, 1), tab$, fixed$(.relDist_i, 1), tab$, fixed$(.relDist_u, 1), tab$, fixed$(.relDist_a, 1), tab$, fixed$(.vtl, 2), tab$, fixed$(.duration,0), tab$, fixed$(.intensity,1), tab$, plotFormantAlgorithm$
+		appendFileLine: output_table$, title$, tab$, .sp$, tab$, .numVowelIntervals, tab$, fixed$(.area2perc, 1), tab$, fixed$(.area1perc, 1), tab$, fixed$(.relDist_i, 1), tab$, fixed$(.relDist_u, 1), tab$, fixed$(.relDist_a, 1), tab$, fixed$(.vtl, 2), tab$, fixed$(.duration,0), tab$, fixed$(.intensity,1), tab$, fixed$(.slope,1), tab$, plotFormantAlgorithm$
 	endif	
 endproc
 

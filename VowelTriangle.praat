@@ -2,7 +2,7 @@
 # 
 # Plot vowels into a vowel triangle
 #
-# We acknowledge Xinyu Zhang for the Chinese translation (2019).
+# We thank Xinyu Zhang for the Chinese translation (2019).
 #
 # Unless specified otherwise:
 #

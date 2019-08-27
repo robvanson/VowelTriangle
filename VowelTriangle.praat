@@ -2330,6 +2330,7 @@ procedure select_vowel_target .sp$ .sound .formants .formantsBandwidth .textgrid
 		selectObject: .formantsBandwidth
 		.b = Get bandwidth at time: 1, .tl, "Hertz", "Linear"
 		.iframe = Get frame number from time: .tl
+		.iframe = round(.iframe)
 		if .iframe > .totalNumFrames
 			.iframe = .totalNumFrames
 		elsif .iframe < 1
@@ -2343,6 +2344,7 @@ procedure select_vowel_target .sp$ .sound .formants .formantsBandwidth .textgrid
 			selectObject: .formantsBandwidth
 			.b = Get bandwidth at time: 1, .tl, "Hertz", "Linear"
 			.iframe = Get frame number from time: .tl	
+			.iframe = round(.iframe)
 			if .iframe > .totalNumFrames
 				.iframe = .totalNumFrames
 			elsif .iframe < 1
@@ -2356,6 +2358,7 @@ procedure select_vowel_target .sp$ .sound .formants .formantsBandwidth .textgrid
 		selectObject: .formantsBandwidth
 		.b = Get bandwidth at time: 1, .th, "Hertz", "Linear"
 		.iframe = Get frame number from time: .th
+		.iframe = round(.iframe)
 		if .iframe > .totalNumFrames
 			.iframe = .totalNumFrames
 		elsif .iframe < 1
@@ -2369,6 +2372,7 @@ procedure select_vowel_target .sp$ .sound .formants .formantsBandwidth .textgrid
 			selectObject: .formantsBandwidth
 			.b = Get bandwidth at time: 1, .th, "Hertz", "Linear"
 			.iframe = Get frame number from time: .th
+			.iframe = round(.iframe)
 			if .iframe > .totalNumFrames
 				.iframe = .totalNumFrames
 			elsif .iframe < 1
@@ -2421,6 +2425,7 @@ procedure select_vowel_target .sp$ .sound .formants .formantsBandwidth .textgrid
 			selectObject: .formantsBandwidth
 			.b = Get bandwidth at time: 1, .ttl, "Hertz", "Linear"
 			.iframe = Get frame number from time: .th
+			.iframe = round(.iframe)
 			if .iframe > .totalNumFrames
 				.iframe = .totalNumFrames
 			elsif .iframe < 1
@@ -2440,6 +2445,7 @@ procedure select_vowel_target .sp$ .sound .formants .formantsBandwidth .textgrid
 				selectObject: .formantsBandwidth
 				.b = Get bandwidth at time: 1, .ttl, "Hertz", "Linear"
 				.iframe = Get frame number from time: .ttl
+				.iframe = round(.iframe)
 				if .iframe > .totalNumFrames
 					.iframe = .totalNumFrames
 				elsif .iframe < 1
@@ -2463,6 +2469,7 @@ procedure select_vowel_target .sp$ .sound .formants .formantsBandwidth .textgrid
 			selectObject: .formantsBandwidth
 			.b = Get bandwidth at time: 1, .tth, "Hertz", "Linear"
 			.iframe = Get frame number from time: .th
+			.iframe = round(.iframe)
 			if .iframe > .totalNumFrames
 				.iframe = .totalNumFrames
 			elsif .iframe < 1
@@ -2482,6 +2489,7 @@ procedure select_vowel_target .sp$ .sound .formants .formantsBandwidth .textgrid
 				selectObject: .formantsBandwidth
 				.b = Get bandwidth at time: 1, .tth, "Hertz", "Linear"
 				.iframe = Get frame number from time: .tth
+				.iframe = round(.iframe)
 				if .iframe > .totalNumFrames
 					.iframe = .totalNumFrames
 				elsif .iframe < 1

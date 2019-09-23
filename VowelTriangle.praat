@@ -1658,15 +1658,17 @@ procedure plot_vowels .plot .sp$ .sound
 	# Get Vocal Track Length
 	.vtlScaling = 1
 	.vocalTractLength = -1
-	if vtl_normalization
+	if vtl_normalization or not .plot
 		@estimate_Vocal_Tract_Length: .formantsPlot, .syllableKernels, .targetTier
 		.vocalTractLength = estimate_Vocal_Tract_Length.vtl
-		.sp$ = "F"
-		if estimate_Vocal_Tract_Length.phi < averagePhi_VTL [plotFormantAlgorithm$, "A"]
-			.sp$ = "M"
+		if vtl_normalization
+			.sp$ = "F"
+			if estimate_Vocal_Tract_Length.phi < averagePhi_VTL [plotFormantAlgorithm$, "A"]
+				.sp$ = "M"
+			endif
+			# Watch out .sp$ must be set BEFORE the scaling
+			.vtlScaling = averagePhi_VTL [plotFormantAlgorithm$, .sp$] / estimate_Vocal_Tract_Length.phi
 		endif
-		# Watch out .sp$ must be set BEFORE the scaling
-		.vtlScaling = averagePhi_VTL [plotFormantAlgorithm$, .sp$] / estimate_Vocal_Tract_Length.phi
 	endif
 	
 	# Draw new vowel triangle

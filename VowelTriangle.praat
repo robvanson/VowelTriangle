@@ -1,4 +1,4 @@
-﻿#! praat
+#! praat
 # 
 # Plot vowels into a vowel triangle
 #
@@ -32,6 +32,10 @@
 # Initialization
 # Get current Locale
 uiLanguage$ = "EN"
+vowelString$ = ""
+segmentTier = 0
+labelFile$ = ""
+
 .defaultLanguage = 1
 .preferencesLanguageFile$ = preferencesDirectory$+"/VowelTriangle.prefs"
 .preferencesLang$ = ""
@@ -55,6 +59,22 @@ if fileReadable(.preferencesLanguageFile$)
 		endif
 	else
 		.formant_default = 1
+	endif
+	
+	# Always assume that the preferences file could be corrupted
+	if index(.preferences$, "VowelTier=") > 0
+		.tmp = extractNumber(.preferences$, "VowelTier=")
+		segmentTier = .tmp
+	else
+		segmentTier = 0
+	endif
+	
+	# Always assume that the preferences file could be corrupted
+	if index(.preferences$, "Vowels=") > 0
+		.tmp$ = extractLine$(.preferences$, "Vowels=")
+		vowelString$ = " "+.tmp$+" "
+	else
+		vowelString$ = ""
 	endif
 	
 endif
@@ -135,8 +155,17 @@ input_table = -1
 # F40L2VT2 F IFAcorpus/chunks/F40L/F40L2VT1.aifc NL target/results.tsv target/F40L2VT2.png
 # All files are used AS IS, and nothing is drawn unless a "Plotfile" is entered
 #
-if input_file$ <> "" and fileReadable(input_file$) and index_regex(input_file$, "(?i\.(tsv|Table))")
-	input_table = Read Table from tab-separated file: input_file$
+# Optionally, columns named "VowelTier", "Vowels", and "LabelFile" can be added containing 
+# the values for the use of existing segmentations. If the sound input has a wildcard, 
+# the labelfile input should have it too and result in a list of label files that has
+# the same order as those of the corresponding sound file.
+#
+if input_file$ <> "" and fileReadable(input_file$) and index_regex(input_file$, "(?i\.(tsv|Table|csv))")
+	if index_regex(input_file$, "(?i\.csv)$")
+		input_table = Read Table from semicolon-separated file: input_file$
+	else
+		input_table = Read Table from tab-separated file: input_file$
+	endif
 	.numRows = Get number of rows
 	.i = Get column index: "Log"
 	if .i <= 0
@@ -199,6 +228,7 @@ uiMessage$ ["EN", "Record2"] = "Please be ready to start"
 uiMessage$ ["EN", "Record3"] = "Select the speech you want to analyse"
 uiMessage$ ["EN", "Open1"] = "Open the recording containing the speech"
 uiMessage$ ["EN", "Open2"] = "Select the speech you want to analyse"
+uiMessage$ ["EN", "Open3"] = "Open the file containing the vowel labels"
 uiMessage$ ["EN", "Corneri"] = "h##ea#t"
 uiMessage$ ["EN", "Corneru"] = "h##oo#t"
 uiMessage$ ["EN", "Cornera"] = "h##a#t"
@@ -212,6 +242,7 @@ uiMessage$ ["EN", "VTL"] = "Vocal tract"
 uiMessage$ ["EN", "LogFile"] = "Write log to table (""-"" write to the info window)"
 uiMessage$ ["EN", "CommentContinue"] = "Click on ""Continue"" if you want to analyze more speech samples"
 uiMessage$ ["EN", "CommentOpen"] = "Click on ""Open"" and select a recording"
+uiMessage$ ["EN", "CommentLabel"] = "Use phoneme segmentation (optional)"
 uiMessage$ ["EN", "CommentRecord"] = "Click on ""Record"" and start speaking"
 uiMessage$ ["EN", "CommentList"] = "Record sound, ""Save to list & Close"", then click ""Continue"""
 uiMessage$ ["EN", "SavePicture"] = "Save picture"
@@ -229,7 +260,7 @@ uiMessage$ ["EN", "Speaker is a"] = "Speaker is a"
 uiMessage$ ["EN", "Male"] = "Male ♂"
 uiMessage$ ["EN", "Female"] = "Female ♀"
 uiMessage$ ["EN", "Automatic"] = "Automatic"
-uiMessage$ ["EN", "Experimental"] = "Experimental: Select formant tracking method"
+uiMessage$ ["EN", "Experimental"] = "Select formant tracking method"
 uiMessage$ ["EN", "Continue"] = "Continue"
 uiMessage$ ["EN", "Done"] = "Done"
 uiMessage$ ["EN", "Stop"] = "Stop"
@@ -237,6 +268,12 @@ uiMessage$ ["EN", "Open"] = "Open"
 uiMessage$ ["EN", "Record"] = "Record"
 uiMessage$ ["EN", "untitled"] = "untitled"
 uiMessage$ ["EN", "Title"] 			= "Title"
+uiMessage$ ["EN", "Vowels"] = "Vowels"
+uiMessage$ ["EN", "Vowel Tier"] = "Vowel tier"
+
+# SAMPA vowels
+vowels$ ["EN"] = " @ { } A E Q O O: o i I u U 6 V i: O: u: aU OI oU eI aI "
+
 
 # Dutch
 uiMessage$ ["NL", "PauseRecord"] 	= "Neem lopende spraak op"
@@ -245,6 +282,7 @@ uiMessage$ ["NL", "Record2"] 		= "Zorg dat u klaar ben om te spreken"
 uiMessage$ ["NL", "Record3"] 		= "Selecteer de spraak die u wilt analyseren"
 uiMessage$ ["NL", "Open1"] 			= "Open de spraakopname"
 uiMessage$ ["NL", "Open2"] 			= "Selecteer de spraak die u wilt analyseren"
+uiMessage$ ["NL", "Open3"]          = "Open het bestand met de klinkerlabels"
 uiMessage$ ["NL", "Corneri"] 		= "h##ie#t"
 uiMessage$ ["NL", "Corneru"] 		= "h##oe#d"
 uiMessage$ ["NL", "Cornera"] 		= "h##aa#t"
@@ -258,6 +296,7 @@ uiMessage$ ["NL", "VTL"] 			= "Spraakkanaal"
 uiMessage$ ["NL", "LogFile"] 		= "Schrijf resultaten naar log bestand (""-"" schrijft naar info venster)"
 uiMessage$ ["NL", "CommentContinue"] = "Klik op ""Doorgaan"" als u meer spraakopnamen wilt analyseren"
 uiMessage$ ["NL", "CommentOpen"] 	= "Klik op ""Open"" en selecteer een opname"
+uiMessage$ ["NL", "CommentLabel"]   = "Gebruik foneemsegmentatie (optioneel)"
 uiMessage$ ["NL", "CommentRecord"] 	= "Klik op ""Opnemen"" en start met spreken"
 uiMessage$ ["NL", "CommentList"] 	= "Spraak opnemen, ""Save to list & Close"", daarna klik op ""Doorgaan"""
 uiMessage$ ["NL", "SavePicture"] 	= "Bewaar afbeelding"
@@ -275,7 +314,7 @@ uiMessage$ ["NL", "Speaker is a"] 	= "De Spreker is een"
 uiMessage$ ["NL", "Male"] 			= "Man ♂"
 uiMessage$ ["NL", "Female"] 		= "Vrouw ♀"
 uiMessage$ ["NL", "Automatic"] 		= "Automatisch"
-uiMessage$ ["NL", "Experimental"] 	= "Experimenteel: Kies methode om formanten te berekenen"
+uiMessage$ ["NL", "Experimental"] 	= "Kies methode om formanten te berekenen"
 uiMessage$ ["NL", "Continue"] 		= "Doorgaan"
 uiMessage$ ["NL", "Done"] 			= "Klaar"
 uiMessage$ ["NL", "Stop"] 			= "Stop"
@@ -283,6 +322,11 @@ uiMessage$ ["NL", "Open"] 			= "Open"
 uiMessage$ ["NL", "Record"] 		= "Opnemen"
 uiMessage$ ["NL", "untitled"] 		= "zonder titel"
 uiMessage$ ["NL", "Title"] 			= "Titel"
+uiMessage$ ["NL", "Vowels"]         = "Klinkers"
+uiMessage$ ["NL", "Vowel Tier"]     = "Klinker tier"
+
+# SAMPA vowels
+vowels$ ["NL"] = " I E A O Y @ i y u a: e: 2: o: Ei 9y Au a:i o:i ui iu yu e:u E: 9: O: "
 
 # German
 uiMessage$ ["DE", "PauseRecord"] 	= "Zeichne laufende Sprache auf"
@@ -291,6 +335,7 @@ uiMessage$ ["DE", "Record2"] 		= "Bitte seien Sie bereit zu sprechen"
 uiMessage$ ["DE", "Record3"] 		= "Wählen Sie die Sprachaufnahme, die Sie analysieren möchten"
 uiMessage$ ["DE", "Open1"] 			= "Öffnen Sie die Sprachaufnahme"
 uiMessage$ ["DE", "Open2"] 			= "Wählen Sie die Sprachaufnahme, die Sie analysieren möchten"
+uiMessage$ ["DE", "Open3"]          = "Öffnen Sie die Datei mit den Vokalbezeichnungen"
 uiMessage$ ["DE", "Corneri"] 		= "L##ie#d"
 uiMessage$ ["DE", "Corneru"] 		= "H##u#t"
 uiMessage$ ["DE", "Cornera"] 		= "T##a#l"
@@ -304,6 +349,7 @@ uiMessage$ ["DE", "VTL"] 			= "Vokaltrakt"
 uiMessage$ ["DE", "LogFile"] 		= "Daten in Tabelle schreiben (""-"" in das Informationsfenster schreiben)"
 uiMessage$ ["DE", "CommentContinue"]= "Klicken Sie auf ""Weiter"", wenn Sie mehr Sprachproben analysieren möchten"
 uiMessage$ ["DE", "CommentOpen"] 	= "Klicke auf ""Öffnen"" und wähle eine Aufnahme"
+uiMessage$ ["DE", "CommentLabel"]   = "Phonemsegmentierung verwenden (optional)"
 uiMessage$ ["DE", "CommentRecord"] 	= "Klicke auf ""Aufzeichnen"" und sprich"
 uiMessage$ ["DE", "CommentList"] 	= "Sprache aufnehmen, ""Save to list & Close"", dann klicken Sie auf ""Weitergehen"""
 uiMessage$ ["DE", "SavePicture"] 	= "Bild speichern"
@@ -321,7 +367,7 @@ uiMessage$ ["DE", "Speaker is a"] 	= "Der Sprecher ist ein(e)"
 uiMessage$ ["DE", "Male"] 			= "Man ♂"
 uiMessage$ ["DE", "Female"] 		= "Frau ♀"
 uiMessage$ ["DE", "Automatic"] 		= "Selbstauswahl"
-uiMessage$ ["DE", "Experimental"] 	= "Experimentell: Wählen Sie die Formant-Berechnungsmethode"
+uiMessage$ ["DE", "Experimental"] 	= "Wählen Sie die Formant-Berechnungsmethode"
 uiMessage$ ["DE", "Continue"] 		= "Weitergehen"
 uiMessage$ ["DE", "Done"] 			= "Fertig"
 uiMessage$ ["DE", "Stop"] 			= "Halt"
@@ -329,6 +375,11 @@ uiMessage$ ["DE", "Open"] 			= "Öffnen"
 uiMessage$ ["DE", "Record"] 		= "Aufzeichnen"
 uiMessage$ ["DE", "untitled"] 		= "ohne Titel"
 uiMessage$ ["DE", "Title"] 			= "Titel"
+uiMessage$ ["DE", "Vowels"]         = "Vokale"
+uiMessage$ ["DE", "Vowel Tier"]     = "Vokale tier"
+
+# SAMPA vowels
+vowels$ ["DE"] = " I E a O U Y 9: i: e: E: a: o: u: y: 2:  aI aU OY: aI aU OY: 6 i:6 I6 y:6 Y6 e:6 E6 E:6 2:6 96 a:6 a6 u:6 U6 o:6 O6 "
 
 # French
 uiMessage$ ["FR", "PauseRecord"]	= "Enregistrer un discours continu"
@@ -337,6 +388,7 @@ uiMessage$ ["FR", "Record2"]		= "S'il vous plaît soyez prêt à commencer"
 uiMessage$ ["FR", "Record3"]		= "Sélectionnez le discours que vous voulez analyser"
 uiMessage$ ["FR", "Open1"]			= "Ouvrir l'enregistrement contenant le discours"
 uiMessage$ ["FR", "Open2"]			= "Sélectionnez le discours que vous voulez analyser"
+uiMessage$ ["FR", "Open3"]          = "Ouvrez le fichier contenant les étiquettes de voyelle"
 uiMessage$ ["FR", "Corneri"]		= "s##i#"
 uiMessage$ ["FR", "Corneru"]		= "f##ou#"
 uiMessage$ ["FR", "Cornera"]		= "l##à#"
@@ -350,6 +402,7 @@ uiMessage$ ["FR", "VTL"] 			= "Conduit vocal"
 uiMessage$ ["FR", "LogFile"]		= "Écrire un fichier journal dans une table (""-"" écrire dans la fenêtre d'information)"
 uiMessage$ ["FR", "CommentContinue"]= "Cliquez sur ""Continuer"" si vous voulez analyser plus d'échantillons de discours"
 uiMessage$ ["FR", "CommentOpen"]	= "Cliquez sur ""Ouvrir"" et sélectionnez un enregistrement"
+uiMessage$ ["FR", "CommentLabel"]   = "Utiliser la segmentation des phonèmes (facultatif)"
 uiMessage$ ["FR", "CommentRecord"]	= "Cliquez sur ""Enregistrer"" et commencez à parler"
 uiMessage$ ["FR", "CommentList"]	= "Enregistrer le son, ""Save to list & Close"", puis cliquez sur ""Continuer"""
 uiMessage$ ["FR", "SavePicture"]	= "Enregistrer l'image"
@@ -367,7 +420,7 @@ uiMessage$ ["FR", "Speaker is a"]	= "Le locuteur est un(e)"
 uiMessage$ ["FR", "Male"] 			= "Homme ♂"
 uiMessage$ ["FR", "Female"] 		= "Femme ♀"
 uiMessage$ ["FR", "Automatic"] 		= "Auto-sélection"
-uiMessage$ ["FR", "Experimental"] 	= "Expérimental: Sélectionner la méthode de calcul du formant"
+uiMessage$ ["FR", "Experimental"] 	= "Sélectionner la méthode de calcul du formant"
 uiMessage$ ["FR", "Continue"]		= "Continuer"
 uiMessage$ ["FR", "Done"]			= "Terminé"
 uiMessage$ ["FR", "Stop"]			= "Arrêt"
@@ -375,6 +428,11 @@ uiMessage$ ["FR", "Open"]			= "Ouvert"
 uiMessage$ ["FR", "Record"]			= "Enregistrer"
 uiMessage$ ["FR", "untitled"] 		= "sans titre"
 uiMessage$ ["FR", "Title"] 			= "Titre"
+uiMessage$ ["FR", "Vowels"]         = "Voyelles"
+uiMessage$ ["FR", "Vowel Tier"]     = "Tier voyelle"
+
+# SAMPA vowels
+vowels$ ["FR"] = " i e E a A O o u y 2 9 @ e~ a~ o~ 9~ E/ A/ &/ O/ U~/ "
 
 # Chinese
 uiMessage$ ["ZH", "PauseRecord"] 	= "录制连续语音"
@@ -383,6 +441,7 @@ uiMessage$ ["ZH", "Record2"] 		= "请准备好开始"
 uiMessage$ ["ZH", "Record3"] 		= "选择你想要分析的语音"
 uiMessage$ ["ZH", "Open1"] 			= "打开包含语音的录音文件"
 uiMessage$ ["ZH", "Open2"] 			= "选择你想要分析的语音片段"
+uiMessage$ ["ZH", "Open3"]          = "打开包含元音标签的文件"
 uiMessage$ ["ZH", "Corneri"] 		= "必"
 uiMessage$ ["ZH", "Corneru"] 		= "不"
 uiMessage$ ["ZH", "Cornera"] 		= "巴"
@@ -393,10 +452,10 @@ uiMessage$ ["ZH", "Area2"] 			= "2"
 uiMessage$ ["ZH", "AreaN"] 			= "N"
 uiMessage$ ["ZH", "VTL"] 			= "声道"
 
-
 uiMessage$ ["ZH", "LogFile"] 		= "将日志写入表格 (""-"" 写入信息窗口)"
 uiMessage$ ["ZH", "CommentContinue"] = "点击 ""继续"" 如果你想分析更多的语音样本"
 uiMessage$ ["ZH", "CommentOpen"] 	= "点击 ""打开录音"" 并选择一个录音"
+uiMessage$ ["ZH", "CommentLabel"]   = "使用音素细分（可选）"
 uiMessage$ ["ZH", "CommentRecord"] 	= "点击 ""录音"" 并开始讲话"
 uiMessage$ ["ZH", "CommentList"] 	= "录制声音, ""Save to list & Close"", 然后单击 ""继续"""
 uiMessage$ ["ZH", "SavePicture"] 	= "保存图片"
@@ -414,7 +473,7 @@ uiMessage$ ["ZH", "Speaker is a"]	= "演讲者是"
 uiMessage$ ["ZH", "Male"] 			= "男性 ♂"
 uiMessage$ ["ZH", "Female"] 		= "女性 ♀"
 uiMessage$ ["ZH", "Automatic"] 		= "自动选择"
-uiMessage$ ["ZH", "Experimental"] 	= "试验：选择共振峰值测量方式"
+uiMessage$ ["ZH", "Experimental"] 	= "选择共振峰值测量方式"
 uiMessage$ ["ZH", "Continue"] 		= "继续"
 uiMessage$ ["ZH", "Done"] 			= "完成"
 uiMessage$ ["ZH", "Stop"] 			= "结束"
@@ -422,6 +481,11 @@ uiMessage$ ["ZH", "Open"] 			= "从文件夹打开"
 uiMessage$ ["ZH", "Record"] 		= "录音"
 uiMessage$ ["ZH", "untitled"] 		= "无标题"
 uiMessage$ ["ZH", "Title"] 			= "标题"
+uiMessage$ ["ZH", "Vowels"]         = "元音"
+uiMessage$ ["ZH", "Vowel Tier"]     = "元音层"
+
+# Pinyin vowels
+vowels$ ["ZH"] = " a o e i u v ai ei ui ao ou iu ie ue iao iou uai uei er "
 
 # Spanish
 uiMessage$ ["ES", "PauseRecord"]	= "Grabar un discurso continuo"
@@ -430,6 +494,7 @@ uiMessage$ ["ES", "Record2"]		= "Por favor, prepárate para comenzar"
 uiMessage$ ["ES", "Record3"]		= "Seleccione el discurso que quiere analizar"
 uiMessage$ ["ES", "Open1"]			= "Abre la grabación que contiene el discurso"
 uiMessage$ ["ES", "Open2"]			= "Seleccione el discurso que quiere analizar"
+uiMessage$ ["ES", "Open3"]          = "Abra el archivo que contiene las etiquetas de las vocales."
 uiMessage$ ["ES", "Corneri"]		= "s##i#"
 uiMessage$ ["ES", "Corneru"]		= "##u#so"
 uiMessage$ ["ES", "Cornera"]		= "h##a#"
@@ -443,6 +508,7 @@ uiMessage$ ["ES", "VTL"] 			= "Tracto vocal"
 uiMessage$ ["ES", "LogFile"]		= "Escribir un archivo de registro en una tabla (""-"" escribir en la ventana de información)"
 uiMessage$ ["ES", "CommentContinue"]= "Haga clic en ""Continúa"" si desea analizar más muestras de voz"
 uiMessage$ ["ES", "CommentOpen"]	= "Haga clic en ""Abrir"" y seleccione un registro"
+uiMessage$ ["ES", "CommentLabel"]   = "Usar segmentación de fonemas (opcional)"
 uiMessage$ ["ES", "CommentRecord"]	= "Haz clic en ""Grabar"" y comienza a hablar"
 uiMessage$ ["ES", "CommentList"]	= "Grabar sonido, ""Save to list & Close"", luego haga clic en ""Continúa"""
 uiMessage$ ["ES", "SavePicture"]	= "Guardar imagen"
@@ -460,7 +526,7 @@ uiMessage$ ["ES", "Speaker is a"]	= "El hablante es un(a)"
 uiMessage$ ["ES", "Male"] 			= "Hombre ♂"
 uiMessage$ ["ES", "Female"] 		= "Mujer ♀"
 uiMessage$ ["ES", "Automatic"] 		= "Autoselección"
-uiMessage$ ["ES", "Experimental"] 	= "Experimental: seleccione el método de seguimiento de formantes"
+uiMessage$ ["ES", "Experimental"] 	= "Seleccione el método de seguimiento de formantes"
 uiMessage$ ["ES", "Continue"]		= "Continúa"
 uiMessage$ ["ES", "Done"]			= "Terminado"
 uiMessage$ ["ES", "Stop"]			= "Detener"
@@ -468,6 +534,11 @@ uiMessage$ ["ES", "Open"]			= "Abrir"
 uiMessage$ ["ES", "Record"]			= "Grabar"
 uiMessage$ ["ES", "untitled"] 		= "no tiene título"
 uiMessage$ ["ES", "Title"] 			= "Título"
+uiMessage$ ["ES", "Vowels"]         = "Vocales"
+uiMessage$ ["ES", "Vowel Tier"]     = "Tier vocal"
+
+# SAMPA vowels
+vowels$ ["ES"] = " i I e E { y Y 2 9 1 @ 6 3 a } 8 & M 7 V A u U o O Q "
 
 # Portugese
 uiMessage$ ["PT", "PauseRecord"]	= "Gravar um discurso contínuo"
@@ -476,6 +547,7 @@ uiMessage$ ["PT", "Record2"]		= "Por favor, prepare-se para começar"
 uiMessage$ ["PT", "Record3"]		= "Selecione o discurso que deseja analisar"
 uiMessage$ ["PT", "Open1"]			= "Abra a gravação que contém o discurso"
 uiMessage$ ["PT", "Open2"]			= "Selecione o discurso que deseja analisar"
+uiMessage$ ["PT", "Open3"]          = "Abra o arquivo que contém os rótulos das vogais"
 uiMessage$ ["PT", "Corneri"]		= "s##i#"
 uiMessage$ ["PT", "Corneru"]		= "r##u#a"
 uiMessage$ ["PT", "Cornera"]		= "d##á#"
@@ -489,6 +561,7 @@ uiMessage$ ["PT", "VTL"] 			= "Trato vocal"
 uiMessage$ ["PT", "LogFile"]		= "Escreva um arquivo de registro em uma tabela (""-"" escreva na janela de informações)"
 uiMessage$ ["PT", "CommentContinue"]= "Clique em ""Continuar"" se quiser analisar mais amostras de voz"
 uiMessage$ ["PT", "CommentOpen"]	= "Clique em ""Abrir"" e selecione um registro"
+uiMessage$ ["PT", "CommentLabel"]   = "Usar segmentação por fonema (opcional)"
 uiMessage$ ["PT", "CommentRecord"]	= "Clique ""Gravar"" e comece a falar "
 uiMessage$ ["PT", "CommentList"]	= "Gravar som, ""Save to list & Close"", depois clique em ""Continuar"""
 uiMessage$ ["PT", "SavePicture"]	= "Salvar imagem"
@@ -506,7 +579,7 @@ uiMessage$ ["PT", "Speaker is a"]	= "O falante é um(a)"
 uiMessage$ ["PT", "Male"] 			= "Homem ♂"
 uiMessage$ ["PT", "Female"] 		= "Mulher ♀"
 uiMessage$ ["PT", "Automatic"] 		= "Auto-seleção"
-uiMessage$ ["PT", "Experimental"] 	= "Experimental: Selecione o método de rastreamento formant"
+uiMessage$ ["PT", "Experimental"] 	= "Selecione o método de rastreamento formant"
 uiMessage$ ["PT", "Continue"]		= "Continuar"
 uiMessage$ ["PT", "Done"]			= "Terminado"
 uiMessage$ ["PT", "Stop"]			= "Pare"
@@ -514,6 +587,11 @@ uiMessage$ ["PT", "Open"]			= "Abrir"
 uiMessage$ ["PT", "Record"]			= "Gravar"
 uiMessage$ ["PT", "untitled"] 		= "sem título"
 uiMessage$ ["PT", "Title"] 			= "Título"
+uiMessage$ ["PT", "Vowels"]         = "Vogais"
+uiMessage$ ["PT", "Vowel Tier"]     = "Tier de vogal"
+
+# SAMPA vowels
+vowels$ ["PT"] = " i e E a 6 O o u @ i~ e~ 6~ o~ u~ aw iw ew Ew ow aj ej Ej Oj oj 6~j~ e~j~ o~j~ u~j~ "
 
 # Italian
 uiMessage$ ["IT", "PauseRecord"]	= "Registra un discorso continuo"
@@ -522,6 +600,7 @@ uiMessage$ ["IT", "Record2"]		= "Per favore, preparati a iniziare"
 uiMessage$ ["IT", "Record3"]		= "Seleziona il discorso che vuoi analizzare"
 uiMessage$ ["IT", "Open1"]			= "Apri la registrazione che contiene il discorso"
 uiMessage$ ["IT", "Open2"]			= "Seleziona il discorso che vuoi analizzare"
+uiMessage$ ["IT", "Open3"]          = "Apri il file contenente le etichette vocaliche"
 uiMessage$ ["IT", "Corneri"]		= "s##ì#"
 uiMessage$ ["IT", "Corneru"]		= "##u#si"
 uiMessage$ ["IT", "Cornera"]		= "sar##à#"
@@ -535,6 +614,7 @@ uiMessage$ ["IT", "VTL"] 			= "Tratto vocale"
 uiMessage$ ["IT", "LogFile"]		= "Scrivi un file di registrazione in una tabella (""-"" scrivi nella finestra delle informazioni)"
 uiMessage$ ["IT", "CommentContinue"]= "Clicca su ""Continua"" se vuoi analizzare più campioni vocali"
 uiMessage$ ["IT", "CommentOpen"]	= "Fare clic su ""Apri"" e selezionare un record"
+uiMessage$ ["IT", "CommentLabel"]   = "Usa segmentazione fonemi (opzionale)"
 uiMessage$ ["IT", "CommentRecord"]	= "Fai clic su ""Registra"" e inizia a parlare"
 uiMessage$ ["IT", "CommentList"]	= "Registra suono, ""Save to list & Close"", quindi fai clic su ""Continua"""
 uiMessage$ ["IT", "SavePicture"]	= "Salva immagine"
@@ -548,11 +628,11 @@ uiMessage$ ["IT", "Nothing to do"] 	= "Niente da fare"
 uiMessage$ ["IT", "No readable recording selected "] = "Nessun record utilizzabile è stato selezionato "
 
 uiMessage$ ["IT", "Interface Language"] = "Lingua (Language)"
-uiMessage$ ["IT", "Speaker is a"]	= "L‘oratore è un(a)"
+uiMessage$ ["IT", "Speaker is a"]	= "L oratore è un(a)"
 uiMessage$ ["IT", "Male"] 			= "Uomo ♂"
 uiMessage$ ["IT", "Female"] 		= "Donna ♀"
 uiMessage$ ["IT", "Automatic"] 		= "Auto-selezione"
-uiMessage$ ["IT", "Experimental"] 	= "Sperimentale: seleziona il metodo di tracciamento dei formanti"
+uiMessage$ ["IT", "Experimental"] 	= "Seleziona il metodo di tracciamento dei formanti"
 uiMessage$ ["IT", "Continue"]		= "Continua"
 uiMessage$ ["IT", "Done"]			= "Finito"
 uiMessage$ ["IT", "Stop"]			= "Fermare"
@@ -560,13 +640,19 @@ uiMessage$ ["IT", "Open"]			= "Apri"
 uiMessage$ ["IT", "Record"]			= "Registra"
 uiMessage$ ["IT", "untitled"] 		= "senza titolo"
 uiMessage$ ["IT", "Title"] 			= "Titolo"
+uiMessage$ ["IT", "Vowels"]         = "Vocali"
+uiMessage$ ["IT", "Vowel Tier"]     = "Tier Vocale"
+
+# SAMPA vowels
+vowels$ ["IT"] = " i e E a O o u: "
 
 #############################################################
 #
 # To add a new interface language, translate the text below
 # and substitute in the correct places. Keep the double quotes "" intact
 # Replace the "EN" in the ''uiMessage$ ["EN",'' to the code you
-# need. Then add the new language in the options (following "English" etc.)
+# need, should be the ISO country code. Then add the new language 
+# in the options (following "English" etc.)
 # and the code following the endPause below.
 #
 # "Record continuous speech"
@@ -575,6 +661,7 @@ uiMessage$ ["IT", "Title"] 			= "Titolo"
 # "Select the speech you want to analyse"
 # "Open the recording containing the speech"
 # "Select the speech you want to analyse"
+# "Open the file containing the vowel labels"
 # "h##ea#t"
 # "h##oo#t"
 # "h##a#t"
@@ -583,17 +670,19 @@ uiMessage$ ["IT", "Title"] 			= "Titolo"
 # "1"
 # "2"
 # "N"
+# "Vocal tract"
 
 # "Write log to table (""-"" write to the info window)"
 # "Click on ""Continue"" if you want to analyze more speech samples"
 # "Click on ""Open"" and select a recording"
+# "Use phoneme segmentation (optional)"
 # "Click on ""Record"" and start speaking"
 # "Record sound, ""Save to list & Close"", then click ""Continue"""
 # "Save picture"
 # "Do you want to continue?"
 # "Select the sound and continue"
 # "It is possible to remove unwanted sounds from the selection"
-# "Select the unwanted part and then chose ""Cut"" from the ""Edit"" menu"
+# "Select the unwanted part and then choose ""Cut"" from the ""Edit"" menu"
 # "Vowel Triangle stopped"
 # "Error: Not a sound "
 # "Nothing to do"
@@ -601,13 +690,22 @@ uiMessage$ ["IT", "Title"] 			= "Titolo"
 
 # "Language"
 # "Speaker is a"
-# "Male"
-# "Female"
+# "Male ♂"
+# "Female ♀"
+# "Automatic"
+# "Select formant tracking method"
 # "Continue"
 # "Done"
 # "Stop"
 # "Open"
 # "Record"
+# "untitled"
+# "Title"
+# "Vowels"
+# "Vowel tier"
+
+# Also, find out what the relevant (SAMPA) vowel symbols for this new language are
+# vowels$ ["EN"] = " @ { } A E Q O O: o i I u U 6 V i: O: u: aU OI oU eI aI "
 #
 ##############################################################
 
@@ -1064,6 +1162,9 @@ averagePhi_VTL ["KeepAll", "A"] = 529.48
 
 # Run as a non interactive program
 if input_table > 0
+	segmentTier = 0
+	labelFile$ = ""
+
 	selectObject: input_table
 	.numInputRows = Get number of rows
 	for .r to .numInputRows
@@ -1084,6 +1185,7 @@ if input_table > 0
 		tmp$ = Get value: .r, "Language"
 		if index(tmp$, "[A-Z]{2}")
 			uiLanguage$ = tmp$
+			vowelString$ = vowels$ [uiLanguage$]
 		endif
 		.log$ = Get value: .r, "Log"
 		if index_regex(.log$, "\w")
@@ -1114,9 +1216,30 @@ if input_table > 0
 				plotFormantAlgorithm$ = targetFormantAlgorithm$
 			endif
 		endif
+		
+		# Get the segment tier, vowel list, and label file
+		.idx = Get column index: "VowelTier"
+		if .idx > 0
+			segmentTier = Get value: .r, "VowelTier"
+		endif
+		.idx = Get column index: "Vowels"
+		if .idx > 0
+			.tmp$ = Get value: .r, "Vowels"
+			if tmp$ <> "" and index_regex(.tmp$, "[^-.?]")
+				vowelString$ = .tmp$
+			endif
+		endif
+		.idx = Get column index: "LabelFile"
+		if .idx > 0
+			.tmp$ = Get value: .r, "LabelFile"
+			if tmp$ <> "" and index_regex(.tmp$, "[^-.?]")
+				labelFile$ = .tmp$
+			endif
+		endif
 
 		# Handle cases where there is a wildcard
-		if file$ <> "" and index_regex(file$, "[*]{1}") and index_regex(file$, "(?i\.(wav|mp3|aif[fc]))")
+		.textGrid = -1
+		if file$ <> "" and index_regex(file$, "[*]{1}") and index_regex(file$, "(?i\.(wav|mp3|aif[fc]|flac|nist|au))")
 			.preFix$ = ""
 			if index(file$, "/") > 0
 				.preFix$ = replace_regex$(file$, "/[^/]+$", "/", 0)
@@ -1172,7 +1295,66 @@ if input_table > 0
 			endfor
 			selectObject: .fileList
 			Remove
-		elsif file$ <> "" and fileReadable(file$) and index_regex(file$, "(?i\.(wav|mp3|aif[fc]))")
+			
+			# Get TextGrids if needed
+			if segmentTier > 0
+				if labelFile$ <> ""
+					.textGridname$ = labelFile$
+				else
+					.textGridname$ = replace_regex$(.filename$, "(?i\.(wav|mp3|aif[fc]|flac|nist|au))$", ".TextGrid", 0)
+				endif
+				if .textGridname$ <> "" and index_regex(.textGridname$, "[*]{1}")
+					.preFix$ = ""
+					if index(.textGridname$, "/") > 0
+						.preFix$ = replace_regex$(.textGridname$, "/[^/]+$", "/", 0)
+					endif
+					.fileList = Create Strings as file list: "FileList", .textGridname$
+					.numFiles = Get number of strings
+					.textGrid = -1
+					for .f to .numFiles
+						selectObject: .fileList
+						.fileName$ = Get string: .f
+		
+						@read_and_process_TextGrid: .preFix$ + .fileName$, segmentTier, vowelString$
+						.tmp = read_and_process_TextGrid.textGrid
+						if .tmp <= 0
+							exitScript: uiMessage$ [uiLanguage$, "ErrorSound"]
+						endif
+						# Force last boundary == duration
+						selectObject: .tmp
+						.numInt = Get number of intervals: segmentTier
+						.duration = Get end time of interval: segmentTier, .numInt
+						.textGridPart = Extract part: 0, .duration, "no"
+						selectObject: .tmp
+						Remove
+						
+						if .textGrid > 0
+							selectObject: .textGrid, .textGridPart
+							.tmp = Concatenate
+							.duration = Get total duration
+							selectObject: .textGrid, .textGridPart
+							Remove
+							.textGrid = .tmp
+							.tmp = -1
+						else
+							.textGrid = .textGridPart
+						endif
+					endfor
+					selectObject: .fileList
+					Remove
+					
+				elsif fileReadable(.textGridname$)
+					@read_and_process_TextGrid: .textGridname$, segmentTier, vowelString$
+					.textGrid = read_and_process_TextGrid.textGrid
+					if index_regex(vowelString$, "\w") <= 0
+						vowelString$ = read_and_process_TextGrid.vowelString$
+					endif
+					
+					selectObject: .textGrid
+					Rename: name$
+				endif
+			endif
+		elsif file$ <> "" and fileReadable(file$) and index_regex(file$, "(?i\.(wav|mp3|aif[fc]|flac|nist|au))")
 			tmp = Read from file: file$
 			if tmp <= 0 or numberOfSelected("Sound") <= 0
 				exitScript: uiMessage$ [uiLanguage$, "ErrorSound"]
@@ -1205,25 +1387,44 @@ if input_table > 0
 			Rename: name$
 			selectObject(tmp)
 			Remove
+			
+			# Get TextGrid if needed
+			if segmentTier > 0
+				.textGridname$ = replace_regex$(.filename$, "(?i\.wav)$", ".TextGrid", 0)
+				if fileReadable(.textGridname$)
+					@read_and_process_TextGrid: .textGridname$, segmentTier, vowelString$
+					.textGrid = read_and_process_TextGrid.textGrid
+					if index_regex(vowelString$, "\w") <= 0
+						vowelString$ = read_and_process_TextGrid.vowelString$
+					endif
+					
+					selectObject: .textGrid
+					Rename: name$
+				endif
+			endif
+			
 		else
 			exitScript: uiMessage$ [uiLanguage$, "ErrorSound"]
 		endif
-		
+
 		if .plotVowels
 			Erase all
 			call set_up_Canvas
 			#@plot_vowel_triangle: .sp$
 			Text special... 0.5 Centre 1.05 bottom Helvetica 18 0 ##'title$'#
 		endif
-		@plot_vowels: .plotVowels, .sp$, .sound
+		@plot_vowels: .plotVowels, .sp$, .sound, .textGrid
 		@print_output_line: title$, plot_vowels.sp$, plot_vowels.numVowelIntervals, plot_vowels.area2perc, plot_vowels.area1perc, plot_vowels.relDist_i, plot_vowels.relDist_u, plot_vowels.relDist_a, plot_vowels.vocalTractLength, .duration, .intensity, plot_vowels.slope
 
 		if index_regex(.plotFile$, "\w")
 			Select outer viewport: 0, 8, 0, 8
 			Save as 300-dpi PNG file: .plotFile$
 		endif
-		
+
 		selectObject: .sound
+		if .textGrid > 0
+			plusObject: .textGrid
+		endif
 		Remove
 		
 		label NEXTROW
@@ -1249,11 +1450,26 @@ while .continue
 	.speakerIsA$ = uiMessage$ [uiLanguage$, "Speaker is a"]
 	.speakerIsAVar$ = replace_regex$(.speakerIsA$, "^([A-Z])", "\l\1", 0)
 	.speakerIsAVar$ = replace_regex$(.speakerIsAVar$, "\s*\(.*$", "", 0)
-	.speakerIsAVar$ = replace_regex$(.speakerIsAVar$, "[\s.?!()/\\\\]", "_", 0)
+	.speakerIsAVar$ = replace_regex$(.speakerIsAVar$, "(\s|[.?!()/\\\\])", "_", 0)
 	.languageInput$ = uiMessage$ [uiLanguage$, "Interface Language"]
 	.languageInputVar$ = replace_regex$(.languageInput$, "^([A-Z])", "\l\1", 0)
 	.languageInputVar$ = replace_regex$(.languageInputVar$, "\s*\(.*$", "", 0)
-	.languageInputVar$ = replace_regex$(.languageInputVar$, "[\s.?!()/\\\\]", "_", 0)
+	.languageInputVar$ = replace_regex$(.languageInputVar$, "(\s|[.?!()/\\\\])", "_", 0)
+	.segmentTierVar$ =  uiMessage$ [uiLanguage$, "Vowel Tier"]
+	.segmentTierVar$ =  replace_regex$(.segmentTierVar$, "^([A-Z])", "\l\1", 0)
+	.segmentTierVar$ =  replace_regex$(.segmentTierVar$, "(\s|[.?!()/\\\\])", "_", 0)
+	.vowelsVar$ = uiMessage$ [uiLanguage$, "Vowels"]
+	.vowelsVar$ = replace_regex$(.vowelsVar$, "^([A-Z])", "\l\1", 0)
+	
+	segmentValue$ = ""
+	vowelsValue$ = ""
+	if segmentTier > 0
+		segmentValue$ = "'segmentTier'"
+		if index_regex(vowelString$, "\w") <= 0
+			vowelString$ = vowels$ [uiLanguage$]
+		endif
+		vowelsValue$ = vowelString$
+	endif
 
 	.recording = 0
 	beginPause: "Select a recording"
@@ -1281,6 +1497,9 @@ while .continue
 			option: "Burg"
 			option: "Robust"
 			option: "Keep All"
+		comment: uiMessage$ [uiLanguage$, "CommentLabel"]
+		sentence: uiMessage$ [uiLanguage$, "Vowel Tier"], segmentValue$
+		sentence: uiMessage$ [uiLanguage$, "Vowels"], vowelsValue$
 	.clicked = endPause: (uiMessage$ [uiLanguage$, "Stop"]), (uiMessage$ [uiLanguage$, "Record"]), (uiMessage$ [uiLanguage$, "Open"]), 3, 1	
 	if .clicked = 1
 		.continue = 0
@@ -1295,6 +1514,18 @@ while .continue
 		title$ = "untitled"
 	endif
 	
+	# Magic incantations to extract the values
+	segmentTier = 0
+	segmentTierValue$ = '.segmentTierVar$'$
+	if index_regex(segmentTierValue$, "\d") > 0
+		segmentTier = extractNumber('.segmentTierVar$'$, "")
+	endif
+	if segmentTier > 0
+		vowelString$ = '.vowelsVar$'$
+	else
+		vowelString$ = ""
+	endif
+
 	.sp$ = "M"
 	vtl_normalization = 0
 	.sp_default = 2
@@ -1361,6 +1592,8 @@ while .continue
 	# Store preferences
 	writeFileLine: .preferencesLanguageFile$, "Language=",uiLanguage$
 	appendFileLine: .preferencesLanguageFile$, "Formant=",targetFormantAlgorithm$
+	appendFileLine: .preferencesLanguageFile$, "VowelTier=",segmentTier
+	appendFileLine: .preferencesLanguageFile$, "Vowels=",vowelString$
 	
 	# Start
 	if log and output_table$ = ""
@@ -1406,6 +1639,7 @@ while .continue
 		goto NEXTROUND
 	endif
 	.sound = read_and_select_audio.sound
+	.textGrid = read_and_select_audio.textGrid
 	if title$ = "untitled"
 		title$ = replace_regex$(read_and_select_audio.filename$, "\.[^\.]+$", "", 0)
 		title$ = replace_regex$(title$, "^.*/([^/]+)$", "\1", 0)
@@ -1422,11 +1656,14 @@ while .continue
 	.duration = Get total duration
 	.intensity = Get intensity (dB)
 	if .intensity > 50
-		@plot_vowels: 1, .sp$, .sound, 
+		@plot_vowels: 1, .sp$, .sound, .textGrid
 		@print_output_line: title$, plot_vowels.sp$, plot_vowels.numVowelIntervals, plot_vowels.area2perc, plot_vowels.area1perc, plot_vowels.relDist_i, plot_vowels.relDist_u, plot_vowels.relDist_a, plot_vowels.vocalTractLength, .duration, .intensity, plot_vowels.slope
 	endif
 	
 	selectObject: .sound
+	if .textGrid > 0
+		plusObject: .textGrid
+	endif
 	Remove
 	
 	
@@ -1447,9 +1684,61 @@ while .continue
 endwhile
 
 #####################################################################
+# 
+# Use a TextGrid to select the vowel segments
+# 
+procedure read_and_process_TextGrid .textGridname$ .tier .vowelString$
+	.tmpTextGrid = Read from file: .textGridname$
+	.numTiers = Get number of tiers
+	if .tier <= 0 or .numTiers < .tier
+		goto ENDOFREADANDPROCESSTEXTGRID
+	endif
+	
+	if index_regex(.vowelString$, "\w") <= 0
+		.vowelString$ = vowels$ [uiLanguage$]
+	endif
+	
+	.textGrid = Extract one tier: .tier
+	Set tier name: 1, "Vowel"
+	.numIntervals = Get number of intervals: 1
+	for .int to .numIntervals
+		selectObject: .textGrid
+		.label$ = Get label of interval: 1, .int
+		# Remove extraneous text from labels
+		.label$ = replace_regex$(.label$, "__.*$", "", 0)
+		if not index(.vowelString$, " "+.label$+" ")
+			.label$ = ""
+		else
+			.label$ = "Vowel"
+		endif
+		Set interval text: 1, .int, .label$
+	endfor
+	# Now, change the intervals to include only the central 2/3, from back to front
+	for .int to .numIntervals
+		selectObject: .textGrid
+		.j = 1 + .numIntervals - .int
+		.label$ = Get label of interval: 1, .j
+		if .label$ = "Vowel"
+			Set interval text: 1, .j, ""
+			.start = Get start time of interval: 1, .j
+			.end = Get end time of interval: 1, .j
+			.s1 = .start + (.end - .start)/6
+			.s2 = .start + 5*(.end - .start)/6
+			Insert boundary: 1, .s1
+			Insert boundary: 1, .s2
+			Set interval text: 1, .j+1, "Vowel"
+		endif
+	endfor
+	
+	label ENDOFREADANDPROCESSTEXTGRID
+	
+	selectObject: .tmpTextGrid
+	Remove
+endproc
 
 procedure read_and_select_audio .type .message1$ .message2$
 	.sound = -1
+	.textGrid = -1
 	if .type
 		Record mono Sound...
 		beginPause: (uiMessage$ [uiLanguage$, "PauseRecord"])
@@ -1466,19 +1755,45 @@ procedure read_and_select_audio .type .message1$ .message2$
 		.source = selected ("Sound")
 		.filename$ = "Recorded speech"
 	else
-		.filename$ = chooseReadFile$: .message1$
-		if .filename$ = "" or not fileReadable(.filename$) or not index_regex(.filename$, "(?i\.(wav|mp3|aif[fc]))")
-			pauseScript: (uiMessage$ [uiLanguage$, "No readable recording selected "])+.filename$
+		.fullFilename$ = chooseReadFile$: .message1$
+		if .fullFilename$ = "" or not fileReadable(.fullFilename$) or not index_regex(.fullFilename$, "(?i\.(wav|mp3|aif[fc]|flac|nist|au))")
+			pauseScript: (uiMessage$ [uiLanguage$, "No readable recording selected "])+.fullFilename$
 			goto RETURN
 		endif
 		
-		.source = Open long sound file: .filename$
+		.source = Open long sound file: .fullFilename$
 		.filename$ = selected$("LongSound")
 		.fullName$ = selected$()
 		.fileType$ = extractWord$ (.fullName$, "")
 		if .fileType$ <> "Sound" and .fileType$ <> "LongSound"
 			pauseScript:  (uiMessage$ [uiLanguage$, "ErrorSound"])+.filename$
 			goto RETURN
+		endif
+		
+		if segmentTier > 0
+			.textGridname$ = replace_regex$(.fullFilename$, "(?i\.(wav|mp3|aif[fc]|flac|nist|au))$", ".TextGrid", 0)
+			# Ask for a TextGrid file if a tier number has been given
+			if ! fileReadable(.textGridname$)
+				writeInfoLine: uiMessage$ [uiLanguage$, "Open3"]
+				Erase all
+				Select outer viewport: 0, 8, 0, 8
+				Select inner viewport: 0.5, 7.5, 0.5, 4.5
+				Axes: 0, 1, 0, 1
+				Blue
+				Text special: 0, "left", 0.65, "half", "Helvetica", 16, "0", "##"+uiMessage$ [uiLanguage$, "Open3"]+"#"
+				Black
+				.tmp$ = chooseReadFile$: uiMessage$ [uiLanguage$, "Open3"]
+				if .tmp$ <> ""
+					.textGridname$ = .tmp$
+				endif
+			endif
+			if fileReadable(.textGridname$)
+				@read_and_process_TextGrid: .textGridname$, segmentTier, vowelString$
+				.textGrid = read_and_process_TextGrid.textGrid
+				if index_regex(vowelString$, "\w") <= 0
+					vowelString$ = read_and_process_TextGrid.vowelString$
+				endif
+			endif
 		endif
 	endif
 	
@@ -1504,6 +1819,8 @@ procedure read_and_select_audio .type .message1$ .message2$
 		goto RETURN
 	endif
 	
+	.start = -1
+	.end = -1
 	editor: .source
 		.start = Get start of selection
 		.end = Get end of selection
@@ -1518,7 +1835,20 @@ procedure read_and_select_audio .type .message1$ .message2$
 		.duration = Get total duration
 		.tmp = Extract part: 0, .duration, "yes"
 	endif
+	# Handle very low recording levels
+	selectObject: .tmp
+	Scale intensity: 70
 	
+	# Get selection of TextGrid
+	if .textGrid > 0 and .start >= 0 and .end > .start
+		selectObject: .textGrid
+		.tmp1 = Extract part: .start, .end, "no"
+		selectObject: .textGrid
+		Remove
+		.textGrid = .tmp1
+		.tmp1 = -1
+	endif
+
 	# Recordings can be in Stereo, change to mono
 	selectObject: .tmp
 	.numChannels = Get number of channels
@@ -1551,6 +1881,7 @@ procedure read_and_select_audio .type .message1$ .message2$
 	Rename: .filename$
 	
 	label RETURN
+
 endproc
 
 # Set up Canvas
@@ -1565,13 +1896,30 @@ endproc
 
 # Plot the vowels in a sound
 # .plot: Actually plot inside picture window or just calculate paramters
-procedure plot_vowels .plot .sp$ .sound
+procedure plot_vowels .plot .sp$ .sound .vowelTextGrid
 	.startT = 0
 	.dot_Radius = default_Dot_Radius
+
 	#call syllable_nuclei -25 4 0.3 1 .sound
 	#.syllableKernels = syllable_nuclei.textgridid
-	call segment_syllables -25 4 0.3 1 .sound
-	.syllableKernels = segment_syllables.textgridid
+	if .vowelTextGrid <= 0
+		call segment_syllables -25 4 0.3 1 .sound
+		.syllableKernels = segment_syllables.textgridid
+	else
+		selectObject: .vowelTextGrid
+		.syllableKernels = Copy: "Vowels"
+		Insert point tier: 2, "VowelTarget"
+		.numVowels = Get number of intervals: 1
+		for .int to .numVowels
+			.label$ = Get label of interval: 1, .int
+			if .label$ <> ""
+				.start = Get start time of interval: 1, .int
+				.end = Get end time of interval: 1, .int
+				.target = (.start + .end)/2
+				Insert point: 2, .target, "P"
+			endif
+		endfor
+	endif
 	
 	# Calculate the formants
 	selectObject: .sound
@@ -1889,16 +2237,16 @@ procedure plot_vowels .plot .sp$ .sound
 			.dY = 0.05
 		endif
 		.shift = Text width (world coordinates): " ('plotFormantAlgorithm$')"
-		Text special: 1+.shift, "right", 0.07 + .dY, "bottom", "Helvetica", 16, "0", uiMessage$ [uiLanguage$, "AreaTitle"]+" ('plotFormantAlgorithm$')"
-		Text special: 0.9, "right", 0.02 + .dY, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "Area1"]
-		Text special: 0.9, "left", 0.02 + .dY, "bottom", "Helvetica", 14, "0", ": '.area1perc:0'\% "
-		Text special: 0.9, "right", -0.03 + .dY, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "Area2"]
-		Text special: 0.9, "left", -0.03 + .dY, "bottom", "Helvetica", 14, "0", ": '.area2perc:0'\% "
-		Text special: 0.9, "right", -0.08 + .dY, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "AreaN"]
-		Text special: 0.9, "left", -0.08 + .dY, "bottom", "Helvetica", 14, "0", ": '.numVowelIntervals' ('.duration:0' s, '.slope:1' dB)"
+		Text special: 0.95+.shift, "right", 0.07 + .dY, "bottom", "Helvetica", 16, "0", uiMessage$ [uiLanguage$, "AreaTitle"]+" ('plotFormantAlgorithm$')"
+		Text special: 0.8, "right", 0.02 + .dY, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "Area1"]
+		Text special: 0.8, "left", 0.02 + .dY, "bottom", "Helvetica", 14, "0", ": '.area1perc:0'\% "
+		Text special: 0.8, "right", -0.03 + .dY, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "Area2"]
+		Text special: 0.8, "left", -0.03 + .dY, "bottom", "Helvetica", 14, "0", ": '.area2perc:0'\% "
+		Text special: 0.8, "right", -0.08 + .dY, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "AreaN"]
+		Text special: 0.8, "left", -0.08 + .dY, "bottom", "Helvetica", 14, "0", ": '.numVowelIntervals' ('.duration:0' s, '.slope:1' dB)"
 		if vtl_normalization
-			Text special: 0.9, "right", -0.08, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "VTL"]
-			Text special: 0.9, "left", -0.08, "bottom", "Helvetica", 14, "0", ": '.vocalTractLength:1' cm"
+			Text special: 0.8, "right", -0.08, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "VTL"]
+			Text special: 0.8, "left", -0.08, "bottom", "Helvetica", 14, "0", ": '.vocalTractLength:1' cm"
 		endif
 
 		# Relative distance to corners
@@ -1910,7 +2258,7 @@ procedure plot_vowels .plot .sp$ .sound
 		Text special: 0.0, "right", -0.08 + .dY, "bottom", "Helvetica", 14, "0", "/a/:"
 		Text special: 0.16, "right", -0.08 + .dY, "bottom", "Helvetica", 14, "0", " '.relDist_a:0'\%  ('.num_a_Intervals')"
 	endif
-	
+
 	selectObject: .formants, .formantsBandwidth, .syllableKernels
 	Remove
 endproc
@@ -2219,21 +2567,29 @@ procedure get_most_distant_vowels .sp$ .formants .textgrid .f1_o .f2_o .scaling
 endproc
 
 procedure select_vowel_target .sp$ .sound .formants .formantsBandwidth .textgrid
-	.f1_Lowest = phonemes [targetFormantAlgorithm$, .sp$, "i_corner", "F1"]
-	.f1_Highest = (1050/900) * phonemes [targetFormantAlgorithm$, .sp$, "a_corner", "F1"]
-	selectObject: .textgrid
-	.duration = Get total duration
-	.firstTier$ = Get tier name: 1
-	if .firstTier$ <> "Vowel"
-		Insert point tier: 1, "VowelTarget"
-		Insert interval tier: 1, "Vowel"
-	endif
+	
 	.vowelTier = 1
 	.targetTier = 2
 	.peakTier = 3
 	.valleyTier = 4
 	.silencesTier = 5
 	.vuvTier = 6
+	
+	selectObject: .textgrid
+	.duration = Get total duration
+	.firstTier$ = Get tier name: 1
+	if .firstTier$ <> "Vowel"
+		Insert point tier: 1, "VowelTarget"
+		Insert interval tier: 1, "Vowel"
+	else
+	 	.numTiers = Get number of tiers
+		if .numTiers <= 2
+			goto TEXTGRIDREADY
+		endif
+	endif
+	
+	.f1_Lowest = phonemes [targetFormantAlgorithm$, .sp$, "i_corner", "F1"]
+	.f1_Highest = (1050/900) * phonemes [targetFormantAlgorithm$, .sp$, "a_corner", "F1"]
 
 	selectObject: .sound
 	.samplingFrequency = Get sampling frequency
@@ -2544,6 +2900,7 @@ procedure select_vowel_target .sp$ .sound .formants .formantsBandwidth .textgrid
 	selectObject: .voicePP
 	Remove
 	
+	label TEXTGRIDREADY
 endproc
 
 

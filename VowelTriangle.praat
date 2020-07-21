@@ -1301,7 +1301,7 @@ if input_table > 0
 				if labelFile$ <> ""
 					.textGridname$ = labelFile$
 				else
-					.textGridname$ = replace_regex$(.filename$, "(?i\.(wav|mp3|aif[fc]|flac|nist|au))$", ".TextGrid", 0)
+					.textGridname$ = replace_regex$(file$, "(?i\.(wav|mp3|aif[fc]|flac|nist|au))$", ".TextGrid", 0)
 				endif
 				if .textGridname$ <> "" and index_regex(.textGridname$, "[*]{1}")
 					.preFix$ = ""
@@ -2357,6 +2357,13 @@ endproc
 # Convert the frequencies to coordinates
 procedure vowel2point .scaling .targetFormantAlgorithm$ .sp$ .f1 .f2
 	.scaleSt = 12*log2(.scaling)
+	
+	if .f1=undefined or .f2=undefined or .f1 <= 0 or .f2 <= 0
+		.x = -1
+		.y = -1
+		
+		goto ENDOFVowel2point
+	endif
 
 	.spt1 = 12*log2(.f1)
 	.spt2 = 12*log2(.f2)
@@ -2388,6 +2395,8 @@ procedure vowel2point .scaling .targetFormantAlgorithm$ .sp$ .f1 .f2
 	# Reflect y-axis and make i_corner as (0, 1)
 	.y = 1 - .y
 	.yp = 1 - .yp
+	
+	label ENDOFVowel2point
 endproc
 
 # Stop the progam

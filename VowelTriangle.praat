@@ -1390,7 +1390,7 @@ if input_table > 0
 			
 			# Get TextGrid if needed
 			if segmentTier > 0
-				.textGridname$ = replace_regex$(.filename$, "(?i\.wav)$", ".TextGrid", 0)
+				.textGridname$ = replace_regex$(file$, "(?i\.wav)$", ".TextGrid", 0)
 				if fileReadable(.textGridname$)
 					@read_and_process_TextGrid: .textGridname$, segmentTier, vowelString$
 					.textGrid = read_and_process_TextGrid.textGrid

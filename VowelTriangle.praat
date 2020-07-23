@@ -1183,7 +1183,7 @@ if input_table > 0
 		endif
 		file$ = Get value: .r, "File"
 		tmp$ = Get value: .r, "Language"
-		if index(tmp$, "[A-Z]{2}")
+		if index_regex(tmp$, "[A-Z]{2}")
 			uiLanguage$ = tmp$
 			vowelString$ = vowels$ [uiLanguage$]
 		endif

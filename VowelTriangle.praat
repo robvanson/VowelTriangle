@@ -36,6 +36,46 @@ vowelString$ = ""
 segmentTier = 0
 labelFile$ = ""
 
+# 
+#######################################################################
+# 
+# Non-inrteractive (batch) use
+# 
+# Enter valid file path in input_file$ to run non-interactive (batch)
+#
+# The input table should have tab (.tsv) or semicolon (csv) separated 
+# columns labeled: 
+# Title, Speaker, File, Language, Log, Plotfile
+# An example would be a semicolon separated list:
+# F40L2VT2;F;IFAcorpus/chunks/F40L/F40L2VT1.aifc;NL;target/results.tsv;
+# target/F40L2VT2.png
+# 
+# All files are used AS IS, and nothing is drawn unless a "Plotfile" 
+# is entered.
+#
+# Optionally, columns named "VowelTier", "Vowels", and "LabelFile" 
+# can be added containing the values for the use of existing 
+# segmentations. If the sound input has a wildcard, the labelfile input 
+# should have it too and result in a list of label files that has the 
+# same order as those of the corresponding sound files. If a tier number
+# is entered for the phoneme tier, and no Label filename, it is assumed
+# label files have the same name as the corresponding audio file, and 
+# the extension ".TextGrid". If no vowel symbol list is given, the 
+# default SAMPA list for the laguage is used (Pinyin for ZH).
+#
+#######################################################################
+#
+#input_file$ = "concatlist.tsv"
+#input_file$ = "chunkslist.tsv"
+input_file$ = ""
+
+# 
+#######################################################################
+# 
+# Retrieve last saved settings
+# 
+#######################################################################
+#
 .defaultLanguage = 1
 .preferencesLanguageFile$ = preferencesDirectory$+"/VowelTriangle.prefs"
 .preferencesLang$ = ""
@@ -137,28 +177,39 @@ vtl_normalization = 0
 
 default_Dot_Radius = 0.01
 dot_Radius_Cutoff = 300
+
 # 
 #######################################################################
 # 
-# Enter valid file path in input_file$ to run non-interactive
+# Read input file for non-interactive (batch) use 
 #
-#input_file$ = "concatlist.tsv"
-#input_file$ = "chunkslist.tsv"
-input_file$ = ""
 
 input_table = -1
 .continue = 1
+
 #
-# The input table should have tab separated columns labeled: 
+# 
+#######################################################################
+#
+# The input table should have tab (.tsv) or semicolon (csv) separated 
+# columns labeled: 
 # Title, Speaker, File, Language, Log, Plotfile
-# An example would be a tab separated list:
-# F40L2VT2 F IFAcorpus/chunks/F40L/F40L2VT1.aifc NL target/results.tsv target/F40L2VT2.png
-# All files are used AS IS, and nothing is drawn unless a "Plotfile" is entered
+# An example would be a semicolon separated list:
+# F40L2VT2;F;IFAcorpus/chunks/F40L/F40L2VT1.aifc;NL;target/results.tsv;
+# target/F40L2VT2.png
+# 
+# All files are used AS IS, and nothing is drawn unless a "Plotfile" 
+# is entered.
 #
-# Optionally, columns named "VowelTier", "Vowels", and "LabelFile" can be added containing 
-# the values for the use of existing segmentations. If the sound input has a wildcard, 
-# the labelfile input should have it too and result in a list of label files that has
-# the same order as those of the corresponding sound file.
+# Optionally, columns named "VowelTier", "Vowels", and "LabelFile" 
+# can be added containing the values for the use of existing 
+# segmentations. If the sound input has a wildcard, the labelfile input 
+# should have it too and result in a list of label files that has the 
+# same order as those of the corresponding sound files. If a tier number
+# is entered for the phoneme tier, and no Label filename, it is assumed
+# label files have the same name as the corresponding audio file, and 
+# the extension ".TextGrid". If no vowel symbol list is given, the 
+# default SAMPA list for the laguage is used (Pinyin for ZH).
 #
 if input_file$ <> "" and fileReadable(input_file$) and index_regex(input_file$, "(?i\.(tsv|Table|csv))")
 	if index_regex(input_file$, "(?i\.csv)$")
@@ -188,8 +239,11 @@ endif
 .samplingFrequency = 44100
 .recordingTime = 4
 
-# Define Language
-# Add new targets if necessary
+# 
+#######################################################################
+#
+# Define Language dependend aspects, e.g., all messages
+# 
 
 # Select algorithm for calculating formants
 # Alternatives: "SL", "Burg", "Robust", or "KeepAll"
@@ -219,8 +273,16 @@ color$ ["i"] = "Green"
 color$ ["u"] = "Blue"
 color$ ["@"] = "{0.8,0.8,0.8}"
 
+#######################################################################
+#
 # UI messages and texts
+#
+#######################################################################
+#
 
+
+#######################################################################
+#
 # English
 uiMessage$ ["EN", "PauseRecord"] = "Record continuous speech"
 uiMessage$ ["EN", "Record1"] = "Record the ##continuous speech#"
@@ -275,6 +337,8 @@ uiMessage$ ["EN", "Vowel Tier"] = "Vowel tier"
 vowels$ ["EN"] = " @ { } A E Q O O: o i I u U 6 V i: O: u: aU OI oU eI aI "
 
 
+#######################################################################
+#
 # Dutch
 uiMessage$ ["NL", "PauseRecord"] 	= "Neem lopende spraak op"
 uiMessage$ ["NL", "Record1"] 		= "Neem de ##lopende spraak# op"
@@ -328,6 +392,8 @@ uiMessage$ ["NL", "Vowel Tier"]     = "Klinker tier"
 # SAMPA vowels
 vowels$ ["NL"] = " I E A O Y @ i y u a: e: 2: o: Ei 9y Au a:i o:i ui iu yu e:u E: 9: O: "
 
+#######################################################################
+#
 # German
 uiMessage$ ["DE", "PauseRecord"] 	= "Zeichne laufende Sprache auf"
 uiMessage$ ["DE", "Record1"] 		= "Die ##laufende Sprache# aufzeichnen"
@@ -381,6 +447,8 @@ uiMessage$ ["DE", "Vowel Tier"]     = "Vokale tier"
 # SAMPA vowels
 vowels$ ["DE"] = " I E a O U Y 9: i: e: E: a: o: u: y: 2:  aI aU OY: aI aU OY: 6 i:6 I6 y:6 Y6 e:6 E6 E:6 2:6 96 a:6 a6 u:6 U6 o:6 O6 "
 
+#######################################################################
+#
 # French
 uiMessage$ ["FR", "PauseRecord"]	= "Enregistrer un discours continu"
 uiMessage$ ["FR", "Record1"]		= "Enregistrer le ##discours continu#"
@@ -434,6 +502,8 @@ uiMessage$ ["FR", "Vowel Tier"]     = "Tier voyelle"
 # SAMPA vowels
 vowels$ ["FR"] = " i e E a A O o u y 2 9 @ e~ a~ o~ 9~ E/ A/ &/ O/ U~/ "
 
+#######################################################################
+#
 # Chinese
 uiMessage$ ["ZH", "PauseRecord"] 	= "录制连续语音"
 uiMessage$ ["ZH", "Record1"] 		= "录制##连续语音#"
@@ -487,6 +557,8 @@ uiMessage$ ["ZH", "Vowel Tier"]     = "元音层"
 # Pinyin vowels
 vowels$ ["ZH"] = " a o e i u v ai ei ui ao ou iu ie ue iao iou uai uei er "
 
+#######################################################################
+#
 # Spanish
 uiMessage$ ["ES", "PauseRecord"]	= "Grabar un discurso continuo"
 uiMessage$ ["ES", "Record1"]		= "Guardar ##discurso continuo#"
@@ -540,6 +612,8 @@ uiMessage$ ["ES", "Vowel Tier"]     = "Tier vocal"
 # SAMPA vowels
 vowels$ ["ES"] = " i I e E { y Y 2 9 1 @ 6 3 a } 8 & M 7 V A u U o O Q "
 
+#######################################################################
+#
 # Portugese
 uiMessage$ ["PT", "PauseRecord"]	= "Gravar um discurso contínuo"
 uiMessage$ ["PT", "Record1"]		= "Salvar ##discurso contínua#"
@@ -593,6 +667,8 @@ uiMessage$ ["PT", "Vowel Tier"]     = "Tier de vogal"
 # SAMPA vowels
 vowels$ ["PT"] = " i e E a 6 O o u @ i~ e~ 6~ o~ u~ aw iw ew Ew ow aj ej Ej Oj oj 6~j~ e~j~ o~j~ u~j~ "
 
+#######################################################################
+#
 # Italian
 uiMessage$ ["IT", "PauseRecord"]	= "Registra un discorso continuo"
 uiMessage$ ["IT", "Record1"]		= "Salva ##discorso continuo#"
@@ -710,6 +786,8 @@ vowels$ ["IT"] = " i e E a O o u: "
 ##############################################################
 
 
+#######################################################################
+#
 # Formant values according to 
 # IFA corpus averages from FPA isolated vowels
 
@@ -1435,7 +1513,6 @@ if input_table > 0
 	exitScript: uiMessage$ [uiLanguage$, "Done"]
 endif
 
-
 ###############################################
 #
 # Start program: Interactive
@@ -1682,6 +1759,14 @@ while .continue
 	
 	label NEXTROUND
 endwhile
+
+#######################################################################
+#
+# Procedure definitions
+#
+#######################################################################
+#
+
 
 #####################################################################
 # 

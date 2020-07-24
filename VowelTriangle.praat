@@ -1603,8 +1603,7 @@ while .continue
 			Read from file: "ManPages/VowelTriangle.man"
 		else
 			beginPause: "See manual"
-			comment: "https://robvanson.github.io/"
-			comment: "VowelTriangle"
+			comment: "https://robvanson.github.io/VowelTriangle"
 			helpClicked = endPause: "Continue", 1
 		endif
 		goto START

@@ -328,6 +328,7 @@ uiMessage$ ["EN", "Done"] = "Done"
 uiMessage$ ["EN", "Stop"] = "Stop"
 uiMessage$ ["EN", "Open"] = "Open"
 uiMessage$ ["EN", "Record"] = "Record"
+uiMessage$ ["EN", "Help"] = "Help"
 uiMessage$ ["EN", "untitled"] = "untitled"
 uiMessage$ ["EN", "Title"] 			= "Title"
 uiMessage$ ["EN", "Vowels"] = "Vowels"
@@ -384,6 +385,7 @@ uiMessage$ ["NL", "Done"] 			= "Klaar"
 uiMessage$ ["NL", "Stop"] 			= "Stop"
 uiMessage$ ["NL", "Open"] 			= "Open"
 uiMessage$ ["NL", "Record"] 		= "Opnemen"
+uiMessage$ ["NL", "Help"]           = "Help"
 uiMessage$ ["NL", "untitled"] 		= "zonder titel"
 uiMessage$ ["NL", "Title"] 			= "Titel"
 uiMessage$ ["NL", "Vowels"]         = "Klinkers"
@@ -439,6 +441,7 @@ uiMessage$ ["DE", "Done"] 			= "Fertig"
 uiMessage$ ["DE", "Stop"] 			= "Halt"
 uiMessage$ ["DE", "Open"] 			= "Öffnen"
 uiMessage$ ["DE", "Record"] 		= "Aufzeichnen"
+uiMessage$ ["DE", "Help"]           = "Help"
 uiMessage$ ["DE", "untitled"] 		= "ohne Titel"
 uiMessage$ ["DE", "Title"] 			= "Titel"
 uiMessage$ ["DE", "Vowels"]         = "Vokale"
@@ -494,6 +497,7 @@ uiMessage$ ["FR", "Done"]			= "Terminé"
 uiMessage$ ["FR", "Stop"]			= "Arrêt"
 uiMessage$ ["FR", "Open"]			= "Ouvert"
 uiMessage$ ["FR", "Record"]			= "Enregistrer"
+uiMessage$ ["FR", "Help"]           = "Help"
 uiMessage$ ["FR", "untitled"] 		= "sans titre"
 uiMessage$ ["FR", "Title"] 			= "Titre"
 uiMessage$ ["FR", "Vowels"]         = "Voyelles"
@@ -549,6 +553,7 @@ uiMessage$ ["ZH", "Done"] 			= "完成"
 uiMessage$ ["ZH", "Stop"] 			= "结束"
 uiMessage$ ["ZH", "Open"] 			= "从文件夹打开"
 uiMessage$ ["ZH", "Record"] 		= "录音"
+uiMessage$ ["ZH", "Help"]           = "Help"
 uiMessage$ ["ZH", "untitled"] 		= "无标题"
 uiMessage$ ["ZH", "Title"] 			= "标题"
 uiMessage$ ["ZH", "Vowels"]         = "元音"
@@ -604,6 +609,7 @@ uiMessage$ ["ES", "Done"]			= "Terminado"
 uiMessage$ ["ES", "Stop"]			= "Detener"
 uiMessage$ ["ES", "Open"]			= "Abrir"
 uiMessage$ ["ES", "Record"]			= "Grabar"
+uiMessage$ ["ES", "Help"]           = "Help"
 uiMessage$ ["ES", "untitled"] 		= "no tiene título"
 uiMessage$ ["ES", "Title"] 			= "Título"
 uiMessage$ ["ES", "Vowels"]         = "Vocales"
@@ -659,6 +665,7 @@ uiMessage$ ["PT", "Done"]			= "Terminado"
 uiMessage$ ["PT", "Stop"]			= "Pare"
 uiMessage$ ["PT", "Open"]			= "Abrir"
 uiMessage$ ["PT", "Record"]			= "Gravar"
+uiMessage$ ["PT", "Help"]           = "Help"
 uiMessage$ ["PT", "untitled"] 		= "sem título"
 uiMessage$ ["PT", "Title"] 			= "Título"
 uiMessage$ ["PT", "Vowels"]         = "Vogais"
@@ -714,6 +721,7 @@ uiMessage$ ["IT", "Done"]			= "Finito"
 uiMessage$ ["IT", "Stop"]			= "Fermare"
 uiMessage$ ["IT", "Open"]			= "Apri"
 uiMessage$ ["IT", "Record"]			= "Registra"
+uiMessage$ ["IT", "Help"]           = "Help"
 uiMessage$ ["IT", "untitled"] 		= "senza titolo"
 uiMessage$ ["IT", "Title"] 			= "Titolo"
 uiMessage$ ["IT", "Vowels"]         = "Vocali"
@@ -1549,6 +1557,7 @@ while .continue
 	endif
 
 	.recording = 0
+	label START
 	beginPause: "Select a recording"
 		sentence: uiMessage$ [uiLanguage$, "Title"], uiMessage$ [uiLanguage$, "untitled"]
 		comment: uiMessage$ [uiLanguage$, "CommentOpen"]
@@ -1577,7 +1586,8 @@ while .continue
 		comment: uiMessage$ [uiLanguage$, "CommentLabel"]
 		sentence: uiMessage$ [uiLanguage$, "Vowel Tier"], segmentValue$
 		sentence: uiMessage$ [uiLanguage$, "Vowels"], vowelsValue$
-	.clicked = endPause: (uiMessage$ [uiLanguage$, "Stop"]), (uiMessage$ [uiLanguage$, "Record"]), (uiMessage$ [uiLanguage$, "Open"]), 3, 1	
+	.clicked = endPause: (uiMessage$ [uiLanguage$, "Stop"]), (uiMessage$ [uiLanguage$, "Help"]), (uiMessage$ [uiLanguage$, "Record"]), (uiMessage$ [uiLanguage$, "Open"]), 4, 1	
+
 	if .clicked = 1
 		.continue = 0
 		.message$ = uiMessage$ [uiLanguage$, "Nothing to do"]
@@ -1585,7 +1595,21 @@ while .continue
 	elsif .clicked = 2
 		.recording = 1
 	endif
-
+	
+	if .clicked = 2
+		if fileReadable("VowelTriangle.man") 
+			Read from file: "VowelTriangle.man"
+		elsif fileReadable("ManPages/VowelTriangle.man")
+			Read from file: "ManPages/VowelTriangle.man"
+		else
+			beginPause: "See manual"
+			comment: "https://robvanson.github.io/"
+			comment: "VowelTriangle"
+			helpClicked = endPause: "Continue", 1
+		endif
+		goto START
+	endif
+	
 	title$ = '.titleVar$'$
 	if title$ = uiMessage$ [uiLanguage$, "untitled"]
 		title$ = "untitled"
@@ -1775,6 +1799,7 @@ endwhile
 procedure read_and_process_TextGrid .textGridname$ .tier .vowelString$
 	.tmpTextGrid = Read from file: .textGridname$
 	.numTiers = Get number of tiers
+	.textGrid = -1
 	if .tier <= 0 or .numTiers < .tier
 		goto ENDOFREADANDPROCESSTEXTGRID
 	endif

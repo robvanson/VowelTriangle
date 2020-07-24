@@ -1,0 +1,46 @@
+ManPagesTextFile
+"VowelTriangle" "Rob van Son" 20200824 0
+<intro> "A %%Praat% script to calculate the Vowel Space Area from labelled and unlabelled running speech [1]."
+
+
+<entry> "Running the script interactively"
+<normal> "When running the script, a form will appear with the following fields (English labels):"
+<list_item> "\bu %%Title%%: The title of the Vowel Triangle plot. This will also be the name of the plot figure file."
+<list_item> "\bu %%Speaker is a%%: Indicate whether the speaker is a %%Female% or %%Male%. This is used to scale the vowel triangle. Select %%Automatic% if the scaling should be done automatically, using the estimated vocal tract length [2]. Automatic scaling works best when there is ample speech, e.g., more than 300 seconds. "
+<list_item> "\bu %%Language%%: Select the language of the interface and plot. "
+<list_item> "\bu %%Log%%: Store all values also in a tab-separated-values text file. "
+<list_item> "\bu %%Formant%%: Select the method to calculate the formant values. "
+<list_item> "\bu %%Vowel tier%%: If a TextGrid file with vowel segmentation should be used to select the vowels, enter the number of the tier with the vowel boundaries. "
+<list_item> "\bu %%Vowels%%: If a TextGrid file with vowel segmentation should be used to select the vowels, list the vowel labels. If this field is empty, the default SAMPA [3] vowel symbols will be used for the interface language. For Chinese, the Pinyin vowel list is used. "
+<list_item> "\bu %%Vowels%%: If a TextGrid file with vowel segmentation should be used to select the vowels, list the vowel labels, separated by a %%space% character "" "". If this field is empty, the default SAMPA [3] vowel symbols will be used for the interface language. For Chinese, the Pinyin vowel list is used. "
+
+<normal> "Buttons:" 
+<list_item> "\bu %%Revert%: Erase the form."
+<list_item> "\bu %%Stop%: Abort the script."
+<list_item> "\bu %%Help%: Open this manual instead of running the script."
+<list_item> "\bu %%Record%: Open the recording window to directly record speech. Follow the instructions to continue. "
+<list_item> "\bu %%Continue%: Run the script with the values given."
+
+<normal> "After the script starts, if the %%Record% option has not been chosen, a window will open to select a sound file. If a tier number has been entered in the %%Vowel tier% field, a window will open to select the TextGrid file corresponding to the audio file. If the is a TextGrid file with the same name as the audio file, with extension %%TextGrid%, this file will be selected and used automatically. If the tiernumber given does not exist in this file, no label file is used. "
+
+<normal> "After the vowel triangle has been plotted, a window will open to enter the file name and select the folder to save the plot. If cancel is chosen, the plot is not saved. "
+
+<entry> "Running the script non-interactively"
+<normal> "It is possible to run %%VowelTriangle.praat% using a list of audio and TextGrid files as the input. To do this, enter the name of the list in the script in the %%input_file\$ = ""<file path>""% (search for %%input_file\$%). "
+<normal> "The input table should have tab (.tsv) or semicolon (.csv) separated columns labeled: "
+<normal> "%%Title%, %%Speaker%, %%File%, %%Language%, %%Log%, %%Plotfile% "
+<normal> "An example would be a semicolon separated list: "
+<normal> "%%F40L2VT2;F;IFAcorpus/chunks/F40L/F40L2VT1.aifc;NL;target/results.tsv;target/F40L2VT2.png%"
+
+<normal> "All files are used ##AS IS#, and nothing is drawn unless a %%Plotfile% is entered. "
+
+<normal> "Optionally, columns named %%VowelTier%, %%Vowels%, and %%LabelFile% can be added containing the values for the use of existing segmentations. If the sound input has a wildcard (*), the labelfile input should have it too and result in a list of label files that has the same order as those of the corresponding sound files. If a tier numberis entered for the phoneme tier, and no Label filename, it is assumed label files have the same name as the corresponding audio file, and the extension %%.TextGrid%. If no vowel symbol list is given, the default SAMPA [3] list for the interface laguage is used (Pinyin for Chinese). "
+
+
+<entry> "%%References%"
+<normal> "[1] van Son, R.J.J.H., Middag, C., & Demuynck, K (2018). %%Vowel space as a tool to evaluate articulation problems%, Proceedings of INTERSPEECH 2018, Hyderabad, India, 357-361"
+<normal> "[2] Lammert AC, Narayanan SS. %%On Short-Time Estimation of Vocal Tract Length from Formant Frequencies%. PLOS ONE. 2015 Jul 15;10(7):e0132193. "
+<normal> "The vocal tract length (VTL) is calculated as: VTL = 100 \.c 352.95 / (4 \.c \fi) cm. Note that a different formant tracking algorithm is used in %%Pseudonymize Speech% than was used in [2] and the estimated \fi values here are used only as scale factors. They should not be interpreted as corresponding to ""real"" VTL values. "
+
+<normal> "[3] ##SAMPA#. Charts for languages: %%https://www.phon.ucl.ac.uk/home/sampa/index.html%"
+

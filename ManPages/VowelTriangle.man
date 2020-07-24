@@ -36,8 +36,6 @@ ManPagesTextFile
 
 <normal> "Optionally, columns named %%VowelTier%, %%Vowels%, and %%LabelFile% can be added containing the values for the use of existing segmentations. If the sound input has a wildcard (*), the labelfile input should have it too and result in a list of label files that has the same order as those of the corresponding sound files. If a tier numberis entered for the phoneme tier, and no Label filename, it is assumed label files have the same name as the corresponding audio file, and the extension %%.TextGrid%. If no vowel symbol list is given, the default SAMPA [3] list for the interface laguage is used (Pinyin for Chinese). "
 
-<normal> "GitHub page: https://github.com/robvanson/VowelTriangle "
-
 <entry> "%%References%"
 <normal> "GitHub page: https://github.com/robvanson/VowelTriangle "
 

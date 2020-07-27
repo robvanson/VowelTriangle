@@ -26,15 +26,18 @@ ManPagesTextFile
 <normal> "After the vowel triangle has been plotted, a window will open to enter the file name and select the folder to save the plot. If cancel is chosen, the plot is not saved. "
 
 <entry> "Running the script non-interactively"
-<normal> "It is possible to run %%VowelTriangle.praat% using a list of audio and TextGrid files as the input. To do this, enter the name of the list in the script in the %%input_file\$ = ""<file path>""% (search for %%input_file\$%). "
-<normal> "The input table should have tab (.tsv) or semicolon (.csv) separated columns labeled: "
-<normal> "%%Title%, %%Speaker%, %%File%, %%Language%, %%Log%, %%Plotfile% "
-<normal> "An example would be a semicolon separated list: "
-<normal> "%%F40L2VT2;F;IFAcorpus/chunks/F40L/F40L2VT1.aifc;NL;target/results.tsv;target/F40L2VT2.png%"
+<normal> "It is possible to run %%VowelTriangle.praat% using a control list of audio and TextGrid files as the input^\SS. To do this, enter %%file://<path to the control table>% in the %%Title:% field. The path can be relative to the %%VowelTriangle.praat% script, or it can be an absolute path, starting with /, \bs, or %%<Drive letter>:%\bs (<Drive letter> one of C, D, ...). The control table should have the %%.tsv% or %%.csv% extension. If no file path is given, i.e., after entering just %%file://%, a window will pop-up to ask you to select a control table. "
+<normal> "\bu The control table should have tab (.tsv) or semicolon (.csv) separated columns labelled: "
+<definition> "%%Title%;%%Speaker%;%%File%;%%Language%;%%Log%;%%Plotfile% "
+<normal> "\bu An example of an entry line in the table would be a semicolon separated list: "
+<definition> "%%F40L2VT2;F;IFAcorpus/chunks/F40L/F40L2VT1.aifc;NL;target/results.tsv;target/F40L2VT2.png%"
+<normal> "\bu All file paths in the control table are relative to the position of the control table, unless they start with /, \bs, %%~%, or %%<Drive letter>:%."
 
 <normal> "All files are used ##AS IS#, and nothing is drawn unless a %%Plotfile% is entered. "
 
-<normal> "Optionally, columns named %%VowelTier%, %%Vowels%, and %%LabelFile% can be added containing the values for the use of existing segmentations. If the sound input has a wildcard (*), the labelfile input should have it too and result in a list of label files that has the same order as those of the corresponding sound files. If a tier numberis entered for the phoneme tier, and no Label filename, it is assumed label files have the same name as the corresponding audio file, and the extension %%.TextGrid%. If no vowel symbol list is given, the default SAMPA [3] list for the interface laguage is used (Pinyin for Chinese). "
+<normal> "Optionally, columns named %%VowelTier%, %%Vowels%, and %%LabelFile% can be added containing the values for the use of existing segmentations. If the sound input has a wildcard (*), the labelfile input should have it too and result in a list of label files that has the same order as those of the corresponding sound files. If a tier number is entered for the phoneme tier, and no Label filename, it is assumed label files have the same name as the corresponding audio file, and the extension %%.TextGrid%. If no vowel symbol list is given, the default SAMPA [3] list for the interface laguage is used (Pinyin for Chinese). "
+
+<normal> "^\SSAnother way to run %%VowelTriangle.praat% non-interactively is to enter the name of the list in the %%VowelTriangle.praat% script in the line: %%input_file\$ = ""<file path>""% (search for %%input_file\$%). From then on, this version of the script will just run this single input file. "
 
 <entry> "%%References%"
 <normal> "GitHub page: https://github.com/robvanson/VowelTriangle "

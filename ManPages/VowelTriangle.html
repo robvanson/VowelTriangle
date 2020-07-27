@@ -49,23 +49,31 @@ After the vowel triangle has been plotted, a window will open to enter the file 
 <h3>
 Running the script non-interactively</h3>
 <p>
-It is possible to run <i>VowelTriangle.praat</i> using a list of audio and TextGrid files as the input. To do this, enter the name of the list in the script in the <i>input_file$= "&lt;file path&gt;"</i> (search for <i>input_file ). </i></p>
+It is possible to run <i>VowelTriangle.praat</i> using a control list of audio and TextGrid files as the input<sup>&#167;</sup>. To do this, enter <i>file://&lt;path to the control table&gt;</i> in the <i>Title:</i> field. The path can be relative to the <i>VowelTriangle.praat</i> script, or it can be an absolute path, starting with /, \, or <i>&lt;Drive letter&gt;:</i>\ (&lt;Drive letter&gt; one of C, D, ...). The control table should have the <i>.tsv</i> or <i>.csv</i> extension. If no file path is given, i.e., after entering just <i>file://</i>, a window will pop-up to ask you to select a control table. </p>
 <p>
-The input table should have tab (.tsv) or semicolon (.csv) separated columns labeled: </p>
+&#8226; The control table should have tab (.tsv) or semicolon (.csv) separated columns labelled: </p>
+<dl>
+<dd>
+<i>Title</i>;<i>Speaker</i>;<i>File</i>;<i>Language</i>;<i>Log</i>;<i>Plotfile</i> 
+</dl>
 <p>
-<i>Title</i>, <i>Speaker</i>, <i>File</i>, <i>Language</i>, <i>Log</i>, <i>Plotfile</i> </p>
+&#8226; An example of an entry line in the table would be a semicolon separated list: </p>
+<dl>
+<dd>
+<i>F40L2VT2;F;IFAcorpus/chunks/F40L/F40L2VT1.aifc;NL;target/results.tsv;target/F40L2VT2.png</i>
+</dl>
 <p>
-An example would be a semicolon separated list: </p>
-<p>
-<i>F40L2VT2;F;IFAcorpus/chunks/F40L/F40L2VT1.aifc;NL;target/results.tsv;target/F40L2VT2.png</i></p>
+&#8226; All file paths in the control table are relative to the position of the control table, unless they start with /, \, <i>~</i>, or <i>&lt;Drive letter&gt;:</i>.</p>
 <p>
 All files are used <b>AS IS</b>, and nothing is drawn unless a <i>Plotfile</i> is entered. </p>
 <p>
-Optionally, columns named <i>VowelTier</i>, <i>Vowels</i>, and <i>LabelFile</i> can be added containing the values for the use of existing segmentations. If the sound input has a wildcard (*), the labelfile input should have it too and result in a list of label files that has the same order as those of the corresponding sound files. If a tier numberis entered for the phoneme tier, and no Label filename, it is assumed label files have the same name as the corresponding audio file, and the extension <i>.TextGrid</i>. If no vowel symbol list is given, the default SAMPA [3] list for the interface laguage is used (Pinyin for Chinese). </p>
+Optionally, columns named <i>VowelTier</i>, <i>Vowels</i>, and <i>LabelFile</i> can be added containing the values for the use of existing segmentations. If the sound input has a wildcard (*), the labelfile input should have it too and result in a list of label files that has the same order as those of the corresponding sound files. If a tier number is entered for the phoneme tier, and no Label filename, it is assumed label files have the same name as the corresponding audio file, and the extension <i>.TextGrid</i>. If no vowel symbol list is given, the default SAMPA [3] list for the interface laguage is used (Pinyin for Chinese). </p>
+<p>
+<sup>&#167;</sup>Another way to run <i>VowelTriangle.praat</i> non-interactively is to enter the name of the list in the <i>VowelTriangle.praat</i> script in the line: <i>input_file$= "&lt;file path&gt;"</i> (search for <i>input_file ). From then on, this version of the script will just run this single input file. </i></p>
 <h3>
 <i>References</i></h3>
 <p>
-GitHub page: <a href="https://github.com/robvanson/VowelTriangle">https://github.com/robvanson/VowelTriangle</a> </p>
+GitHub page: https://github.com/robvanson/VowelTriangle </p>
 <p>
 [1] van Son, R.J.J.H., Middag, C., &amp; Demuynck, K (2018). <i>Vowel space as a tool to evaluate articulation problems</i>, Proceedings of INTERSPEECH 2018, Hyderabad, India, 357-361</p>
 <p>

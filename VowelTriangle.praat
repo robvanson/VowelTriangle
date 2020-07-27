@@ -69,6 +69,8 @@ labelFile$ = ""
 #input_file$ = "chunkslist.tsv"
 input_file$ = ""
 
+input_prefix$ = ""
+
 # 
 #######################################################################
 # 
@@ -184,6 +186,8 @@ dot_Radius_Cutoff = 300
 # Read input file for non-interactive (batch) use 
 #
 
+label REENTERINPUTFILE
+
 input_table = -1
 .continue = 1
 
@@ -231,7 +235,10 @@ if input_file$ <> "" and fileReadable(input_file$) and index_regex(input_file$, 
 		for .r to .numRows
 			Set string value: .r, "Plotfile", "-"
 		endfor
-	endif 
+	endif
+	# Set new shell (default) directory
+	defaultDirectory$ = replace_regex$(input_file$, "[/\\][^/\\]*$", "", 0)
+	input_prefix$ = defaultDirectory$ + "/"
 endif
 
 # When using a microphone:
@@ -1268,6 +1275,9 @@ if input_table > 0
 			vtl_normalization = 0
 		endif
 		file$ = Get value: .r, "File"
+		if index_regex(file$, "^([/\\~]|[A-Z]:)") <= 0
+			file$ = input_prefix$ + file$
+		endif
 		tmp$ = Get value: .r, "Language"
 		if index_regex(tmp$, "[A-Z]{2}")
 			uiLanguage$ = tmp$
@@ -1276,6 +1286,9 @@ if input_table > 0
 		.log$ = Get value: .r, "Log"
 		if index_regex(.log$, "\w")
 			log = 1
+			if index_regex(.log$, "^([/\\~]|[A-Z]:)") <= 0
+				.log$ = input_prefix$ + .log$
+			endif
 			output_table$ = .log$
 			if not fileReadable(output_table$)
 				writeFileLine: output_table$, "Name", tab$, "Speaker", tab$, "N", tab$, "Area2", tab$, "Area1", tab$, "i.dist", tab$, "u.dist", tab$, "a.dist", tab$, "VTL", tab$, "Duration", tab$, "Intensity", tab$, "Slope", tab$, "Formant"
@@ -1291,6 +1304,9 @@ if input_table > 0
 			.plotFile$ = ""
 		else
 			.plotVowels = 1
+			if index_regex(.plotFile$, "^([/\\~]|[A-Z]:)") <= 0
+				.plotFile$ = input_prefix$ + .plotFile$
+			endif
 		endif
 		
 		# Get the formant algorithm, if given
@@ -1320,6 +1336,9 @@ if input_table > 0
 			.tmp$ = Get value: .r, "LabelFile"
 			if tmp$ <> "" and index_regex(.tmp$, "[^-.?]")
 				labelFile$ = .tmp$
+				if index_regex(labelFile$, "^([/\\~]|[A-Z]:)") <= 0
+					labelFile$ = input_prefix$ + labelFile$
+				endif
 			endif
 		endif
 
@@ -1612,6 +1631,13 @@ while .continue
 	title$ = '.titleVar$'$
 	if title$ = uiMessage$ [uiLanguage$, "untitled"]
 		title$ = "untitled"
+	elsif index_regex(title$, "(?ifile://)")
+		# Run non-interactive
+		input_file$ = replace_regex$(title$, "^(?ifile://)", "", 0)
+		if input_file$ = ""
+			input_file$ = chooseReadFile$: "Select the control file"
+		endif
+		goto REENTERINPUTFILE
 	endif
 	
 	# Magic incantations to extract the values

@@ -81,7 +81,7 @@ input_prefix$ = ""
 .defaultLanguage = 1
 .preferencesLanguageFile$ = preferencesDirectory$+"/VowelTriangle.prefs"
 .preferencesLang$ = ""
-.formant_default = 1
+.formant_default = 3
 if fileReadable(.preferencesLanguageFile$)
 	.preferences$ = readFile$(.preferencesLanguageFile$)
 	if index(.preferences$, "Language=") > 0

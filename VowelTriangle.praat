@@ -1611,7 +1611,7 @@ while .continue
 		.continue = 0
 		.message$ = uiMessage$ [uiLanguage$, "Nothing to do"]
 		@exitVowelTriangle: .message$
-	elsif .clicked = 2
+	elsif .clicked = 3
 		.recording = 1
 	endif
 	

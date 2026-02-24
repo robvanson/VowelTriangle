@@ -39,9 +39,10 @@ labelFile$ = ""
 # 
 #######################################################################
 # 
-# Non-inrteractive (batch) use
+# Non-interactive (batch) use
 # 
 # Enter valid file path in input_file$ to run non-interactive (batch)
+# or select a .csv or .tsv file when using "Open"
 #
 # The input table should have tab (.tsv) or semicolon (csv) separated 
 # columns labeled: 
@@ -65,8 +66,8 @@ labelFile$ = ""
 #
 #######################################################################
 #
+# Add file path to start batch processing
 #input_file$ = "concatlist.tsv"
-#input_file$ = "chunkslist.tsv"
 input_file$ = ""
 
 input_prefix$ = ""
@@ -81,7 +82,7 @@ input_prefix$ = ""
 .defaultLanguage = 1
 .preferencesLanguageFile$ = preferencesDirectory$+"/VowelTriangle.prefs"
 .preferencesLang$ = ""
-.formant_default = 3
+.formant_default = 2
 if fileReadable(.preferencesLanguageFile$)
 	.preferences$ = readFile$(.preferencesLanguageFile$)
 	if index(.preferences$, "Language=") > 0
@@ -215,6 +216,8 @@ input_table = -1
 # the extension ".TextGrid". If no vowel symbol list is given, the 
 # default SAMPA list for the laguage is used (Pinyin for ZH).
 #
+label NONINTERACTIVEINPUT
+
 if input_file$ <> "" and fileReadable(input_file$) and index_regex(input_file$, "(?i\.(tsv|Table|csv))")
 	if index_regex(input_file$, "(?i\.csv)$")
 		input_table = Read Table from semicolon-separated file: input_file$
@@ -1344,7 +1347,7 @@ if input_table > 0
 
 		# Handle cases where there is a wildcard
 		.textGrid = -1
-		if file$ <> "" and index_regex(file$, "[*]{1}") and index_regex(file$, "(?i\.(wav|mp3|aif[fc]|flac|nist|au))")
+		if file$ <> "" and index_regex(file$, "[*]{1}") and index_regex(file$, "(?i\.(wav|mp3|aif[fc]|flac|nist|au|ogg))")
 			.preFix$ = ""
 			if index(file$, "/") > 0
 				.preFix$ = replace_regex$(file$, "/[^/]+$", "/", 0)
@@ -1406,7 +1409,7 @@ if input_table > 0
 				if labelFile$ <> ""
 					.textGridname$ = labelFile$
 				else
-					.textGridname$ = replace_regex$(file$, "(?i\.(wav|mp3|aif[fc]|flac|nist|au))$", ".TextGrid", 0)
+					.textGridname$ = replace_regex$(file$, "(?i\.(wav|mp3|aif[fc]|flac|nist|au|ogg))$", ".TextGrid", 0)
 				endif
 				if .textGridname$ <> "" and index_regex(.textGridname$, "[*]{1}")
 					.preFix$ = ""
@@ -1459,7 +1462,7 @@ if input_table > 0
 					Rename: name$
 				endif
 			endif
-		elsif file$ <> "" and fileReadable(file$) and index_regex(file$, "(?i\.(wav|mp3|aif[fc]|flac|nist|au))")
+		elsif file$ <> "" and fileReadable(file$) and index_regex(file$, "(?i\.(wav|mp3|aif[fc]|flac|nist|au|ogg))")
 			tmp = Read from file: file$
 			if tmp <= 0 or numberOfSelected("Sound") <= 0
 				exitScript: uiMessage$ [uiLanguage$, "ErrorSound"]
@@ -1696,7 +1699,6 @@ while .continue
 	#	uiLanguage$ = "MyCode"
 	#	.defaultLanguage = 9
 	endif
-
 	if formant$ = "Burg"
 		plotFormantAlgorithm$ = "Burg"
 		targetFormantAlgorithm$ = "Burg"
@@ -1762,6 +1764,7 @@ while .continue
 	.open2$ = uiMessage$ [uiLanguage$, "Open2"]
 	@read_and_select_audio: .recording, .open1$ , .open2$
 	if read_and_select_audio.sound < 1
+		
 		goto NEXTROUND
 	endif
 	.sound = read_and_select_audio.sound
@@ -1891,13 +1894,21 @@ procedure read_and_select_audio .type .message1$ .message2$
 		.filename$ = "Recorded speech"
 	else
 		.fullFilename$ = chooseReadFile$: .message1$
-		if .fullFilename$ = "" or not fileReadable(.fullFilename$) or not index_regex(.fullFilename$, "(?i\.(wav|mp3|aif[fc]|flac|nist|au))")
+		if index_regex(.fullFilename$, "(?i\.(csv|Table|tsv))") and fileReadable(.fullFilename$)
+			input_file$ = .fullFilename$
+			goto NONINTERACTIVEINPUT
+		elsif .fullFilename$ = "" or not fileReadable(.fullFilename$) or not index_regex(.fullFilename$, "(?i\.(wav|mp3|aif[fc]|flac|nist|au|ogg))")
 			pauseScript: (uiMessage$ [uiLanguage$, "No readable recording selected "])+.fullFilename$
 			goto RETURN
 		endif
 		
-		.source = Open long sound file: .fullFilename$
-		.filename$ = selected$("LongSound")
+		if index_regex (.fullFilename$, "(?i\.ogg)")
+			.source = Read from file: .fullFilename$
+			.filename$ = selected$("Sound")
+		else
+			.source = Open long sound file: .fullFilename$
+			.filename$ = selected$("LongSound")
+		endif
 		.fullName$ = selected$()
 		.fileType$ = extractWord$ (.fullName$, "")
 		if .fileType$ <> "Sound" and .fileType$ <> "LongSound"
@@ -1906,7 +1917,7 @@ procedure read_and_select_audio .type .message1$ .message2$
 		endif
 		
 		if segmentTier > 0
-			.textGridname$ = replace_regex$(.fullFilename$, "(?i\.(wav|mp3|aif[fc]|flac|nist|au))$", ".TextGrid", 0)
+			.textGridname$ = replace_regex$(.fullFilename$, "(?i\.(wav|mp3|aif[fc]|flac|nist|au|ogg))$", ".TextGrid", 0)
 			# Ask for a TextGrid file if a tier number has been given
 			if ! fileReadable(.textGridname$)
 				writeInfoLine: uiMessage$ [uiLanguage$, "Open3"]

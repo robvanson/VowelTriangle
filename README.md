@@ -13,7 +13,7 @@ Area from labelled and unlabelled running speech.
 
 How to use the script.
 
-[GitHub page](https://github.com/robvanson/VowelTriangle)
+[Git repository page](https://github.com/robvanson/VowelTriangle)
 
 ## References
 

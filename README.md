@@ -4,7 +4,7 @@ Vowel Triangle
 
 </div>
 
-# Vowel Triangle {#vowel-triangle style="font-size:40px;text-align: center"}
+# Vowel Triangle
 
 A [*Praat*](http://www.praat.org) script to calculate the Vowel Space
 Area from labelled and unlabelled running speech.
@@ -15,7 +15,7 @@ How to use the script.
 
 [GitHub page](https://github.com/robvanson/VowelTriangle)
 
-## References {#references style="width:70%;margin-left:auto;margin-right:auto;"}
+## References
 
 van Son, R.J.J.H., Middag, C., & Demuynck, K (2018). [\"Vowel space as a
 tool to evaluate articulation

@@ -44,7 +44,4 @@ SAMPA. Charts for languages:
 
 Figure: Vowel Triangle plot (left) and corresponding settings (right).
 
-![Vowel Triangle
-plot](ManPages/VowelTriangle_praat.png){style="width:45%;vertical-align: text-top;"}
-  ![Vowel Triangle
-screenshot](ManPages/VowelTriangle%20Screenshot.png){style="width:45%;vertical-align: text-top;"}
+<img title="" src="ManPages/VowelTriangle_praat.png" alt="" width="309">  <img title="" src="ManPages/VowelTriangle%20Screenshot.png" alt="" width="330">

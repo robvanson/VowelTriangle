@@ -29,1339 +29,1458 @@
 #     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 # 
 #
-# Initialization
-# Get current Locale
-uiLanguage$ = "EN"
-vowelString$ = ""
-segmentTier = 0
-labelFile$ = ""
 
-# 
-#######################################################################
-# 
-# Non-interactive (batch) use
-# 
-# Enter valid file path in input_file$ to run non-interactive (batch)
-# or select a .csv or .tsv file when using "Open"
-#
-# The input table should have tab (.tsv) or semicolon (csv) separated 
-# columns labeled: 
-# Title, Speaker, File, Language, Log, Plotfile
-# An example would be a semicolon separated list:
-# F40L2VT2;F;IFAcorpus/chunks/F40L/F40L2VT1.aifc;NL;target/results.tsv;
-# target/F40L2VT2.png
-# 
-# All files are used AS IS, and nothing is drawn unless a "Plotfile" 
-# is entered.
-#
-# Optionally, columns named "VowelTier", "Vowels", and "LabelFile" 
-# can be added containing the values for the use of existing 
-# segmentations. If the sound input has a wildcard, the labelfile input 
-# should have it too and result in a list of label files that has the 
-# same order as those of the corresponding sound files. If a tier number
-# is entered for the phoneme tier, and no Label filename, it is assumed
-# label files have the same name as the corresponding audio file, and 
-# the extension ".TextGrid". If no vowel symbol list is given, the 
-# default SAMPA list for the laguage is used (Pinyin for ZH).
-#
-#######################################################################
-#
-# Add file path to start batch processing
-#input_file$ = "concatlist.tsv"
-input_file$ = ""
-
-input_prefix$ = ""
-
-# 
-#######################################################################
-# 
-# Retrieve last saved settings
-# 
-#######################################################################
-#
-.defaultLanguage = 1
-.preferencesLanguageFile$ = preferencesDirectory$+"/VowelTriangle.prefs"
-.preferencesLang$ = ""
-.formant_default = 2
-if fileReadable(.preferencesLanguageFile$)
-	.preferences$ = readFile$(.preferencesLanguageFile$)
-	if index(.preferences$, "Language=") > 0
-		.preferencesLang$ = extractWord$(.preferences$, "Language=")
-	else
-		.preferencesLang$ = ""
-	endif
-	# Always assume that the preferences file could be corrupted
-	if index(.preferences$, "Formant=") > 0
-		.tmp$ = extractWord$(.preferences$, "Formant=")
-		if index(.tmp$, "Burg")
-			.formant_default = 2
-		elsif index(.tmp$, "Robust")
-			.formant_default = 3
-		elsif index(.tmp$, "KeepAll")
-			.formant_default = 4
-		endif
-	else
-		.formant_default = 1
-	endif
-	
-	# Always assume that the preferences file could be corrupted
-	if index(.preferences$, "VowelTier=") > 0
-		.tmp = extractNumber(.preferences$, "VowelTier=")
-		segmentTier = .tmp
-	else
-		segmentTier = 0
-	endif
-	
-	# Always assume that the preferences file could be corrupted
-	if index(.preferences$, "Vowels=") > 0
-		.tmp$ = extractLine$(.preferences$, "Vowels=")
-		vowelString$ = " "+.tmp$+" "
-	else
-		vowelString$ = ""
-	endif
-	
+if not variableExists ("runInsideSpeechAnalysisAVL") 
+	@vowelTrianglemain
 endif
 
-.locale$ = "en"
-if .preferencesLang$ <> ""
-	.locale$ = .preferencesLang$
-else
-	if macintosh
-		.scratch$ = replace_regex$(temporaryDirectory$+"/scratch"+date$()+".txt", "\W", "_", 0)
-		runSystem_nocheck: "defaults read -g AppleLocale | cut -c 1-2 - > ",.scratch$
-		.locale$ = readFile$(.scratch$)
-		deleteFile: .scratch$
-	elsif unix
-		.locale$ = environment$("LANG")
-	elsif windows
-		.scratch$ = replace_regex$(temporaryDirectory$+"/scratch"+date$()+".txt", "\W", "_", 0)
-		runSystem_nocheck: "dism /online /get-intl > ",.scratch$
-		.locale$ = readFile$(.scratch$)
-		.locale$ = replace_regex$(.locale$, "\n", " ", 0)	
-		.locale$ = replace_regex$(.locale$, "^.*Default System UI language : (\S+).*", "\1", 0)
-		deleteFile: .scratch$	
-	endif
-	.locale$ = replace_regex$(.preferencesLang$, "(.)", "\U\1", 0)
-endif
+#############################################
+#
+# Main procedure
+# 
+#############################################
 
-# Always assume that the preferences file could be corrupted
-if startsWith(.locale$, "EN")
+procedure vowelTrianglemain
+	# Initialization
+	# Get current Locale
 	uiLanguage$ = "EN"
-	.defaultLanguage = 1
-elsif startsWith(.locale$, "NL")
-	uiLanguage$ = "NL"
-	.defaultLanguage = 2
-elsif startsWith(.locale$, "DE")
-	uiLanguage$ = "DE"
-	.defaultLanguage = 3
-elsif startsWith(.locale$, "FR")
-	uiLanguage$ = "FR"
-	.defaultLanguage = 4
-elsif startsWith(.locale$, "ZH")
-	uiLanguage$ = "ZH"
-	.defaultLanguage = 5
-elsif startsWith(.locale$, "ES")
-	uiLanguage$ = "ES"
-	.defaultLanguage = 6
-elsif startsWith(.locale$, "PT")
-	uiLanguage$ = "PT"
-	.defaultLanguage = 7
-elsif startsWith(.locale$, "IT")
-	uiLanguage$ = "IT"
-	.defaultLanguage = 8
-#elsif startsWith(.locale$, "MYLANGUAGE")
-#	uiLanguage$ = "XX"
-#	.defaultLanguage = 9
-endif
-
-.sp_default = 1
-output_table$ = ""
-vtl_normalization = 0
-
-default_Dot_Radius = 0.01
-dot_Radius_Cutoff = 300
-
-# 
-#######################################################################
-# 
-# Read input file for non-interactive (batch) use 
-#
-
-label REENTERINPUTFILE
-
-input_table = -1
-.continue = 1
-
-#
-# 
-#######################################################################
-#
-# The input table should have tab (.tsv) or semicolon (csv) separated 
-# columns labeled: 
-# Title, Speaker, File, Language, Log, Plotfile
-# An example would be a semicolon separated list:
-# F40L2VT2;F;IFAcorpus/chunks/F40L/F40L2VT1.aifc;NL;target/results.tsv;
-# target/F40L2VT2.png
-# 
-# All files are used AS IS, and nothing is drawn unless a "Plotfile" 
-# is entered.
-#
-# Optionally, columns named "VowelTier", "Vowels", and "LabelFile" 
-# can be added containing the values for the use of existing 
-# segmentations. If the sound input has a wildcard, the labelfile input 
-# should have it too and result in a list of label files that has the 
-# same order as those of the corresponding sound files. If a tier number
-# is entered for the phoneme tier, and no Label filename, it is assumed
-# label files have the same name as the corresponding audio file, and 
-# the extension ".TextGrid". If no vowel symbol list is given, the 
-# default SAMPA list for the laguage is used (Pinyin for ZH).
-#
-label NONINTERACTIVEINPUT
-
-if input_file$ <> "" and fileReadable(input_file$) and index_regex(input_file$, "(?i\.(tsv|Table|csv))")
-	if index_regex(input_file$, "(?i\.csv)$")
-		input_table = Read Table from semicolon-separated file: input_file$
-	else
-		input_table = Read Table from tab-separated file: input_file$
-	endif
-	.numRows = Get number of rows
-	.i = Get column index: "Log"
-	if .i <= 0
-		Append column: "Log"
-		for .r to .numRows
-			Set string value: .r, "Log", "-"
-		endfor
-	endif 
-	.i = Get column index: "Plotfile"
-	if .i <= 0
-		Append column: "Plotfile"
-		for .r to .numRows
-			Set string value: .r, "Plotfile", "-"
-		endfor
-	endif
-	# Set new shell (default) directory
-	defaultDirectory$ = replace_regex$(input_file$, "[/\\][^/\\]*$", "", 0)
-	input_prefix$ = defaultDirectory$ + "/"
-endif
-
-# When using a microphone:
-.input$ = "Microphone"
-.samplingFrequency = 44100
-.recordingTime = 4
-
-# 
-#######################################################################
-#
-# Define Language dependend aspects, e.g., all messages
-# 
-
-# Select algorithm for calculating formants
-# Alternatives: "SL", "Burg", "Robust", or "KeepAll"
-
-# Vowel targets
-targetFormantAlgorithm$ = "Robust"
-
-# Plotting can be different from the target, in principle
-plotFormantAlgorithm$ = targetFormantAlgorithm$
-
-numVowels = 12
-vowelList$ [1] = "i"
-vowelList$ [2] = "I"
-vowelList$ [3] = "e"
-vowelList$ [4] = "E"
-vowelList$ [5] = "a"
-vowelList$ [6] = "A"
-vowelList$ [7] = "O"
-vowelList$ [8] = "o"
-vowelList$ [9] = "u"
-vowelList$ [10] = "y"
-vowelList$ [11] = "Y"
-vowelList$ [12] = "@"
-
-color$ ["a"] = "Red"
-color$ ["i"] = "Green"
-color$ ["u"] = "Blue"
-color$ ["@"] = "{0.8,0.8,0.8}"
-
-#######################################################################
-#
-# UI messages and texts
-#
-#######################################################################
-#
-
-
-#######################################################################
-#
-# English
-uiMessage$ ["EN", "PauseRecord"] = "Record continuous speech"
-uiMessage$ ["EN", "Record1"] = "Record the ##continuous speech#"
-uiMessage$ ["EN", "Record2"] = "Please be ready to start"
-uiMessage$ ["EN", "Record3"] = "Select the speech you want to analyse"
-uiMessage$ ["EN", "Open1"] = "Open the recording containing the speech"
-uiMessage$ ["EN", "Open2"] = "Select the speech you want to analyse"
-uiMessage$ ["EN", "Open3"] = "Open the file containing the vowel labels"
-uiMessage$ ["EN", "Corneri"] = "h##ea#t"
-uiMessage$ ["EN", "Corneru"] = "h##oo#t"
-uiMessage$ ["EN", "Cornera"] = "h##a#t"
-uiMessage$ ["EN", "DistanceTitle"] = "Rel. Distance (N)"
-uiMessage$ ["EN", "AreaTitle"] = "Rel. Area"
-uiMessage$ ["EN", "Area1"] = "1"
-uiMessage$ ["EN", "Area2"] = "2"
-uiMessage$ ["EN", "AreaN"] = "N"
-uiMessage$ ["EN", "VTL"] = "Vocal tract"
-
-uiMessage$ ["EN", "LogFile"] = "Write log to table (""-"" write to the info window)"
-uiMessage$ ["EN", "CommentContinue"] = "Click on ""Continue"" if you want to analyze more speech samples"
-uiMessage$ ["EN", "CommentOpen"] = "Click on ""Open"" and select a recording"
-uiMessage$ ["EN", "CommentLabel"] = "Use phoneme segmentation (optional)"
-uiMessage$ ["EN", "CommentRecord"] = "Click on ""Record"" and start speaking"
-uiMessage$ ["EN", "CommentList"] = "Record sound, ""Save to list & Close"", then click ""Continue"""
-uiMessage$ ["EN", "SavePicture"] = "Save picture"
-uiMessage$ ["EN", "DoContinue"] = "Do you want to continue?"
-uiMessage$ ["EN", "SelectSound1"] = "Select the sound and continue"
-uiMessage$ ["EN", "SelectSound2"] = "It is possible to remove unwanted sounds from the selection"
-uiMessage$ ["EN", "SelectSound3"] = "Select the unwanted part and then choose ""Cut"" from the ""Edit"" menu"
-uiMessage$ ["EN", "Stopped"] = "Vowel Triangle stopped"
-uiMessage$ ["EN", "ErrorSound"] = "Error: Not a sound "
-uiMessage$ ["EN", "Nothing to do"] = "Nothing to do"
-uiMessage$ ["EN", "No readable recording selected "] = "No readable recording selected "
-
-uiMessage$ ["EN", "Interface Language"] = "Language"
-uiMessage$ ["EN", "Speaker is a"] = "Speaker is a"
-uiMessage$ ["EN", "Male"] = "Male ♂"
-uiMessage$ ["EN", "Female"] = "Female ♀"
-uiMessage$ ["EN", "Automatic"] = "Automatic"
-uiMessage$ ["EN", "Experimental"] = "Select formant tracking method"
-uiMessage$ ["EN", "Continue"] = "Continue"
-uiMessage$ ["EN", "Done"] = "Done"
-uiMessage$ ["EN", "Stop"] = "Stop"
-uiMessage$ ["EN", "Open"] = "Open"
-uiMessage$ ["EN", "Record"] = "Record"
-uiMessage$ ["EN", "Help"] = "Help"
-uiMessage$ ["EN", "untitled"] = "untitled"
-uiMessage$ ["EN", "Title"] 			= "Title"
-uiMessage$ ["EN", "Vowels"] = "Vowels"
-uiMessage$ ["EN", "Vowel Tier"] = "Vowel tier"
-
-# SAMPA vowels
-vowels$ ["EN"] = " @ { } A E Q O O: o i I u U 6 V i: O: u: aU OI oU eI aI "
-
-
-#######################################################################
-#
-# Dutch
-uiMessage$ ["NL", "PauseRecord"] 	= "Neem lopende spraak op"
-uiMessage$ ["NL", "Record1"] 		= "Neem de ##lopende spraak# op"
-uiMessage$ ["NL", "Record2"] 		= "Zorg dat u klaar ben om te spreken"
-uiMessage$ ["NL", "Record3"] 		= "Selecteer de spraak die u wilt analyseren"
-uiMessage$ ["NL", "Open1"] 			= "Open de spraakopname"
-uiMessage$ ["NL", "Open2"] 			= "Selecteer de spraak die u wilt analyseren"
-uiMessage$ ["NL", "Open3"]          = "Open het bestand met de klinkerlabels"
-uiMessage$ ["NL", "Corneri"] 		= "h##ie#t"
-uiMessage$ ["NL", "Corneru"] 		= "h##oe#d"
-uiMessage$ ["NL", "Cornera"] 		= "h##aa#t"
-uiMessage$ ["NL", "DistanceTitle"] 	= "Rel. Afstand (N)"
-uiMessage$ ["NL", "AreaTitle"] 		= "Rel. Oppervlak"
-uiMessage$ ["NL", "Area1"] 			= "1"
-uiMessage$ ["NL", "Area2"] 			= "2"
-uiMessage$ ["NL", "AreaN"] 			= "N"
-uiMessage$ ["NL", "VTL"] 			= "Spraakkanaal"
-
-uiMessage$ ["NL", "LogFile"] 		= "Schrijf resultaten naar log bestand (""-"" schrijft naar info venster)"
-uiMessage$ ["NL", "CommentContinue"] = "Klik op ""Doorgaan"" als u meer spraakopnamen wilt analyseren"
-uiMessage$ ["NL", "CommentOpen"] 	= "Klik op ""Open"" en selecteer een opname"
-uiMessage$ ["NL", "CommentLabel"]   = "Gebruik foneemsegmentatie (optioneel)"
-uiMessage$ ["NL", "CommentRecord"] 	= "Klik op ""Opnemen"" en start met spreken"
-uiMessage$ ["NL", "CommentList"] 	= "Spraak opnemen, ""Save to list & Close"", daarna klik op ""Doorgaan"""
-uiMessage$ ["NL", "SavePicture"] 	= "Bewaar afbeelding"
-uiMessage$ ["NL", "DoContinue"] 	= "Wilt u doorgaan?"
-uiMessage$ ["NL", "SelectSound1"] 	= "Selecteer het spraakfragment en ga door"
-uiMessage$ ["NL", "SelectSound2"] 	= "Het is mogelijk om ongewenste geluiden uit de opname te verwijderen"
-uiMessage$ ["NL", "SelectSound3"] 	= "Selecteer het ongewenste deel en kies ""Cut"" in het ""Edit"" menu"
-uiMessage$ ["NL", "Stopped"] 		= "Vowel Triangle is gestopt"
-uiMessage$ ["NL", "ErrorSound"] 	= "Fout: Dit is geen geluid "
-uiMessage$ ["NL", "Nothing to do"] 	= "Geen taken"
-uiMessage$ ["NL", "No readable recording selected "] = "Geen leesbare opname geselecteerd "
-
-uiMessage$ ["NL", "Interface Language"] = "Taal (Language)"
-uiMessage$ ["NL", "Speaker is a"] 	= "De Spreker is een"
-uiMessage$ ["NL", "Male"] 			= "Man ♂"
-uiMessage$ ["NL", "Female"] 		= "Vrouw ♀"
-uiMessage$ ["NL", "Automatic"] 		= "Automatisch"
-uiMessage$ ["NL", "Experimental"] 	= "Kies methode om formanten te berekenen"
-uiMessage$ ["NL", "Continue"] 		= "Doorgaan"
-uiMessage$ ["NL", "Done"] 			= "Klaar"
-uiMessage$ ["NL", "Stop"] 			= "Stop"
-uiMessage$ ["NL", "Open"] 			= "Open"
-uiMessage$ ["NL", "Record"] 		= "Opnemen"
-uiMessage$ ["NL", "Help"]           = "Help"
-uiMessage$ ["NL", "untitled"] 		= "zonder titel"
-uiMessage$ ["NL", "Title"] 			= "Titel"
-uiMessage$ ["NL", "Vowels"]         = "Klinkers"
-uiMessage$ ["NL", "Vowel Tier"]     = "Klinker tier"
-
-# SAMPA vowels
-vowels$ ["NL"] = " I E A O Y @ i y u a: e: 2: o: Ei 9y Au a:i o:i ui iu yu e:u E: 9: O: "
-
-#######################################################################
-#
-# German
-uiMessage$ ["DE", "PauseRecord"] 	= "Zeichne laufende Sprache auf"
-uiMessage$ ["DE", "Record1"] 		= "Die ##laufende Sprache# aufzeichnen"
-uiMessage$ ["DE", "Record2"] 		= "Bitte seien Sie bereit zu sprechen"
-uiMessage$ ["DE", "Record3"] 		= "Wählen Sie die Sprachaufnahme, die Sie analysieren möchten"
-uiMessage$ ["DE", "Open1"] 			= "Öffnen Sie die Sprachaufnahme"
-uiMessage$ ["DE", "Open2"] 			= "Wählen Sie die Sprachaufnahme, die Sie analysieren möchten"
-uiMessage$ ["DE", "Open3"]          = "Öffnen Sie die Datei mit den Vokalbezeichnungen"
-uiMessage$ ["DE", "Corneri"] 		= "L##ie#d"
-uiMessage$ ["DE", "Corneru"] 		= "H##u#t"
-uiMessage$ ["DE", "Cornera"] 		= "T##a#l"
-uiMessage$ ["DE", "DistanceTitle"] 	= "Rel. Länge (N)"
-uiMessage$ ["DE", "AreaTitle"] 		= "Rel. Oberfläche"
-uiMessage$ ["DE", "Area1"] 			= "1"
-uiMessage$ ["DE", "Area2"] 			= "2"
-uiMessage$ ["DE", "AreaN"] 			= "N"
-uiMessage$ ["DE", "VTL"] 			= "Vokaltrakt"
-                                     
-uiMessage$ ["DE", "LogFile"] 		= "Daten in Tabelle schreiben (""-"" in das Informationsfenster schreiben)"
-uiMessage$ ["DE", "CommentContinue"]= "Klicken Sie auf ""Weiter"", wenn Sie mehr Sprachproben analysieren möchten"
-uiMessage$ ["DE", "CommentOpen"] 	= "Klicke auf ""Öffnen"" und wähle eine Aufnahme"
-uiMessage$ ["DE", "CommentLabel"]   = "Phonemsegmentierung verwenden (optional)"
-uiMessage$ ["DE", "CommentRecord"] 	= "Klicke auf ""Aufzeichnen"" und sprich"
-uiMessage$ ["DE", "CommentList"] 	= "Sprache aufnehmen, ""Save to list & Close"", dann klicken Sie auf ""Weitergehen"""
-uiMessage$ ["DE", "SavePicture"] 	= "Bild speichern"
-uiMessage$ ["DE", "DoContinue"] 	= "Möchten Sie weitergehen?"
-uiMessage$ ["DE", "SelectSound1"] 	= "Wählen Sie den Aufnahmebereich und gehen Sie weiter"
-uiMessage$ ["DE", "SelectSound2"] 	= "Es ist möglich, unerwünschte Geräusche aus der Auswahl zu entfernen"
-uiMessage$ ["DE", "SelectSound3"] 	= "Wählen Sie den unerwünschten Teil und wählen Sie dann ""Cut"" aus dem ""Edit"" Menü"
-uiMessage$ ["DE", "Stopped"] 		= "VowelTriangle ist gestoppt"
-uiMessage$ ["DE", "ErrorSound"] 	= "Fehler: Keine Sprache gefunden"
-uiMessage$ ["DE", "Nothing to do"] 	= "Keine Aufgaben"
-uiMessage$ ["DE", "No readable recording selected "] = "Keine verwertbare Aufnahme ausgewählt "
-               
-uiMessage$ ["DE", "Interface Language"] = "Sprache (Language)"
-uiMessage$ ["DE", "Speaker is a"] 	= "Der Sprecher ist ein(e)"
-uiMessage$ ["DE", "Male"] 			= "Man ♂"
-uiMessage$ ["DE", "Female"] 		= "Frau ♀"
-uiMessage$ ["DE", "Automatic"] 		= "Selbstauswahl"
-uiMessage$ ["DE", "Experimental"] 	= "Wählen Sie die Formant-Berechnungsmethode"
-uiMessage$ ["DE", "Continue"] 		= "Weitergehen"
-uiMessage$ ["DE", "Done"] 			= "Fertig"
-uiMessage$ ["DE", "Stop"] 			= "Halt"
-uiMessage$ ["DE", "Open"] 			= "Öffnen"
-uiMessage$ ["DE", "Record"] 		= "Aufzeichnen"
-uiMessage$ ["DE", "Help"]           = "Help"
-uiMessage$ ["DE", "untitled"] 		= "ohne Titel"
-uiMessage$ ["DE", "Title"] 			= "Titel"
-uiMessage$ ["DE", "Vowels"]         = "Vokale"
-uiMessage$ ["DE", "Vowel Tier"]     = "Vokale tier"
-
-# SAMPA vowels
-vowels$ ["DE"] = " I E a O U Y 9: i: e: E: a: o: u: y: 2:  aI aU OY: aI aU OY: 6 i:6 I6 y:6 Y6 e:6 E6 E:6 2:6 96 a:6 a6 u:6 U6 o:6 O6 "
-
-#######################################################################
-#
-# French
-uiMessage$ ["FR", "PauseRecord"]	= "Enregistrer un discours continu"
-uiMessage$ ["FR", "Record1"]		= "Enregistrer le ##discours continu#"
-uiMessage$ ["FR", "Record2"]		= "S'il vous plaît soyez prêt à commencer"
-uiMessage$ ["FR", "Record3"]		= "Sélectionnez le discours que vous voulez analyser"
-uiMessage$ ["FR", "Open1"]			= "Ouvrir l'enregistrement contenant le discours"
-uiMessage$ ["FR", "Open2"]			= "Sélectionnez le discours que vous voulez analyser"
-uiMessage$ ["FR", "Open3"]          = "Ouvrez le fichier contenant les étiquettes de voyelle"
-uiMessage$ ["FR", "Corneri"]		= "s##i#"
-uiMessage$ ["FR", "Corneru"]		= "f##ou#"
-uiMessage$ ["FR", "Cornera"]		= "l##à#"
-uiMessage$ ["FR", "DistanceTitle"]	= "Longeur Relative (N)"
-uiMessage$ ["FR", "AreaTitle"]		= "Surface Relative"
-uiMessage$ ["FR", "Area1"]			= "1"
-uiMessage$ ["FR", "Area2"]			= "2"
-uiMessage$ ["FR", "AreaN"]			= "N"
-uiMessage$ ["FR", "VTL"] 			= "Conduit vocal"
-                                     
-uiMessage$ ["FR", "LogFile"]		= "Écrire un fichier journal dans une table (""-"" écrire dans la fenêtre d'information)"
-uiMessage$ ["FR", "CommentContinue"]= "Cliquez sur ""Continuer"" si vous voulez analyser plus d'échantillons de discours"
-uiMessage$ ["FR", "CommentOpen"]	= "Cliquez sur ""Ouvrir"" et sélectionnez un enregistrement"
-uiMessage$ ["FR", "CommentLabel"]   = "Utiliser la segmentation des phonèmes (facultatif)"
-uiMessage$ ["FR", "CommentRecord"]	= "Cliquez sur ""Enregistrer"" et commencez à parler"
-uiMessage$ ["FR", "CommentList"]	= "Enregistrer le son, ""Save to list & Close"", puis cliquez sur ""Continuer"""
-uiMessage$ ["FR", "SavePicture"]	= "Enregistrer l'image"
-uiMessage$ ["FR", "DoContinue"]		= "Voulez-vous continuer?"
-uiMessage$ ["FR", "SelectSound1"]	= "Sélectionnez le son et continuez"
-uiMessage$ ["FR", "SelectSound2"]	= "Il est possible de supprimer les sons indésirables de la sélection"
-uiMessage$ ["FR", "SelectSound3"]	= "Sélectionnez la partie indésirable, puis choisissez ""Cut"" dans le menu ""Edit"""
-uiMessage$ ["FR", "Stopped"]		= "VowelTriangle s'est arrêté"
-uiMessage$ ["FR", "ErrorSound"]		= "Erreur: pas du son"
-uiMessage$ ["FR", "Nothing to do"] 	= "Rien à faire"
-uiMessage$ ["FR", "No readable recording selected "] = "Aucun enregistrement utilisable sélectionné "
-                  
-uiMessage$ ["FR", "Interface Language"] = "Langue (Language)"
-uiMessage$ ["FR", "Speaker is a"]	= "Le locuteur est un(e)"
-uiMessage$ ["FR", "Male"] 			= "Homme ♂"
-uiMessage$ ["FR", "Female"] 		= "Femme ♀"
-uiMessage$ ["FR", "Automatic"] 		= "Auto-sélection"
-uiMessage$ ["FR", "Experimental"] 	= "Sélectionner la méthode de calcul du formant"
-uiMessage$ ["FR", "Continue"]		= "Continuer"
-uiMessage$ ["FR", "Done"]			= "Terminé"
-uiMessage$ ["FR", "Stop"]			= "Arrêt"
-uiMessage$ ["FR", "Open"]			= "Ouvert"
-uiMessage$ ["FR", "Record"]			= "Enregistrer"
-uiMessage$ ["FR", "Help"]           = "Help"
-uiMessage$ ["FR", "untitled"] 		= "sans titre"
-uiMessage$ ["FR", "Title"] 			= "Titre"
-uiMessage$ ["FR", "Vowels"]         = "Voyelles"
-uiMessage$ ["FR", "Vowel Tier"]     = "Tier voyelle"
-
-# SAMPA vowels
-vowels$ ["FR"] = " i e E a A O o u y 2 9 @ e~ a~ o~ 9~ E/ A/ &/ O/ U~/ "
-
-#######################################################################
-#
-# Chinese
-uiMessage$ ["ZH", "PauseRecord"] 	= "录制连续语音"
-uiMessage$ ["ZH", "Record1"] 		= "录制##连续语音#"
-uiMessage$ ["ZH", "Record2"] 		= "请准备好开始"
-uiMessage$ ["ZH", "Record3"] 		= "选择你想要分析的语音"
-uiMessage$ ["ZH", "Open1"] 			= "打开包含语音的录音文件"
-uiMessage$ ["ZH", "Open2"] 			= "选择你想要分析的语音片段"
-uiMessage$ ["ZH", "Open3"]          = "打开包含元音标签的文件"
-uiMessage$ ["ZH", "Corneri"] 		= "必"
-uiMessage$ ["ZH", "Corneru"] 		= "不"
-uiMessage$ ["ZH", "Cornera"] 		= "巴"
-uiMessage$ ["ZH", "DistanceTitle"] 	= "相对长度 (N)"
-uiMessage$ ["ZH", "AreaTitle"] 		= "相对面积"
-uiMessage$ ["ZH", "Area1"] 			= "1"
-uiMessage$ ["ZH", "Area2"] 			= "2"
-uiMessage$ ["ZH", "AreaN"] 			= "N"
-uiMessage$ ["ZH", "VTL"] 			= "声道"
-
-uiMessage$ ["ZH", "LogFile"] 		= "将日志写入表格 (""-"" 写入信息窗口)"
-uiMessage$ ["ZH", "CommentContinue"] = "点击 ""继续"" 如果你想分析更多的语音样本"
-uiMessage$ ["ZH", "CommentOpen"] 	= "点击 ""打开录音"" 并选择一个录音"
-uiMessage$ ["ZH", "CommentLabel"]   = "使用音素细分（可选）"
-uiMessage$ ["ZH", "CommentRecord"] 	= "点击 ""录音"" 并开始讲话"
-uiMessage$ ["ZH", "CommentList"] 	= "录制声音, ""Save to list & Close"", 然后单击 ""继续"""
-uiMessage$ ["ZH", "SavePicture"] 	= "保存图片"
-uiMessage$ ["ZH", "DoContinue"] 	= "你想继续吗"
-uiMessage$ ["ZH", "SelectSound1"] 	= "选择声音并继续"
-uiMessage$ ["ZH", "SelectSound2"] 	= "可以从选择中删除不需要的声音"
-uiMessage$ ["ZH", "SelectSound3"] 	= "选择不需要的部分，然后从 ""Edit"" 菜单选择 ""Cut"""
-uiMessage$ ["ZH", "Stopped"] 		= "VowelTriangle 已停止运行"
-uiMessage$ ["ZH", "ErrorSound"] 	= "错误：不是声音"
-uiMessage$ ["ZH", "Nothing to do"] 	= "无法进行"
-uiMessage$ ["ZH", "No readable recording selected "] = "未选择可读取的录音 "
-
-uiMessage$ ["ZH", "Interface Language"] = "语言 (Language)"
-uiMessage$ ["ZH", "Speaker is a"]	= "演讲者是"
-uiMessage$ ["ZH", "Male"] 			= "男性 ♂"
-uiMessage$ ["ZH", "Female"] 		= "女性 ♀"
-uiMessage$ ["ZH", "Automatic"] 		= "自动选择"
-uiMessage$ ["ZH", "Experimental"] 	= "选择共振峰值测量方式"
-uiMessage$ ["ZH", "Continue"] 		= "继续"
-uiMessage$ ["ZH", "Done"] 			= "完成"
-uiMessage$ ["ZH", "Stop"] 			= "结束"
-uiMessage$ ["ZH", "Open"] 			= "从文件夹打开"
-uiMessage$ ["ZH", "Record"] 		= "录音"
-uiMessage$ ["ZH", "Help"]           = "Help"
-uiMessage$ ["ZH", "untitled"] 		= "无标题"
-uiMessage$ ["ZH", "Title"] 			= "标题"
-uiMessage$ ["ZH", "Vowels"]         = "元音"
-uiMessage$ ["ZH", "Vowel Tier"]     = "元音层"
-
-# Pinyin vowels
-vowels$ ["ZH"] = " a o e i u v ai ei ui ao ou iu ie ue iao iou uai uei er "
-
-#######################################################################
-#
-# Spanish
-uiMessage$ ["ES", "PauseRecord"]	= "Grabar un discurso continuo"
-uiMessage$ ["ES", "Record1"]		= "Guardar ##discurso continuo#"
-uiMessage$ ["ES", "Record2"]		= "Por favor, prepárate para comenzar"
-uiMessage$ ["ES", "Record3"]		= "Seleccione el discurso que quiere analizar"
-uiMessage$ ["ES", "Open1"]			= "Abre la grabación que contiene el discurso"
-uiMessage$ ["ES", "Open2"]			= "Seleccione el discurso que quiere analizar"
-uiMessage$ ["ES", "Open3"]          = "Abra el archivo que contiene las etiquetas de las vocales."
-uiMessage$ ["ES", "Corneri"]		= "s##i#"
-uiMessage$ ["ES", "Corneru"]		= "##u#so"
-uiMessage$ ["ES", "Cornera"]		= "h##a#"
-uiMessage$ ["ES", "DistanceTitle"]	= "Longitud relativa (N)"
-uiMessage$ ["ES", "AreaTitle"]		= "Superficie relativa"
-uiMessage$ ["ES", "Area1"]			= "1"
-uiMessage$ ["ES", "Area2"]			= "2"
-uiMessage$ ["ES", "AreaN"]			= "N"
-uiMessage$ ["ES", "VTL"] 			= "Tracto vocal"
-                                      
-uiMessage$ ["ES", "LogFile"]		= "Escribir un archivo de registro en una tabla (""-"" escribir en la ventana de información)"
-uiMessage$ ["ES", "CommentContinue"]= "Haga clic en ""Continúa"" si desea analizar más muestras de voz"
-uiMessage$ ["ES", "CommentOpen"]	= "Haga clic en ""Abrir"" y seleccione un registro"
-uiMessage$ ["ES", "CommentLabel"]   = "Usar segmentación de fonemas (opcional)"
-uiMessage$ ["ES", "CommentRecord"]	= "Haz clic en ""Grabar"" y comienza a hablar"
-uiMessage$ ["ES", "CommentList"]	= "Grabar sonido, ""Save to list & Close"", luego haga clic en ""Continúa"""
-uiMessage$ ["ES", "SavePicture"]	= "Guardar imagen"
-uiMessage$ ["ES", "DoContinue"]		= "¿Quieres continuar?"
-uiMessage$ ["ES", "SelectSound1"]	= "Selecciona el sonido y continúa"
-uiMessage$ ["ES", "SelectSound2"]	= "Es posible eliminar sonidos no deseados de la selección"
-uiMessage$ ["ES", "SelectSound3"]	= "Seleccione la parte no deseada, luego elija ""Cut"" desde el menú ""Edit"""
-uiMessage$ ["ES", "Stopped"]		= "VowelTriangle se ha detenido"
-uiMessage$ ["ES", "ErrorSound"]		= "Error: no hay sonido"
-uiMessage$ ["ES", "Nothing to do"] 	= "Nada que hacer"
-uiMessage$ ["ES", "No readable recording selected "] = "No se ha seleccionado ningún registro utilizable "
-
-uiMessage$ ["ES", "Interface Language"] = "Idioma (Language)"
-uiMessage$ ["ES", "Speaker is a"]	= "El hablante es un(a)"
-uiMessage$ ["ES", "Male"] 			= "Hombre ♂"
-uiMessage$ ["ES", "Female"] 		= "Mujer ♀"
-uiMessage$ ["ES", "Automatic"] 		= "Autoselección"
-uiMessage$ ["ES", "Experimental"] 	= "Seleccione el método de seguimiento de formantes"
-uiMessage$ ["ES", "Continue"]		= "Continúa"
-uiMessage$ ["ES", "Done"]			= "Terminado"
-uiMessage$ ["ES", "Stop"]			= "Detener"
-uiMessage$ ["ES", "Open"]			= "Abrir"
-uiMessage$ ["ES", "Record"]			= "Grabar"
-uiMessage$ ["ES", "Help"]           = "Help"
-uiMessage$ ["ES", "untitled"] 		= "no tiene título"
-uiMessage$ ["ES", "Title"] 			= "Título"
-uiMessage$ ["ES", "Vowels"]         = "Vocales"
-uiMessage$ ["ES", "Vowel Tier"]     = "Tier vocal"
-
-# SAMPA vowels
-vowels$ ["ES"] = " i I e E { y Y 2 9 1 @ 6 3 a } 8 & M 7 V A u U o O Q "
-
-#######################################################################
-#
-# Portugese
-uiMessage$ ["PT", "PauseRecord"]	= "Gravar um discurso contínuo"
-uiMessage$ ["PT", "Record1"]		= "Salvar ##discurso contínua#"
-uiMessage$ ["PT", "Record2"]		= "Por favor, prepare-se para começar"
-uiMessage$ ["PT", "Record3"]		= "Selecione o discurso que deseja analisar"
-uiMessage$ ["PT", "Open1"]			= "Abra a gravação que contém o discurso"
-uiMessage$ ["PT", "Open2"]			= "Selecione o discurso que deseja analisar"
-uiMessage$ ["PT", "Open3"]          = "Abra o arquivo que contém os rótulos das vogais"
-uiMessage$ ["PT", "Corneri"]		= "s##i#"
-uiMessage$ ["PT", "Corneru"]		= "r##u#a"
-uiMessage$ ["PT", "Cornera"]		= "d##á#"
-uiMessage$ ["PT", "DistanceTitle"]	= "Comprimento relativo (N)"
-uiMessage$ ["PT", "AreaTitle"]		= "Superfície relativa"
-uiMessage$ ["PT", "Area1"]			= "1"
-uiMessage$ ["PT", "Area2"]			= "2"
-uiMessage$ ["PT", "AreaN"]			= "N"
-uiMessage$ ["PT", "VTL"] 			= "Trato vocal"
-                                                                            
-uiMessage$ ["PT", "LogFile"]		= "Escreva um arquivo de registro em uma tabela (""-"" escreva na janela de informações)"
-uiMessage$ ["PT", "CommentContinue"]= "Clique em ""Continuar"" se quiser analisar mais amostras de voz"
-uiMessage$ ["PT", "CommentOpen"]	= "Clique em ""Abrir"" e selecione um registro"
-uiMessage$ ["PT", "CommentLabel"]   = "Usar segmentação por fonema (opcional)"
-uiMessage$ ["PT", "CommentRecord"]	= "Clique ""Gravar"" e comece a falar "
-uiMessage$ ["PT", "CommentList"]	= "Gravar som, ""Save to list & Close"", depois clique em ""Continuar"""
-uiMessage$ ["PT", "SavePicture"]	= "Salvar imagem"
-uiMessage$ ["PT", "DoContinue"]		= "Você quer continuar?"
-uiMessage$ ["PT", "SelectSound1"]	= "Selecione o som e continue"
-uiMessage$ ["PT", "SelectSound2"]	= "É possível remover sons indesejados da seleção"
-uiMessage$ ["PT", "SelectSound3"]	= "Selecione a parte indesejada, então escolha ""Cut"" no menu ""Edit"""
-uiMessage$ ["PT", "Stopped"]		= "VowelTriangle parou"
-uiMessage$ ["PT", "ErrorSound"]		= "Erro: não há som"
-uiMessage$ ["PT", "Nothing to do"] 	= "Nada para fazer"
-uiMessage$ ["PT", "No readable recording selected "] = "Nenhum registro utilizável foi selecionado"
-
-uiMessage$ ["PT", "Interface Language"] = "Idioma (Language)"
-uiMessage$ ["PT", "Speaker is a"]	= "O falante é um(a)"
-uiMessage$ ["PT", "Male"] 			= "Homem ♂"
-uiMessage$ ["PT", "Female"] 		= "Mulher ♀"
-uiMessage$ ["PT", "Automatic"] 		= "Auto-seleção"
-uiMessage$ ["PT", "Experimental"] 	= "Selecione o método de rastreamento formant"
-uiMessage$ ["PT", "Continue"]		= "Continuar"
-uiMessage$ ["PT", "Done"]			= "Terminado"
-uiMessage$ ["PT", "Stop"]			= "Pare"
-uiMessage$ ["PT", "Open"]			= "Abrir"
-uiMessage$ ["PT", "Record"]			= "Gravar"
-uiMessage$ ["PT", "Help"]           = "Help"
-uiMessage$ ["PT", "untitled"] 		= "sem título"
-uiMessage$ ["PT", "Title"] 			= "Título"
-uiMessage$ ["PT", "Vowels"]         = "Vogais"
-uiMessage$ ["PT", "Vowel Tier"]     = "Tier de vogal"
-
-# SAMPA vowels
-vowels$ ["PT"] = " i e E a 6 O o u @ i~ e~ 6~ o~ u~ aw iw ew Ew ow aj ej Ej Oj oj 6~j~ e~j~ o~j~ u~j~ "
-
-#######################################################################
-#
-# Italian
-uiMessage$ ["IT", "PauseRecord"]	= "Registra un discorso continuo"
-uiMessage$ ["IT", "Record1"]		= "Salva ##discorso continuo#"
-uiMessage$ ["IT", "Record2"]		= "Per favore, preparati a iniziare"
-uiMessage$ ["IT", "Record3"]		= "Seleziona il discorso che vuoi analizzare"
-uiMessage$ ["IT", "Open1"]			= "Apri la registrazione che contiene il discorso"
-uiMessage$ ["IT", "Open2"]			= "Seleziona il discorso che vuoi analizzare"
-uiMessage$ ["IT", "Open3"]          = "Apri il file contenente le etichette vocaliche"
-uiMessage$ ["IT", "Corneri"]		= "s##ì#"
-uiMessage$ ["IT", "Corneru"]		= "##u#si"
-uiMessage$ ["IT", "Cornera"]		= "sar##à#"
-uiMessage$ ["IT", "DistanceTitle"]	= "Lunghezza relativa (N)"
-uiMessage$ ["IT", "AreaTitle"]		= "Superficie relativa"
-uiMessage$ ["IT", "Area1"]			= "1"
-uiMessage$ ["IT", "Area2"]			= "2"
-uiMessage$ ["IT", "AreaN"]			= "N"
-uiMessage$ ["IT", "VTL"] 			= "Tratto vocale"
-                                                                            
-uiMessage$ ["IT", "LogFile"]		= "Scrivi un file di registrazione in una tabella (""-"" scrivi nella finestra delle informazioni)"
-uiMessage$ ["IT", "CommentContinue"]= "Clicca su ""Continua"" se vuoi analizzare più campioni vocali"
-uiMessage$ ["IT", "CommentOpen"]	= "Fare clic su ""Apri"" e selezionare un record"
-uiMessage$ ["IT", "CommentLabel"]   = "Usa segmentazione fonemi (opzionale)"
-uiMessage$ ["IT", "CommentRecord"]	= "Fai clic su ""Registra"" e inizia a parlare"
-uiMessage$ ["IT", "CommentList"]	= "Registra suono, ""Save to list & Close"", quindi fai clic su ""Continua"""
-uiMessage$ ["IT", "SavePicture"]	= "Salva immagine"
-uiMessage$ ["IT", "DoContinue"]		= "Vuoi continuare?"
-uiMessage$ ["IT", "SelectSound1"]	= "Seleziona il suono e continua"
-uiMessage$ ["IT", "SelectSound2"]	= "È possibile rimuovere i suoni indesiderati dalla selezione"
-uiMessage$ ["IT", "SelectSound3"]	= "Seleziona la parte indesiderata, quindi scegli ""Cut"" dal menu ""Edit"""
-uiMessage$ ["IT", "Stopped"]		= "VowelTriangle si è fermato"
-uiMessage$ ["IT", "ErrorSound"]		= "Errore: non c'è suono"
-uiMessage$ ["IT", "Nothing to do"] 	= "Niente da fare"
-uiMessage$ ["IT", "No readable recording selected "] = "Nessun record utilizzabile è stato selezionato "
-
-uiMessage$ ["IT", "Interface Language"] = "Lingua (Language)"
-uiMessage$ ["IT", "Speaker is a"]	= "L oratore è un(a)"
-uiMessage$ ["IT", "Male"] 			= "Uomo ♂"
-uiMessage$ ["IT", "Female"] 		= "Donna ♀"
-uiMessage$ ["IT", "Automatic"] 		= "Auto-selezione"
-uiMessage$ ["IT", "Experimental"] 	= "Seleziona il metodo di tracciamento dei formanti"
-uiMessage$ ["IT", "Continue"]		= "Continua"
-uiMessage$ ["IT", "Done"]			= "Finito"
-uiMessage$ ["IT", "Stop"]			= "Fermare"
-uiMessage$ ["IT", "Open"]			= "Apri"
-uiMessage$ ["IT", "Record"]			= "Registra"
-uiMessage$ ["IT", "Help"]           = "Help"
-uiMessage$ ["IT", "untitled"] 		= "senza titolo"
-uiMessage$ ["IT", "Title"] 			= "Titolo"
-uiMessage$ ["IT", "Vowels"]         = "Vocali"
-uiMessage$ ["IT", "Vowel Tier"]     = "Tier Vocale"
-
-# SAMPA vowels
-vowels$ ["IT"] = " i e E a O o u: "
-
-#############################################################
-#
-# To add a new interface language, translate the text below
-# and substitute in the correct places. Keep the double quotes "" intact
-# Replace the "EN" in the ''uiMessage$ ["EN",'' to the code you
-# need, should be the ISO country code. Then add the new language 
-# in the options (following "English" etc.)
-# and the code following the endPause below.
-#
-# "Record continuous speech"
-# "Record the ##continuous speech#"
-# "Please be ready to start"
-# "Select the speech you want to analyse"
-# "Open the recording containing the speech"
-# "Select the speech you want to analyse"
-# "Open the file containing the vowel labels"
-# "h##ea#t"
-# "h##oo#t"
-# "h##a#t"
-# "Rel. Distance (N)"
-# "Rel. Area"
-# "1"
-# "2"
-# "N"
-# "Vocal tract"
-
-# "Write log to table (""-"" write to the info window)"
-# "Click on ""Continue"" if you want to analyze more speech samples"
-# "Click on ""Open"" and select a recording"
-# "Use phoneme segmentation (optional)"
-# "Click on ""Record"" and start speaking"
-# "Record sound, ""Save to list & Close"", then click ""Continue"""
-# "Save picture"
-# "Do you want to continue?"
-# "Select the sound and continue"
-# "It is possible to remove unwanted sounds from the selection"
-# "Select the unwanted part and then choose ""Cut"" from the ""Edit"" menu"
-# "Vowel Triangle stopped"
-# "Error: Not a sound "
-# "Nothing to do"
-# "No readable recording selected "
-
-# "Language"
-# "Speaker is a"
-# "Male ♂"
-# "Female ♀"
-# "Automatic"
-# "Select formant tracking method"
-# "Continue"
-# "Done"
-# "Stop"
-# "Open"
-# "Record"
-# "untitled"
-# "Title"
-# "Vowels"
-# "Vowel tier"
-
-# Also, find out what the relevant (SAMPA) vowel symbols for this new language are
-# vowels$ ["EN"] = " @ { } A E Q O O: o i I u U 6 V i: O: u: aU OI oU eI aI "
-#
-##############################################################
-
-
-#######################################################################
-#
-# Formant values according to 
-# IFA corpus averages from FPA isolated vowels
-
-###############################################
-#
-# Split-Levinson (SL)
-#
-###############################################
-
-# Male 
-phonemes ["SL", "M", "A", "F1"] = 696
-phonemes ["SL", "M", "A", "F2"] = 1066
-phonemes ["SL", "M", "E", "F1"] = 552
-phonemes ["SL", "M", "E", "F2"] = 1659
-phonemes ["SL", "M", "I", "F1"] = 378
-phonemes ["SL", "M", "I", "F2"] = 1869
-phonemes ["SL", "M", "O", "F1"] = 483
-phonemes ["SL", "M", "O", "F2"] = 726
-phonemes ["SL", "M", "Y", "F1"] = 418
-phonemes ["SL", "M", "Y", "F2"] = 1455
-phonemes ["SL", "M", "Y:", "F1"] = 386
-phonemes ["SL", "M", "Y:", "F2"] = 1492
-phonemes ["SL", "M", "a", "F1"] = 789
-phonemes ["SL", "M", "a", "F2"] = 1291
-phonemes ["SL", "M", "au", "F1"] = 584
-phonemes ["SL", "M", "au", "F2"] = 959
-phonemes ["SL", "M", "e", "F1"] = 372
-phonemes ["SL", "M", "e", "F2"] = 1960
-phonemes ["SL", "M", "ei", "F1"] = 500
-phonemes ["SL", "M", "ei", "F2"] = 1733
-phonemes ["SL", "M", "i", "F1"] = 260
-phonemes ["SL", "M", "i", "F2"] = 1972
-phonemes ["SL", "M", "o", "F1"] = 427
-phonemes ["SL", "M", "o", "F2"] = 744
-phonemes ["SL", "M", "u", "F1"] = 288
-phonemes ["SL", "M", "u", "F2"] = 666
-phonemes ["SL", "M", "ui", "F1"] = 495
-phonemes ["SL", "M", "ui", "F2"] = 1469
-phonemes ["SL", "M", "y", "F1"] = 268
-phonemes ["SL", "M", "y", "F2"] = 1581
-# Guessed
-phonemes ["SL", "M", "@", "F1"] = 417.7000
-phonemes ["SL", "M", "@", "F2"] = 1455.100
-
-# Female 
-phonemes ["SL", "F", "A", "F1"] = 818
-phonemes ["SL", "F", "A", "F2"] = 1197
-phonemes ["SL", "F", "E", "F1"] = 668
-phonemes ["SL", "F", "E", "F2"] = 1748
-phonemes ["SL", "F", "I", "F1"] = 429
-phonemes ["SL", "F", "I", "F2"] = 1937
-phonemes ["SL", "F", "O", "F1"] = 571
-phonemes ["SL", "F", "O", "F2"] = 882
-phonemes ["SL", "F", "Y", "F1"] = 496
-phonemes ["SL", "F", "Y", "F2"] = 1636
-phonemes ["SL", "F", "Y:", "F1"] = 431
-phonemes ["SL", "F", "Y:", "F2"] = 1695
-phonemes ["SL", "F", "a", "F1"] = 854
-phonemes ["SL", "F", "a", "F2"] = 1436
-phonemes ["SL", "F", "au", "F1"] = 648
-phonemes ["SL", "F", "au", "F2"] = 1057
-phonemes ["SL", "F", "e", "F1"] = 430
-phonemes ["SL", "F", "e", "F2"] = 1862
-phonemes ["SL", "F", "ei", "F1"] = 620
-phonemes ["SL", "F", "ei", "F2"] = 1718
-phonemes ["SL", "F", "i", "F1"] = 294
-phonemes ["SL", "F", "i", "F2"] = 1855
-phonemes ["SL", "F", "o", "F1"] = 528
-phonemes ["SL", "F", "o", "F2"] = 894
-phonemes ["SL", "F", "u", "F1"] = 376
-phonemes ["SL", "F", "u", "F2"] = 735
-phonemes ["SL", "F", "ui", "F1"] = 613
-phonemes ["SL", "F", "ui", "F2"] = 1559
-phonemes ["SL", "F", "y", "F1"] = 321
-phonemes ["SL", "F", "y", "F2"] = 1742
-# Guessed
-phonemes ["SL", "F", "@", "F1"] = 500.5
-phonemes ["SL", "F", "@", "F2"] = 1706.6
-
-# Triangle
-# Male 
-phonemes ["SL", "M", "i_corner", "F1"] = phonemes ["SL", "M", "i", "F1"]/(2^(1/12))
-phonemes ["SL", "M", "i_corner", "F2"] = phonemes ["SL", "M", "i", "F2"]*(2^(1/12))
-phonemes ["SL", "M", "a_corner", "F1"] = phonemes ["SL", "M", "a", "F1"]*(2^(1/12))
-phonemes ["SL", "M", "a_corner", "F2"] = phonemes ["SL", "M", "a", "F2"]
-phonemes ["SL", "M", "u_corner", "F1"] = phonemes ["SL", "M", "u", "F1"]/(2^(1/12))
-phonemes ["SL", "M", "u_corner", "F2"] = phonemes ["SL", "M", "u", "F2"]/(2^(1/12))
-# @_center is not fixed but derived from current corners
-phonemes ["SL", "M", "@_center", "F1"] =(phonemes ["SL", "M", "i_corner", "F1"]*phonemes ["SL", "M", "u_corner", "F1"]*phonemes ["SL", "M", "a_corner", "F1"])^(1/3)
-phonemes ["SL", "M", "@_center", "F2"] = (phonemes ["SL", "M", "i_corner", "F2"]*phonemes ["SL", "M", "u_corner", "F2"]*phonemes ["SL", "M", "a_corner", "F2"])^(1/3)
-
-# Female 
-phonemes ["SL", "F", "i_corner", "F1"] = phonemes ["SL", "F", "i", "F1"]/(2^(1/12))
-phonemes ["SL", "F", "i_corner", "F2"] = phonemes ["SL", "F", "i", "F2"]*(2^(1/12))
-phonemes ["SL", "F", "a_corner", "F1"] = phonemes ["SL", "F", "a", "F1"]*(2^(1/12))
-phonemes ["SL", "F", "a_corner", "F2"] = phonemes ["SL", "F", "a", "F2"]
-phonemes ["SL", "F", "u_corner", "F1"] = phonemes ["SL", "F", "u", "F1"]/(2^(1/12))
-phonemes ["SL", "F", "u_corner", "F2"] = phonemes ["SL", "F", "u", "F2"]/(2^(1/12))
-# @_center is not fixed but derived from current corners
-phonemes ["SL", "F", "@_center", "F1"] =(phonemes ["SL", "F", "i_corner", "F1"]*phonemes ["SL", "F", "u_corner", "F1"]*phonemes ["SL", "F", "a_corner", "F1"])^(1/3)
-phonemes ["SL", "F", "@_center", "F2"] = (phonemes ["SL", "F", "i_corner", "F2"]*phonemes ["SL", "F", "u_corner", "F2"]*phonemes ["SL", "F", "a_corner", "F2"])^(1/3)
-
-# Vocal Tract Length
-# Sex  VTL		Phi
-# F    15.94	553.52
-# M    17.11	516.05
-averagePhi_VTL ["SL", "F"] = 553.52
-averagePhi_VTL ["SL", "M"] = 516.05
-# Classification boundary
-averagePhi_VTL ["SL", "A"] = 529.80
-
-
-###############################################
-#
-# Burg's method formant algorithm (Burg)
-#
-###############################################
-
-# Male 
-phonemes ["Burg", "M", "A", "F1"] = 743
-phonemes ["Burg", "M", "A", "F2"] = 1075
-phonemes ["Burg", "M", "E", "F1"] = 572
-phonemes ["Burg", "M", "E", "F2"] = 1802
-phonemes ["Burg", "M", "I", "F1"] = 383
-phonemes ["Burg", "M", "I", "F2"] = 2037
-phonemes ["Burg", "M", "O", "F1"] = 499
-phonemes ["Burg", "M", "O", "F2"] = 712
-phonemes ["Burg", "M", "Y", "F1"] = 425
-phonemes ["Burg", "M", "Y", "F2"] = 1482
-phonemes ["Burg", "M", "Y:", "F1"] = 388
-phonemes ["Burg", "M", "Y:", "F2"] = 1514
-phonemes ["Burg", "M", "a", "F1"] = 837
-phonemes ["Burg", "M", "a", "F2"] = 1299
-phonemes ["Burg", "M", "au", "F1"] = 606
-phonemes ["Burg", "M", "au", "F2"] = 962
-phonemes ["Burg", "M", "e", "F1"] = 376
-phonemes ["Burg", "M", "e", "F2"] = 2117
-phonemes ["Burg", "M", "ei", "F1"] = 513
-phonemes ["Burg", "M", "ei", "F2"] = 1855
-phonemes ["Burg", "M", "i", "F1"] = 261
-phonemes ["Burg", "M", "i", "F2"] = 2183
-phonemes ["Burg", "M", "o", "F1"] = 446
-phonemes ["Burg", "M", "o", "F2"] = 721
-phonemes ["Burg", "M", "u", "F1"] = 293
-phonemes ["Burg", "M", "u", "F2"] = 654
-phonemes ["Burg", "M", "ui", "F1"] = 501
-phonemes ["Burg", "M", "ui", "F2"] = 1506
-phonemes ["Burg", "M", "y", "F1"] = 268
-phonemes ["Burg", "M", "y", "F2"] = 1608
-
-# Guessed
-phonemes ["Burg", "M", "@", "F1"] = 373
-phonemes ["Burg", "M", "@", "F2"] = 1247
-
-# Female
-phonemes ["Burg", "F", "A", "F1"] = 878
-phonemes ["Burg", "F", "A", "F2"] = 1236
-phonemes ["Burg", "F", "E", "F1"] = 685
-phonemes ["Burg", "F", "E", "F2"] = 1956
-phonemes ["Burg", "F", "I", "F1"] = 435
-phonemes ["Burg", "F", "I", "F2"] = 2260
-phonemes ["Burg", "F", "O", "F1"] = 584
-phonemes ["Burg", "F", "O", "F2"] = 885
-phonemes ["Burg", "F", "Y", "F1"] = 504
-phonemes ["Burg", "F", "Y", "F2"] = 1674
-phonemes ["Burg", "F", "Y:", "F1"] = 437
-phonemes ["Burg", "F", "Y:", "F2"] = 1745
-phonemes ["Burg", "F", "a", "F1"] = 938
-phonemes ["Burg", "F", "a", "F2"] = 1530
-phonemes ["Burg", "F", "au", "F1"] = 677
-phonemes ["Burg", "F", "au", "F2"] = 1074
-phonemes ["Burg", "F", "e", "F1"] = 440
-phonemes ["Burg", "F", "e", "F2"] = 2184
-phonemes ["Burg", "F", "ei", "F1"] = 633
-phonemes ["Burg", "F", "ei", "F2"] = 1951
-phonemes ["Burg", "F", "i", "F1"] = 309
-phonemes ["Burg", "F", "i", "F2"] = 2341
-phonemes ["Burg", "F", "o", "F1"] = 540
-phonemes ["Burg", "F", "o", "F2"] = 900
-phonemes ["Burg", "F", "u", "F1"] = 391
-phonemes ["Burg", "F", "u", "F2"] = 729
-phonemes ["Burg", "F", "ui", "F1"] = 632
-phonemes ["Burg", "F", "ui", "F2"] = 1655
-phonemes ["Burg", "F", "y", "F1"] = 323
-phonemes ["Burg", "F", "y", "F2"] = 1803
-
-# Guessed
-phonemes ["Burg", "F", "@", "F1"] = 440
-phonemes ["Burg", "F", "@", "F2"] = 1415
-
-# Triangle
-# Male 
-phonemes ["Burg", "M", "i_corner", "F1"] = phonemes ["Burg", "M", "i", "F1"]/(2^(1/12))
-phonemes ["Burg", "M", "i_corner", "F2"] = phonemes ["Burg", "M", "i", "F2"]*(2^(1/12))
-phonemes ["Burg", "M", "a_corner", "F1"] = phonemes ["Burg", "M", "a", "F1"]*(2^(1/12))
-phonemes ["Burg", "M", "a_corner", "F2"] = phonemes ["Burg", "M", "a", "F2"]
-phonemes ["Burg", "M", "u_corner", "F1"] = phonemes ["Burg", "M", "u", "F1"]/(2^(1/12))
-phonemes ["Burg", "M", "u_corner", "F2"] = phonemes ["Burg", "M", "u", "F2"]/(2^(1/12))
-# @_center is not fixed but derived from current corners
-phonemes ["Burg", "M", "@_center", "F1"] =(phonemes ["Burg", "M", "i_corner", "F1"]*phonemes ["Burg", "M", "u_corner", "F1"]*phonemes ["Burg", "M", "a_corner", "F1"])^(1/3)
-phonemes ["Burg", "M", "@_center", "F2"] = (phonemes ["Burg", "M", "i_corner", "F2"]*phonemes ["Burg", "M", "u_corner", "F2"]*phonemes ["Burg", "M", "a_corner", "F2"])^(1/3)
-
-# Female
-phonemes ["Burg", "F", "i_corner", "F1"] = phonemes ["Burg", "F", "i", "F1"]/(2^(1/12))
-phonemes ["Burg", "F", "i_corner", "F2"] = phonemes ["Burg", "F", "i", "F2"]*(2^(1/12))
-phonemes ["Burg", "F", "a_corner", "F1"] = phonemes ["Burg", "F", "a", "F1"]*(2^(1/12))
-phonemes ["Burg", "F", "a_corner", "F2"] = phonemes ["Burg", "F", "a", "F2"]
-phonemes ["Burg", "F", "u_corner", "F1"] = phonemes ["Burg", "F", "u", "F1"]/(2^(1/12))
-phonemes ["Burg", "F", "u_corner", "F2"] = phonemes ["Burg", "F", "u", "F2"]/(2^(1/12))
-# @_center is not fixed but derived from current corners
-phonemes ["Burg", "F", "@_center", "F1"] =(phonemes ["Burg", "F", "i_corner", "F1"]*phonemes ["Burg", "F", "u_corner", "F1"]*phonemes ["Burg", "F", "a_corner", "F1"])^(1/3)
-phonemes ["Burg", "F", "@_center", "F2"] = (phonemes ["Burg", "F", "i_corner", "F2"]*phonemes ["Burg", "F", "u_corner", "F2"]*phonemes ["Burg", "F", "a_corner", "F2"])^(1/3)
-
-# Vocal Tract Length
-# Sex  VTL   Phi
-# F    15.39	573.59
-# M    16.62	531.65
-averagePhi_VTL ["Burg", "F"] = 573.59
-averagePhi_VTL ["Burg", "M"] = 531.65
-# Classification boundary
-averagePhi_VTL ["Burg", "A"] = 529.48
-
-
-###############################################
-#
-# Robust formant algorithm (Robust)
-#
-###############################################
-
-# Male
-phonemes ["Robust", "M", "A", "F1"] = 680
-phonemes ["Robust", "M", "A", "F2"] = 1038
-phonemes ["Robust", "M", "E", "F1"] = 510
-phonemes ["Robust", "M", "E", "F2"] = 1900
-phonemes ["Robust", "M", "I", "F1"] = 354
-phonemes ["Robust", "M", "I", "F2"] = 2167
-phonemes ["Robust", "M", "O", "F1"] = 446
-phonemes ["Robust", "M", "O", "F2"] = 680
-phonemes ["Robust", "M", "Y", "F1"] = 389
-phonemes ["Robust", "M", "Y", "F2"] = 1483
-phonemes ["Robust", "M", "Y:", "F1"] = 370
-phonemes ["Robust", "M", "Y:", "F2"] = 1508
-phonemes ["Robust", "M", "a", "F1"] = 797
-phonemes ["Robust", "M", "a", "F2"] = 1328
-phonemes ["Robust", "M", "au", "F1"] = 542
-phonemes ["Robust", "M", "au", "F2"] = 945
-phonemes ["Robust", "M", "e", "F1"] = 351
-phonemes ["Robust", "M", "e", "F2"] = 2180
-phonemes ["Robust", "M", "ei", "F1"] = 471
-phonemes ["Robust", "M", "ei", "F2"] = 1994
-phonemes ["Robust", "M", "i", "F1"] = 242
-phonemes ["Robust", "M", "i", "F2"] = 2330
-phonemes ["Robust", "M", "o", "F1"] = 393
-phonemes ["Robust", "M", "o", "F2"] = 692
-phonemes ["Robust", "M", "u", "F1"] = 269
-phonemes ["Robust", "M", "u", "F2"] = 626
-phonemes ["Robust", "M", "ui", "F1"] = 475
-phonemes ["Robust", "M", "ui", "F2"] = 1523
-phonemes ["Robust", "M", "y", "F1"] = 254
-phonemes ["Robust", "M", "y", "F2"] = 1609
-
-# Guessed
-phonemes ["Robust", "M", "@", "F1"] = 373
-phonemes ["Robust", "M", "@", "F2"] = 1247
-
-# Female
-phonemes ["Robust", "F", "A", "F1"] = 826
-phonemes ["Robust", "F", "A", "F2"] = 1208
-phonemes ["Robust", "F", "E", "F1"] = 648
-phonemes ["Robust", "F", "E", "F2"] = 2136
-phonemes ["Robust", "F", "I", "F1"] = 411
-phonemes ["Robust", "F", "I", "F2"] = 2432
-phonemes ["Robust", "F", "O", "F1"] = 527
-phonemes ["Robust", "F", "O", "F2"] = 836
-phonemes ["Robust", "F", "Y", "F1"] = 447
-phonemes ["Robust", "F", "Y", "F2"] = 1698
-phonemes ["Robust", "F", "Y:", "F1"] = 404
-phonemes ["Robust", "F", "Y:", "F2"] = 1750
-phonemes ["Robust", "F", "a", "F1"] = 942
-phonemes ["Robust", "F", "a", "F2"] = 1550
-phonemes ["Robust", "F", "au", "F1"] = 600
-phonemes ["Robust", "F", "au", "F2"] = 1048
-phonemes ["Robust", "F", "e", "F1"] = 409
-phonemes ["Robust", "F", "e", "F2"] = 2444
-phonemes ["Robust", "F", "ei", "F1"] = 618
-phonemes ["Robust", "F", "ei", "F2"] = 2196
-phonemes ["Robust", "F", "i", "F1"] = 271
-phonemes ["Robust", "F", "i", "F2"] = 2667
-phonemes ["Robust", "F", "o", "F1"] = 470
-phonemes ["Robust", "F", "o", "F2"] = 879
-phonemes ["Robust", "F", "u", "F1"] = 334
-phonemes ["Robust", "F", "u", "F2"] = 686
-phonemes ["Robust", "F", "ui", "F1"] = 594
-phonemes ["Robust", "F", "ui", "F2"] = 1669
-phonemes ["Robust", "F", "y", "F1"] = 285
-phonemes ["Robust", "F", "y", "F2"] = 1765
-
-# Guessed
-phonemes ["Robust", "F", "@", "F1"] = 440
-phonemes ["Robust", "F", "@", "F2"] = 1415
-
-# Triangle
-# Male
-phonemes ["Robust", "M", "i_corner", "F1"] = phonemes ["Robust", "M", "i", "F1"]/(2^(1/12))
-phonemes ["Robust", "M", "i_corner", "F2"] = phonemes ["Robust", "M", "i", "F2"]*(2^(1/12))
-phonemes ["Robust", "M", "a_corner", "F1"] = phonemes ["Robust", "M", "a", "F1"]*(2^(1/12))
-phonemes ["Robust", "M", "a_corner", "F2"] = phonemes ["Robust", "M", "a", "F2"]
-phonemes ["Robust", "M", "u_corner", "F1"] = phonemes ["Robust", "M", "u", "F1"]/(2^(1/12))
-phonemes ["Robust", "M", "u_corner", "F2"] = phonemes ["Robust", "M", "u", "F2"]/(2^(1/12))
-# @_center is not fixed but derived from current corners
-phonemes ["Robust", "M", "@_center", "F1"] =(phonemes ["Robust", "M", "i_corner", "F1"]*phonemes ["Robust", "M", "u_corner", "F1"]*phonemes ["Robust", "M", "a_corner", "F1"])^(1/3)
-phonemes ["Robust", "M", "@_center", "F2"] = (phonemes ["Robust", "M", "i_corner", "F2"]*phonemes ["Robust", "M", "u_corner", "F2"]*phonemes ["Robust", "M", "a_corner", "F2"])^(1/3)
-                                              
-# Female
-phonemes ["Robust", "F", "i_corner", "F1"] = phonemes ["Robust", "F", "i", "F1"]/(2^(1/12))
-phonemes ["Robust", "F", "i_corner", "F2"] = phonemes ["Robust", "F", "i", "F2"]*(2^(1/12))
-phonemes ["Robust", "F", "a_corner", "F1"] = phonemes ["Robust", "F", "a", "F1"]*(2^(1/12))
-phonemes ["Robust", "F", "a_corner", "F2"] = phonemes ["Robust", "F", "a", "F2"]
-phonemes ["Robust", "F", "u_corner", "F1"] = phonemes ["Robust", "F", "u", "F1"]/(2^(1/12))
-phonemes ["Robust", "F", "u_corner", "F2"] = phonemes ["Robust", "F", "u", "F2"]/(2^(1/12))
-# @_center is not fixed but derived from current corners
-phonemes ["Robust", "F", "@_center", "F1"] =(phonemes ["Robust", "F", "i_corner", "F1"]*phonemes ["Robust", "F", "u_corner", "F1"]*phonemes ["Robust", "F", "a_corner", "F1"])^(1/3)
-phonemes ["Robust", "F", "@_center", "F2"] = (phonemes ["Robust", "F", "i_corner", "F2"]*phonemes ["Robust", "F", "u_corner", "F2"]*phonemes ["Robust", "F", "a_corner", "F2"])^(1/3)
-
-# Vocal Tract Length
-# Sex  VTL   Phi
-# F    15.24	579.27
-# M    16.29	542.28
-averagePhi_VTL ["Robust", "F"] = 579.27
-averagePhi_VTL ["Robust", "M"] = 542.28
-# Classification boundary
-averagePhi_VTL ["Robust", "A"] = 546.36
-
-###############################################
-#
-# KeepAll formant algorithm (KeepAll)
-#
-###############################################
-
-# Male
-phonemes ["KeepAll", "M", "A", "F1"] = 680
-phonemes ["KeepAll", "M", "A", "F2"] = 1038
-phonemes ["KeepAll", "M", "E", "F1"] = 510
-phonemes ["KeepAll", "M", "E", "F2"] = 1900
-phonemes ["KeepAll", "M", "I", "F1"] = 354
-phonemes ["KeepAll", "M", "I", "F2"] = 2167
-phonemes ["KeepAll", "M", "O", "F1"] = 446
-phonemes ["KeepAll", "M", "O", "F2"] = 680
-phonemes ["KeepAll", "M", "Y", "F1"] = 389
-phonemes ["KeepAll", "M", "Y", "F2"] = 1483
-phonemes ["KeepAll", "M", "Y:", "F1"] = 370
-phonemes ["KeepAll", "M", "Y:", "F2"] = 1508
-phonemes ["KeepAll", "M", "a", "F1"] = 797
-phonemes ["KeepAll", "M", "a", "F2"] = 1328
-phonemes ["KeepAll", "M", "au", "F1"] = 542
-phonemes ["KeepAll", "M", "au", "F2"] = 945
-phonemes ["KeepAll", "M", "e", "F1"] = 351
-phonemes ["KeepAll", "M", "e", "F2"] = 2180
-phonemes ["KeepAll", "M", "ei", "F1"] = 471
-phonemes ["KeepAll", "M", "ei", "F2"] = 1994
-phonemes ["KeepAll", "M", "i", "F1"] = 242
-phonemes ["KeepAll", "M", "i", "F2"] = 2330
-phonemes ["KeepAll", "M", "o", "F1"] = 393
-phonemes ["KeepAll", "M", "o", "F2"] = 692
-phonemes ["KeepAll", "M", "u", "F1"] = 269
-phonemes ["KeepAll", "M", "u", "F2"] = 626
-phonemes ["KeepAll", "M", "ui", "F1"] = 475
-phonemes ["KeepAll", "M", "ui", "F2"] = 1523
-phonemes ["KeepAll", "M", "y", "F1"] = 254
-phonemes ["KeepAll", "M", "y", "F2"] = 1609
-
-# Guessed
-phonemes ["KeepAll", "M", "@", "F1"] = 373
-phonemes ["KeepAll", "M", "@", "F2"] = 1247
-
-# Female
-phonemes ["KeepAll", "F", "A", "F1"] = 826
-phonemes ["KeepAll", "F", "A", "F2"] = 1208
-phonemes ["KeepAll", "F", "E", "F1"] = 648
-phonemes ["KeepAll", "F", "E", "F2"] = 2136
-phonemes ["KeepAll", "F", "I", "F1"] = 411
-phonemes ["KeepAll", "F", "I", "F2"] = 2432
-phonemes ["KeepAll", "F", "O", "F1"] = 527
-phonemes ["KeepAll", "F", "O", "F2"] = 836
-phonemes ["KeepAll", "F", "Y", "F1"] = 447
-phonemes ["KeepAll", "F", "Y", "F2"] = 1698
-phonemes ["KeepAll", "F", "Y:", "F1"] = 404
-phonemes ["KeepAll", "F", "Y:", "F2"] = 1750
-phonemes ["KeepAll", "F", "a", "F1"] = 942
-phonemes ["KeepAll", "F", "a", "F2"] = 1550
-phonemes ["KeepAll", "F", "au", "F1"] = 600
-phonemes ["KeepAll", "F", "au", "F2"] = 1048
-phonemes ["KeepAll", "F", "e", "F1"] = 409
-phonemes ["KeepAll", "F", "e", "F2"] = 2444
-phonemes ["KeepAll", "F", "ei", "F1"] = 618
-phonemes ["KeepAll", "F", "ei", "F2"] = 2196
-phonemes ["KeepAll", "F", "i", "F1"] = 271
-phonemes ["KeepAll", "F", "i", "F2"] = 2667
-phonemes ["KeepAll", "F", "o", "F1"] = 470
-phonemes ["KeepAll", "F", "o", "F2"] = 879
-phonemes ["KeepAll", "F", "u", "F1"] = 334
-phonemes ["KeepAll", "F", "u", "F2"] = 686
-phonemes ["KeepAll", "F", "ui", "F1"] = 594
-phonemes ["KeepAll", "F", "ui", "F2"] = 1669
-phonemes ["KeepAll", "F", "y", "F1"] = 285
-phonemes ["KeepAll", "F", "y", "F2"] = 1765
-
-# Guessed
-phonemes ["KeepAll", "F", "@", "F1"] = 440
-phonemes ["KeepAll", "F", "@", "F2"] = 1415
-
-# Triangle
-# Male
-phonemes ["KeepAll", "M", "i_corner", "F1"] = phonemes ["KeepAll", "M", "i", "F1"]/(2^(1/12))
-phonemes ["KeepAll", "M", "i_corner", "F2"] = phonemes ["KeepAll", "M", "i", "F2"]*(2^(1/12))
-phonemes ["KeepAll", "M", "a_corner", "F1"] = phonemes ["KeepAll", "M", "a", "F1"]*(2^(1/12))
-phonemes ["KeepAll", "M", "a_corner", "F2"] = phonemes ["KeepAll", "M", "a", "F2"]
-phonemes ["KeepAll", "M", "u_corner", "F1"] = phonemes ["KeepAll", "M", "u", "F1"]/(2^(1/12))
-phonemes ["KeepAll", "M", "u_corner", "F2"] = phonemes ["KeepAll", "M", "u", "F2"]/(2^(1/12))
-# @_center is not fixed but derived from current corners
-phonemes ["KeepAll", "M", "@_center", "F1"] =(phonemes ["KeepAll", "M", "i_corner", "F1"]*phonemes ["KeepAll", "M", "u_corner", "F1"]*phonemes ["KeepAll", "M", "a_corner", "F1"])^(1/3)
-phonemes ["KeepAll", "M", "@_center", "F2"] = (phonemes ["KeepAll", "M", "i_corner", "F2"]*phonemes ["KeepAll", "M", "u_corner", "F2"]*phonemes ["KeepAll", "M", "a_corner", "F2"])^(1/3)
-                                              
-# Female
-phonemes ["KeepAll", "F", "i_corner", "F1"] = phonemes ["KeepAll", "F", "i", "F1"]/(2^(1/12))
-phonemes ["KeepAll", "F", "i_corner", "F2"] = phonemes ["KeepAll", "F", "i", "F2"]*(2^(1/12))
-phonemes ["KeepAll", "F", "a_corner", "F1"] = phonemes ["KeepAll", "F", "a", "F1"]*(2^(1/12))
-phonemes ["KeepAll", "F", "a_corner", "F2"] = phonemes ["KeepAll", "F", "a", "F2"]
-phonemes ["KeepAll", "F", "u_corner", "F1"] = phonemes ["KeepAll", "F", "u", "F1"]/(2^(1/12))
-phonemes ["KeepAll", "F", "u_corner", "F2"] = phonemes ["KeepAll", "F", "u", "F2"]/(2^(1/12))
-# @_center is not fixed but derived from current corners
-phonemes ["KeepAll", "F", "@_center", "F1"] =(phonemes ["KeepAll", "F", "i_corner", "F1"]*phonemes ["KeepAll", "F", "u_corner", "F1"]*phonemes ["KeepAll", "F", "a_corner", "F1"])^(1/3)
-phonemes ["KeepAll", "F", "@_center", "F2"] = (phonemes ["KeepAll", "F", "i_corner", "F2"]*phonemes ["KeepAll", "F", "u_corner", "F2"]*phonemes ["KeepAll", "F", "a_corner", "F2"])^(1/3)
-
-# Vocal Tract Length
-# Sex  VTL   Phi
-# F    15.39	573.59
-# M    16.62	531.65
-averagePhi_VTL ["KeepAll", "F"] = 573.59
-averagePhi_VTL ["KeepAll", "M"] = 531.65
-# Classification boundary
-averagePhi_VTL ["KeepAll", "A"] = 529.48
-
-
-###############################################
-#
-# Start program: Non-Interactive
-#
-###############################################
-
-# Run as a non interactive program
-if input_table > 0
+	vowelString$ = ""
 	segmentTier = 0
 	labelFile$ = ""
 
-	selectObject: input_table
-	.numInputRows = Get number of rows
-	for .r to .numInputRows
+	# 
+	#######################################################################
+	# 
+	# Non-interactive (batch) use
+	# 
+	# Enter valid file path in input_file$ to run non-interactive (batch)
+	# or select a .csv or .tsv file when using "Open"
+	#
+	# The input table should have tab (.tsv) or semicolon (csv) separated 
+	# columns labeled: 
+	# Title, Speaker, File, Language, Log, Plotfile
+	# An example would be a semicolon separated list:
+	# F40L2VT2;F;IFAcorpus/chunks/F40L/F40L2VT1.aifc;NL;target/results.tsv;
+	# target/F40L2VT2.png
+	# 
+	# All files are used AS IS, and nothing is drawn unless a "Plotfile" 
+	# is entered.
+	#
+	# Optionally, columns named "VowelTier", "Vowels", and "LabelFile" 
+	# can be added containing the values for the use of existing 
+	# segmentations. If the sound input has a wildcard, the labelfile input 
+	# should have it too and result in a list of label files that has the 
+	# same order as those of the corresponding sound files. If a tier number
+	# is entered for the phoneme tier, and no Label filename, it is assumed
+	# label files have the same name as the corresponding audio file, and 
+	# the extension ".TextGrid". If no vowel symbol list is given, the 
+	# default SAMPA list for the laguage is used (Pinyin for ZH).
+	#
+	#######################################################################
+	#
+	# Add file path to start batch processing
+	#input_file$ = "concatlist.tsv"
+	input_file$ = ""
+
+	input_prefix$ = ""
+
+	# 
+	#######################################################################
+	# 
+	# Retrieve last saved settings
+	# 
+	#######################################################################
+	#
+	.defaultLanguage = 1
+	.preferencesLanguageFile$ = preferencesDirectory$+"/VowelTriangle.prefs"
+	.preferencesLang$ = ""
+	.formant_default = 2
+	if fileReadable(.preferencesLanguageFile$)
+		.preferences$ = readFile$(.preferencesLanguageFile$)
+		if index(.preferences$, "Language=") > 0
+			.preferencesLang$ = extractWord$(.preferences$, "Language=")
+		else
+			.preferencesLang$ = ""
+		endif
+		# Always assume that the preferences file could be corrupted
+		if index(.preferences$, "Formant=") > 0
+			.tmp$ = extractWord$(.preferences$, "Formant=")
+			if index(.tmp$, "Burg")
+				.formant_default = 2
+			elsif index(.tmp$, "Robust")
+				.formant_default = 3
+			elsif index(.tmp$, "KeepAll")
+				.formant_default = 4
+			endif
+		else
+			.formant_default = 1
+		endif
+		
+		# Always assume that the preferences file could be corrupted
+		if index(.preferences$, "VowelTier=") > 0
+			.tmp = extractNumber(.preferences$, "VowelTier=")
+			segmentTier = .tmp
+		else
+			segmentTier = 0
+		endif
+		
+		# Always assume that the preferences file could be corrupted
+		if index(.preferences$, "Vowels=") > 0
+			.tmp$ = extractLine$(.preferences$, "Vowels=")
+			vowelString$ = " "+.tmp$+" "
+		else
+			vowelString$ = ""
+		endif
+		
+	endif
+
+	.locale$ = "en"
+	if .preferencesLang$ <> ""
+		.locale$ = .preferencesLang$
+	else
+		if macintosh
+			.scratch$ = replace_regex$(temporaryDirectory$+"/scratch"+date$()+".txt", "\W", "_", 0)
+			runSystem_nocheck: "defaults read -g AppleLocale | cut -c 1-2 - > ",.scratch$
+			.locale$ = readFile$(.scratch$)
+			deleteFile: .scratch$
+		elsif unix
+			.locale$ = environment$("LANG")
+		elsif windows
+			.scratch$ = replace_regex$(temporaryDirectory$+"/scratch"+date$()+".txt", "\W", "_", 0)
+			runSystem_nocheck: "dism /online /get-intl > ",.scratch$
+			.locale$ = readFile$(.scratch$)
+			.locale$ = replace_regex$(.locale$, "\n", " ", 0)	
+			.locale$ = replace_regex$(.locale$, "^.*Default System UI language : (\S+).*", "\1", 0)
+			deleteFile: .scratch$	
+		endif
+		.locale$ = replace_regex$(.preferencesLang$, "(.)", "\U\1", 0)
+	endif
+
+	# Always assume that the preferences file could be corrupted
+	if startsWith(.locale$, "EN")
+		uiLanguage$ = "EN"
+		.defaultLanguage = 1
+	elsif startsWith(.locale$, "NL")
+		uiLanguage$ = "NL"
+		.defaultLanguage = 2
+	elsif startsWith(.locale$, "DE")
+		uiLanguage$ = "DE"
+		.defaultLanguage = 3
+	elsif startsWith(.locale$, "FR")
+		uiLanguage$ = "FR"
+		.defaultLanguage = 4
+	elsif startsWith(.locale$, "ZH")
+		uiLanguage$ = "ZH"
+		.defaultLanguage = 5
+	elsif startsWith(.locale$, "ES")
+		uiLanguage$ = "ES"
+		.defaultLanguage = 6
+	elsif startsWith(.locale$, "PT")
+		uiLanguage$ = "PT"
+		.defaultLanguage = 7
+	elsif startsWith(.locale$, "IT")
+		uiLanguage$ = "IT"
+		.defaultLanguage = 8
+	#elsif startsWith(.locale$, "MYLANGUAGE")
+	#	uiLanguage$ = "XX"
+	#	.defaultLanguage = 9
+	endif
+
+	.sp_default = 1
+	output_table$ = ""
+	vtl_normalization = 0
+
+	default_Dot_Radius = 0.01
+	dot_Radius_Cutoff = 300
+
+	# 
+	#######################################################################
+	# 
+	# Read input file for non-interactive (batch) use 
+	#
+
+	label REENTERINPUTFILEVT
+
+	input_table = -1
+	.continue = 1
+
+	#
+	# 
+	#######################################################################
+	#
+	# The input table should have tab (.tsv) or semicolon (csv) separated 
+	# columns labeled: 
+	# Title, Speaker, File, Language, Log, Plotfile
+	# An example would be a semicolon separated list:
+	# F40L2VT2;F;IFAcorpus/chunks/F40L/F40L2VT1.aifc;NL;target/results.tsv;
+	# target/F40L2VT2.png
+	# 
+	# All files are used AS IS, and nothing is drawn unless a "Plotfile" 
+	# is entered.
+	#
+	# Optionally, columns named "VowelTier", "Vowels", and "LabelFile" 
+	# can be added containing the values for the use of existing 
+	# segmentations. If the sound input has a wildcard, the labelfile input 
+	# should have it too and result in a list of label files that has the 
+	# same order as those of the corresponding sound files. If a tier number
+	# is entered for the phoneme tier, and no Label filename, it is assumed
+	# label files have the same name as the corresponding audio file, and 
+	# the extension ".TextGrid". If no vowel symbol list is given, the 
+	# default SAMPA list for the laguage is used (Pinyin for ZH).
+	#
+	label NONINTERACTIVEINPUTVT
+
+	if input_file$ <> "" and fileReadable(input_file$) and index_regex(input_file$, "(?i\.(tsv|Table|csv))")
+		if index_regex(input_file$, "(?i\.csv)$")
+			input_table = Read Table from semicolon-separated file: input_file$
+		else
+			input_table = Read Table from tab-separated file: input_file$
+		endif
+		.numRows = Get number of rows
+		.i = Get column index: "Log"
+		if .i <= 0
+			Append column: "Log"
+			for .r to .numRows
+				Set string value: .r, "Log", "-"
+			endfor
+		endif 
+		.i = Get column index: "Plotfile"
+		if .i <= 0
+			Append column: "Plotfile"
+			for .r to .numRows
+				Set string value: .r, "Plotfile", "-"
+			endfor
+		endif
+		# Set new shell (default) directory
+		defaultDirectory$ = replace_regex$(input_file$, "[/\\][^/\\]*$", "", 0)
+		input_prefix$ = defaultDirectory$ + "/"
+	endif
+
+	# When using a microphone:
+	.input$ = "Microphone"
+	.samplingFrequency = 44100
+	.recordingTime = 4
+
+	# 
+	#######################################################################
+	#
+	# Define Language dependend aspects, e.g., all messages
+	# 
+
+	# Select algorithm for calculating formants
+	# Alternatives: "SL", "Burg", "Robust", or "KeepAll"
+
+	# Vowel targets
+	targetFormantAlgorithm$ = "Robust"
+
+	# Plotting can be different from the target, in principle
+	plotFormantAlgorithm$ = targetFormantAlgorithm$
+
+	numVowels = 12
+	vowelList$ [1] = "i"
+	vowelList$ [2] = "I"
+	vowelList$ [3] = "e"
+	vowelList$ [4] = "E"
+	vowelList$ [5] = "a"
+	vowelList$ [6] = "A"
+	vowelList$ [7] = "O"
+	vowelList$ [8] = "o"
+	vowelList$ [9] = "u"
+	vowelList$ [10] = "y"
+	vowelList$ [11] = "Y"
+	vowelList$ [12] = "@"
+
+	color$ ["a"] = "Red"
+	color$ ["i"] = "Green"
+	color$ ["u"] = "Blue"
+	color$ ["@"] = "{0.8,0.8,0.8}"
+
+	#######################################################################
+	#
+	# UI messages and texts
+	#
+	#######################################################################
+	#
+
+
+	#######################################################################
+	#
+	# English
+	vowelTrianglemain.uiMessage$ ["EN", "PauseRecord"] = "Record continuous speech"
+	vowelTrianglemain.uiMessage$ ["EN", "Record1"] = "Record the ##continuous speech#"
+	vowelTrianglemain.uiMessage$ ["EN", "Record2"] = "Please be ready to start"
+	vowelTrianglemain.uiMessage$ ["EN", "Record3"] = "Select the speech you want to analyse"
+	vowelTrianglemain.uiMessage$ ["EN", "Open1"] = "Open the recording containing the speech"
+	vowelTrianglemain.uiMessage$ ["EN", "Open2"] = "Select the speech you want to analyse"
+	vowelTrianglemain.uiMessage$ ["EN", "Open3"] = "Open the file containing the vowel labels"
+	vowelTrianglemain.uiMessage$ ["EN", "Corneri"] = "h##ea#t"
+	vowelTrianglemain.uiMessage$ ["EN", "Corneru"] = "h##oo#t"
+	vowelTrianglemain.uiMessage$ ["EN", "Cornera"] = "h##a#t"
+	vowelTrianglemain.uiMessage$ ["EN", "DistanceTitle"] = "Rel. Distance (N)"
+	vowelTrianglemain.uiMessage$ ["EN", "AreaTitle"] = "Rel. Area"
+	vowelTrianglemain.uiMessage$ ["EN", "Area1"] = "1"
+	vowelTrianglemain.uiMessage$ ["EN", "Area2"] = "2"
+	vowelTrianglemain.uiMessage$ ["EN", "AreaN"] = "N"
+	vowelTrianglemain.uiMessage$ ["EN", "VTL"] = "Vocal tract"
+
+	vowelTrianglemain.uiMessage$ ["EN", "LogFile"] = "Write log to table (""-"" write to the info window)"
+	vowelTrianglemain.uiMessage$ ["EN", "CommentContinue"] = "Click on ""Continue"" if you want to analyze more speech samples"
+	vowelTrianglemain.uiMessage$ ["EN", "CommentOpen"] = "Click on ""Open"" and select a recording"
+	vowelTrianglemain.uiMessage$ ["EN", "CommentLabel"] = "Use phoneme segmentation (optional)"
+	vowelTrianglemain.uiMessage$ ["EN", "CommentRecord"] = "Click on ""Record"" and start speaking"
+	vowelTrianglemain.uiMessage$ ["EN", "CommentList"] = "Record sound, ""Save to list & Close"", then click ""Continue"""
+	vowelTrianglemain.uiMessage$ ["EN", "SavePicture"] = "Save picture"
+	vowelTrianglemain.uiMessage$ ["EN", "DoContinue"] = "Do you want to continue?"
+	vowelTrianglemain.uiMessage$ ["EN", "SelectSound1"] = "Select the sound and continue"
+	vowelTrianglemain.uiMessage$ ["EN", "SelectSound2"] = "It is possible to remove unwanted sounds from the selection"
+	vowelTrianglemain.uiMessage$ ["EN", "SelectSound3"] = "Select the unwanted part and then choose ""Cut"" from the ""Edit"" menu"
+	vowelTrianglemain.uiMessage$ ["EN", "Stopped"] = "Vowel Triangle stopped"
+	vowelTrianglemain.uiMessage$ ["EN", "ErrorSound"] = "Error: Not a sound "
+	vowelTrianglemain.uiMessage$ ["EN", "Nothing to do"] = "Nothing to do"
+	vowelTrianglemain.uiMessage$ ["EN", "No readable recording selected "] = "No readable recording selected "
+
+	vowelTrianglemain.uiMessage$ ["EN", "Interface Language"] = "Language"
+	vowelTrianglemain.uiMessage$ ["EN", "Speaker is a"] = "Speaker is a"
+	vowelTrianglemain.uiMessage$ ["EN", "Male"] = "Male ♂"
+	vowelTrianglemain.uiMessage$ ["EN", "Female"] = "Female ♀"
+	vowelTrianglemain.uiMessage$ ["EN", "Automatic"] = "Automatic"
+	vowelTrianglemain.uiMessage$ ["EN", "Experimental"] = "Select formant tracking method"
+	vowelTrianglemain.uiMessage$ ["EN", "Continue"] = "Continue"
+	vowelTrianglemain.uiMessage$ ["EN", "Done"] = "Done"
+	vowelTrianglemain.uiMessage$ ["EN", "Stop"] = "Stop"
+	vowelTrianglemain.uiMessage$ ["EN", "Open"] = "Open"
+	vowelTrianglemain.uiMessage$ ["EN", "Record"] = "Record"
+	vowelTrianglemain.uiMessage$ ["EN", "Help"] = "Help"
+	vowelTrianglemain.uiMessage$ ["EN", "untitled"] = "untitled"
+	vowelTrianglemain.uiMessage$ ["EN", "Title"] 			= "Title"
+	vowelTrianglemain.uiMessage$ ["EN", "Vowels"] = "Vowels"
+	vowelTrianglemain.uiMessage$ ["EN", "Vowel Tier"] = "Vowel tier"
+
+	# SAMPA vowels
+	vowels$ ["EN"] = " @ { } A E Q O O: o i I u U 6 V i: O: u: aU OI oU eI aI "
+
+
+	#######################################################################
+	#
+	# Dutch
+	vowelTrianglemain.uiMessage$ ["NL", "PauseRecord"] 	= "Neem lopende spraak op"
+	vowelTrianglemain.uiMessage$ ["NL", "Record1"] 		= "Neem de ##lopende spraak# op"
+	vowelTrianglemain.uiMessage$ ["NL", "Record2"] 		= "Zorg dat u klaar ben om te spreken"
+	vowelTrianglemain.uiMessage$ ["NL", "Record3"] 		= "Selecteer de spraak die u wilt analyseren"
+	vowelTrianglemain.uiMessage$ ["NL", "Open1"] 			= "Open de spraakopname"
+	vowelTrianglemain.uiMessage$ ["NL", "Open2"] 			= "Selecteer de spraak die u wilt analyseren"
+	vowelTrianglemain.uiMessage$ ["NL", "Open3"]          = "Open het bestand met de klinkerlabels"
+	vowelTrianglemain.uiMessage$ ["NL", "Corneri"] 		= "h##ie#t"
+	vowelTrianglemain.uiMessage$ ["NL", "Corneru"] 		= "h##oe#d"
+	vowelTrianglemain.uiMessage$ ["NL", "Cornera"] 		= "h##aa#t"
+	vowelTrianglemain.uiMessage$ ["NL", "DistanceTitle"] 	= "Rel. Afstand (N)"
+	vowelTrianglemain.uiMessage$ ["NL", "AreaTitle"] 		= "Rel. Oppervlak"
+	vowelTrianglemain.uiMessage$ ["NL", "Area1"] 			= "1"
+	vowelTrianglemain.uiMessage$ ["NL", "Area2"] 			= "2"
+	vowelTrianglemain.uiMessage$ ["NL", "AreaN"] 			= "N"
+	vowelTrianglemain.uiMessage$ ["NL", "VTL"] 			= "Spraakkanaal"
+
+	vowelTrianglemain.uiMessage$ ["NL", "LogFile"] 		= "Schrijf resultaten naar log bestand (""-"" schrijft naar info venster)"
+	vowelTrianglemain.uiMessage$ ["NL", "CommentContinue"] = "Klik op ""Doorgaan"" als u meer spraakopnamen wilt analyseren"
+	vowelTrianglemain.uiMessage$ ["NL", "CommentOpen"] 	= "Klik op ""Open"" en selecteer een opname"
+	vowelTrianglemain.uiMessage$ ["NL", "CommentLabel"]   = "Gebruik foneemsegmentatie (optioneel)"
+	vowelTrianglemain.uiMessage$ ["NL", "CommentRecord"] 	= "Klik op ""Opnemen"" en start met spreken"
+	vowelTrianglemain.uiMessage$ ["NL", "CommentList"] 	= "Spraak opnemen, ""Save to list & Close"", daarna klik op ""Doorgaan"""
+	vowelTrianglemain.uiMessage$ ["NL", "SavePicture"] 	= "Bewaar afbeelding"
+	vowelTrianglemain.uiMessage$ ["NL", "DoContinue"] 	= "Wilt u doorgaan?"
+	vowelTrianglemain.uiMessage$ ["NL", "SelectSound1"] 	= "Selecteer het spraakfragment en ga door"
+	vowelTrianglemain.uiMessage$ ["NL", "SelectSound2"] 	= "Het is mogelijk om ongewenste geluiden uit de opname te verwijderen"
+	vowelTrianglemain.uiMessage$ ["NL", "SelectSound3"] 	= "Selecteer het ongewenste deel en kies ""Cut"" in het ""Edit"" menu"
+	vowelTrianglemain.uiMessage$ ["NL", "Stopped"] 		= "Vowel Triangle is gestopt"
+	vowelTrianglemain.uiMessage$ ["NL", "ErrorSound"] 	= "Fout: Dit is geen geluid "
+	vowelTrianglemain.uiMessage$ ["NL", "Nothing to do"] 	= "Geen taken"
+	vowelTrianglemain.uiMessage$ ["NL", "No readable recording selected "] = "Geen leesbare opname geselecteerd "
+
+	vowelTrianglemain.uiMessage$ ["NL", "Interface Language"] = "Taal (Language)"
+	vowelTrianglemain.uiMessage$ ["NL", "Speaker is a"] 	= "De Spreker is een"
+	vowelTrianglemain.uiMessage$ ["NL", "Male"] 			= "Man ♂"
+	vowelTrianglemain.uiMessage$ ["NL", "Female"] 		= "Vrouw ♀"
+	vowelTrianglemain.uiMessage$ ["NL", "Automatic"] 		= "Automatisch"
+	vowelTrianglemain.uiMessage$ ["NL", "Experimental"] 	= "Kies methode om formanten te berekenen"
+	vowelTrianglemain.uiMessage$ ["NL", "Continue"] 		= "Doorgaan"
+	vowelTrianglemain.uiMessage$ ["NL", "Done"] 			= "Klaar"
+	vowelTrianglemain.uiMessage$ ["NL", "Stop"] 			= "Stop"
+	vowelTrianglemain.uiMessage$ ["NL", "Open"] 			= "Open"
+	vowelTrianglemain.uiMessage$ ["NL", "Record"] 		= "Opnemen"
+	vowelTrianglemain.uiMessage$ ["NL", "Help"]           = "Help"
+	vowelTrianglemain.uiMessage$ ["NL", "untitled"] 		= "zonder titel"
+	vowelTrianglemain.uiMessage$ ["NL", "Title"] 			= "Titel"
+	vowelTrianglemain.uiMessage$ ["NL", "Vowels"]         = "Klinkers"
+	vowelTrianglemain.uiMessage$ ["NL", "Vowel Tier"]     = "Klinker tier"
+
+	# SAMPA vowels
+	vowels$ ["NL"] = " I E A O Y @ i y u a: e: 2: o: Ei 9y Au a:i o:i ui iu yu e:u E: 9: O: "
+
+	#######################################################################
+	#
+	# German
+	vowelTrianglemain.uiMessage$ ["DE", "PauseRecord"] 	= "Zeichne laufende Sprache auf"
+	vowelTrianglemain.uiMessage$ ["DE", "Record1"] 		= "Die ##laufende Sprache# aufzeichnen"
+	vowelTrianglemain.uiMessage$ ["DE", "Record2"] 		= "Bitte seien Sie bereit zu sprechen"
+	vowelTrianglemain.uiMessage$ ["DE", "Record3"] 		= "Wählen Sie die Sprachaufnahme, die Sie analysieren möchten"
+	vowelTrianglemain.uiMessage$ ["DE", "Open1"] 			= "Öffnen Sie die Sprachaufnahme"
+	vowelTrianglemain.uiMessage$ ["DE", "Open2"] 			= "Wählen Sie die Sprachaufnahme, die Sie analysieren möchten"
+	vowelTrianglemain.uiMessage$ ["DE", "Open3"]          = "Öffnen Sie die Datei mit den Vokalbezeichnungen"
+	vowelTrianglemain.uiMessage$ ["DE", "Corneri"] 		= "L##ie#d"
+	vowelTrianglemain.uiMessage$ ["DE", "Corneru"] 		= "H##u#t"
+	vowelTrianglemain.uiMessage$ ["DE", "Cornera"] 		= "T##a#l"
+	vowelTrianglemain.uiMessage$ ["DE", "DistanceTitle"] 	= "Rel. Länge (N)"
+	vowelTrianglemain.uiMessage$ ["DE", "AreaTitle"] 		= "Rel. Oberfläche"
+	vowelTrianglemain.uiMessage$ ["DE", "Area1"] 			= "1"
+	vowelTrianglemain.uiMessage$ ["DE", "Area2"] 			= "2"
+	vowelTrianglemain.uiMessage$ ["DE", "AreaN"] 			= "N"
+	vowelTrianglemain.uiMessage$ ["DE", "VTL"] 			= "Vokaltrakt"
+										 
+	vowelTrianglemain.uiMessage$ ["DE", "LogFile"] 		= "Daten in Tabelle schreiben (""-"" in das Informationsfenster schreiben)"
+	vowelTrianglemain.uiMessage$ ["DE", "CommentContinue"]= "Klicken Sie auf ""Weiter"", wenn Sie mehr Sprachproben analysieren möchten"
+	vowelTrianglemain.uiMessage$ ["DE", "CommentOpen"] 	= "Klicke auf ""Öffnen"" und wähle eine Aufnahme"
+	vowelTrianglemain.uiMessage$ ["DE", "CommentLabel"]   = "Phonemsegmentierung verwenden (optional)"
+	vowelTrianglemain.uiMessage$ ["DE", "CommentRecord"] 	= "Klicke auf ""Aufzeichnen"" und sprich"
+	vowelTrianglemain.uiMessage$ ["DE", "CommentList"] 	= "Sprache aufnehmen, ""Save to list & Close"", dann klicken Sie auf ""Weitergehen"""
+	vowelTrianglemain.uiMessage$ ["DE", "SavePicture"] 	= "Bild speichern"
+	vowelTrianglemain.uiMessage$ ["DE", "DoContinue"] 	= "Möchten Sie weitergehen?"
+	vowelTrianglemain.uiMessage$ ["DE", "SelectSound1"] 	= "Wählen Sie den Aufnahmebereich und gehen Sie weiter"
+	vowelTrianglemain.uiMessage$ ["DE", "SelectSound2"] 	= "Es ist möglich, unerwünschte Geräusche aus der Auswahl zu entfernen"
+	vowelTrianglemain.uiMessage$ ["DE", "SelectSound3"] 	= "Wählen Sie den unerwünschten Teil und wählen Sie dann ""Cut"" aus dem ""Edit"" Menü"
+	vowelTrianglemain.uiMessage$ ["DE", "Stopped"] 		= "VowelTriangle ist gestoppt"
+	vowelTrianglemain.uiMessage$ ["DE", "ErrorSound"] 	= "Fehler: Keine Sprache gefunden"
+	vowelTrianglemain.uiMessage$ ["DE", "Nothing to do"] 	= "Keine Aufgaben"
+	vowelTrianglemain.uiMessage$ ["DE", "No readable recording selected "] = "Keine verwertbare Aufnahme ausgewählt "
+				   
+	vowelTrianglemain.uiMessage$ ["DE", "Interface Language"] = "Sprache (Language)"
+	vowelTrianglemain.uiMessage$ ["DE", "Speaker is a"] 	= "Der Sprecher ist ein(e)"
+	vowelTrianglemain.uiMessage$ ["DE", "Male"] 			= "Man ♂"
+	vowelTrianglemain.uiMessage$ ["DE", "Female"] 		= "Frau ♀"
+	vowelTrianglemain.uiMessage$ ["DE", "Automatic"] 		= "Selbstauswahl"
+	vowelTrianglemain.uiMessage$ ["DE", "Experimental"] 	= "Wählen Sie die Formant-Berechnungsmethode"
+	vowelTrianglemain.uiMessage$ ["DE", "Continue"] 		= "Weitergehen"
+	vowelTrianglemain.uiMessage$ ["DE", "Done"] 			= "Fertig"
+	vowelTrianglemain.uiMessage$ ["DE", "Stop"] 			= "Halt"
+	vowelTrianglemain.uiMessage$ ["DE", "Open"] 			= "Öffnen"
+	vowelTrianglemain.uiMessage$ ["DE", "Record"] 		= "Aufzeichnen"
+	vowelTrianglemain.uiMessage$ ["DE", "Help"]           = "Help"
+	vowelTrianglemain.uiMessage$ ["DE", "untitled"] 		= "ohne Titel"
+	vowelTrianglemain.uiMessage$ ["DE", "Title"] 			= "Titel"
+	vowelTrianglemain.uiMessage$ ["DE", "Vowels"]         = "Vokale"
+	vowelTrianglemain.uiMessage$ ["DE", "Vowel Tier"]     = "Vokale tier"
+
+	# SAMPA vowels
+	vowels$ ["DE"] = " I E a O U Y 9: i: e: E: a: o: u: y: 2:  aI aU OY: aI aU OY: 6 i:6 I6 y:6 Y6 e:6 E6 E:6 2:6 96 a:6 a6 u:6 U6 o:6 O6 "
+
+	#######################################################################
+	#
+	# French
+	vowelTrianglemain.uiMessage$ ["FR", "PauseRecord"]	= "Enregistrer un discours continu"
+	vowelTrianglemain.uiMessage$ ["FR", "Record1"]		= "Enregistrer le ##discours continu#"
+	vowelTrianglemain.uiMessage$ ["FR", "Record2"]		= "S'il vous plaît soyez prêt à commencer"
+	vowelTrianglemain.uiMessage$ ["FR", "Record3"]		= "Sélectionnez le discours que vous voulez analyser"
+	vowelTrianglemain.uiMessage$ ["FR", "Open1"]			= "Ouvrir l'enregistrement contenant le discours"
+	vowelTrianglemain.uiMessage$ ["FR", "Open2"]			= "Sélectionnez le discours que vous voulez analyser"
+	vowelTrianglemain.uiMessage$ ["FR", "Open3"]          = "Ouvrez le fichier contenant les étiquettes de voyelle"
+	vowelTrianglemain.uiMessage$ ["FR", "Corneri"]		= "s##i#"
+	vowelTrianglemain.uiMessage$ ["FR", "Corneru"]		= "f##ou#"
+	vowelTrianglemain.uiMessage$ ["FR", "Cornera"]		= "l##à#"
+	vowelTrianglemain.uiMessage$ ["FR", "DistanceTitle"]	= "Longeur Relative (N)"
+	vowelTrianglemain.uiMessage$ ["FR", "AreaTitle"]		= "Surface Relative"
+	vowelTrianglemain.uiMessage$ ["FR", "Area1"]			= "1"
+	vowelTrianglemain.uiMessage$ ["FR", "Area2"]			= "2"
+	vowelTrianglemain.uiMessage$ ["FR", "AreaN"]			= "N"
+	vowelTrianglemain.uiMessage$ ["FR", "VTL"] 			= "Conduit vocal"
+										 
+	vowelTrianglemain.uiMessage$ ["FR", "LogFile"]		= "Écrire un fichier journal dans une table (""-"" écrire dans la fenêtre d'information)"
+	vowelTrianglemain.uiMessage$ ["FR", "CommentContinue"]= "Cliquez sur ""Continuer"" si vous voulez analyser plus d'échantillons de discours"
+	vowelTrianglemain.uiMessage$ ["FR", "CommentOpen"]	= "Cliquez sur ""Ouvrir"" et sélectionnez un enregistrement"
+	vowelTrianglemain.uiMessage$ ["FR", "CommentLabel"]   = "Utiliser la segmentation des phonèmes (facultatif)"
+	vowelTrianglemain.uiMessage$ ["FR", "CommentRecord"]	= "Cliquez sur ""Enregistrer"" et commencez à parler"
+	vowelTrianglemain.uiMessage$ ["FR", "CommentList"]	= "Enregistrer le son, ""Save to list & Close"", puis cliquez sur ""Continuer"""
+	vowelTrianglemain.uiMessage$ ["FR", "SavePicture"]	= "Enregistrer l'image"
+	vowelTrianglemain.uiMessage$ ["FR", "DoContinue"]		= "Voulez-vous continuer?"
+	vowelTrianglemain.uiMessage$ ["FR", "SelectSound1"]	= "Sélectionnez le son et continuez"
+	vowelTrianglemain.uiMessage$ ["FR", "SelectSound2"]	= "Il est possible de supprimer les sons indésirables de la sélection"
+	vowelTrianglemain.uiMessage$ ["FR", "SelectSound3"]	= "Sélectionnez la partie indésirable, puis choisissez ""Cut"" dans le menu ""Edit"""
+	vowelTrianglemain.uiMessage$ ["FR", "Stopped"]		= "VowelTriangle s'est arrêté"
+	vowelTrianglemain.uiMessage$ ["FR", "ErrorSound"]		= "Erreur: pas du son"
+	vowelTrianglemain.uiMessage$ ["FR", "Nothing to do"] 	= "Rien à faire"
+	vowelTrianglemain.uiMessage$ ["FR", "No readable recording selected "] = "Aucun enregistrement utilisable sélectionné "
+					  
+	vowelTrianglemain.uiMessage$ ["FR", "Interface Language"] = "Langue (Language)"
+	vowelTrianglemain.uiMessage$ ["FR", "Speaker is a"]	= "Le locuteur est un(e)"
+	vowelTrianglemain.uiMessage$ ["FR", "Male"] 			= "Homme ♂"
+	vowelTrianglemain.uiMessage$ ["FR", "Female"] 		= "Femme ♀"
+	vowelTrianglemain.uiMessage$ ["FR", "Automatic"] 		= "Auto-sélection"
+	vowelTrianglemain.uiMessage$ ["FR", "Experimental"] 	= "Sélectionner la méthode de calcul du formant"
+	vowelTrianglemain.uiMessage$ ["FR", "Continue"]		= "Continuer"
+	vowelTrianglemain.uiMessage$ ["FR", "Done"]			= "Terminé"
+	vowelTrianglemain.uiMessage$ ["FR", "Stop"]			= "Arrêt"
+	vowelTrianglemain.uiMessage$ ["FR", "Open"]			= "Ouvert"
+	vowelTrianglemain.uiMessage$ ["FR", "Record"]			= "Enregistrer"
+	vowelTrianglemain.uiMessage$ ["FR", "Help"]           = "Help"
+	vowelTrianglemain.uiMessage$ ["FR", "untitled"] 		= "sans titre"
+	vowelTrianglemain.uiMessage$ ["FR", "Title"] 			= "Titre"
+	vowelTrianglemain.uiMessage$ ["FR", "Vowels"]         = "Voyelles"
+	vowelTrianglemain.uiMessage$ ["FR", "Vowel Tier"]     = "Tier voyelle"
+
+	# SAMPA vowels
+	vowels$ ["FR"] = " i e E a A O o u y 2 9 @ e~ a~ o~ 9~ E/ A/ &/ O/ U~/ "
+
+	#######################################################################
+	#
+	# Chinese
+	vowelTrianglemain.uiMessage$ ["ZH", "PauseRecord"] 	= "录制连续语音"
+	vowelTrianglemain.uiMessage$ ["ZH", "Record1"] 		= "录制##连续语音#"
+	vowelTrianglemain.uiMessage$ ["ZH", "Record2"] 		= "请准备好开始"
+	vowelTrianglemain.uiMessage$ ["ZH", "Record3"] 		= "选择你想要分析的语音"
+	vowelTrianglemain.uiMessage$ ["ZH", "Open1"] 			= "打开包含语音的录音文件"
+	vowelTrianglemain.uiMessage$ ["ZH", "Open2"] 			= "选择你想要分析的语音片段"
+	vowelTrianglemain.uiMessage$ ["ZH", "Open3"]          = "打开包含元音标签的文件"
+	vowelTrianglemain.uiMessage$ ["ZH", "Corneri"] 		= "必"
+	vowelTrianglemain.uiMessage$ ["ZH", "Corneru"] 		= "不"
+	vowelTrianglemain.uiMessage$ ["ZH", "Cornera"] 		= "巴"
+	vowelTrianglemain.uiMessage$ ["ZH", "DistanceTitle"] 	= "相对长度 (N)"
+	vowelTrianglemain.uiMessage$ ["ZH", "AreaTitle"] 		= "相对面积"
+	vowelTrianglemain.uiMessage$ ["ZH", "Area1"] 			= "1"
+	vowelTrianglemain.uiMessage$ ["ZH", "Area2"] 			= "2"
+	vowelTrianglemain.uiMessage$ ["ZH", "AreaN"] 			= "N"
+	vowelTrianglemain.uiMessage$ ["ZH", "VTL"] 			= "声道"
+
+	vowelTrianglemain.uiMessage$ ["ZH", "LogFile"] 		= "将日志写入表格 (""-"" 写入信息窗口)"
+	vowelTrianglemain.uiMessage$ ["ZH", "CommentContinue"] = "点击 ""继续"" 如果你想分析更多的语音样本"
+	vowelTrianglemain.uiMessage$ ["ZH", "CommentOpen"] 	= "点击 ""打开录音"" 并选择一个录音"
+	vowelTrianglemain.uiMessage$ ["ZH", "CommentLabel"]   = "使用音素细分（可选）"
+	vowelTrianglemain.uiMessage$ ["ZH", "CommentRecord"] 	= "点击 ""录音"" 并开始讲话"
+	vowelTrianglemain.uiMessage$ ["ZH", "CommentList"] 	= "录制声音, ""Save to list & Close"", 然后单击 ""继续"""
+	vowelTrianglemain.uiMessage$ ["ZH", "SavePicture"] 	= "保存图片"
+	vowelTrianglemain.uiMessage$ ["ZH", "DoContinue"] 	= "你想继续吗"
+	vowelTrianglemain.uiMessage$ ["ZH", "SelectSound1"] 	= "选择声音并继续"
+	vowelTrianglemain.uiMessage$ ["ZH", "SelectSound2"] 	= "可以从选择中删除不需要的声音"
+	vowelTrianglemain.uiMessage$ ["ZH", "SelectSound3"] 	= "选择不需要的部分，然后从 ""Edit"" 菜单选择 ""Cut"""
+	vowelTrianglemain.uiMessage$ ["ZH", "Stopped"] 		= "VowelTriangle 已停止运行"
+	vowelTrianglemain.uiMessage$ ["ZH", "ErrorSound"] 	= "错误：不是声音"
+	vowelTrianglemain.uiMessage$ ["ZH", "Nothing to do"] 	= "无法进行"
+	vowelTrianglemain.uiMessage$ ["ZH", "No readable recording selected "] = "未选择可读取的录音 "
+
+	vowelTrianglemain.uiMessage$ ["ZH", "Interface Language"] = "语言 (Language)"
+	vowelTrianglemain.uiMessage$ ["ZH", "Speaker is a"]	= "演讲者是"
+	vowelTrianglemain.uiMessage$ ["ZH", "Male"] 			= "男性 ♂"
+	vowelTrianglemain.uiMessage$ ["ZH", "Female"] 		= "女性 ♀"
+	vowelTrianglemain.uiMessage$ ["ZH", "Automatic"] 		= "自动选择"
+	vowelTrianglemain.uiMessage$ ["ZH", "Experimental"] 	= "选择共振峰值测量方式"
+	vowelTrianglemain.uiMessage$ ["ZH", "Continue"] 		= "继续"
+	vowelTrianglemain.uiMessage$ ["ZH", "Done"] 			= "完成"
+	vowelTrianglemain.uiMessage$ ["ZH", "Stop"] 			= "结束"
+	vowelTrianglemain.uiMessage$ ["ZH", "Open"] 			= "从文件夹打开"
+	vowelTrianglemain.uiMessage$ ["ZH", "Record"] 		= "录音"
+	vowelTrianglemain.uiMessage$ ["ZH", "Help"]           = "Help"
+	vowelTrianglemain.uiMessage$ ["ZH", "untitled"] 		= "无标题"
+	vowelTrianglemain.uiMessage$ ["ZH", "Title"] 			= "标题"
+	vowelTrianglemain.uiMessage$ ["ZH", "Vowels"]         = "元音"
+	vowelTrianglemain.uiMessage$ ["ZH", "Vowel Tier"]     = "元音层"
+
+	# Pinyin vowels
+	vowels$ ["ZH"] = " a o e i u v ai ei ui ao ou iu ie ue iao iou uai uei er "
+
+	#######################################################################
+	#
+	# Spanish
+	vowelTrianglemain.uiMessage$ ["ES", "PauseRecord"]	= "Grabar un discurso continuo"
+	vowelTrianglemain.uiMessage$ ["ES", "Record1"]		= "Guardar ##discurso continuo#"
+	vowelTrianglemain.uiMessage$ ["ES", "Record2"]		= "Por favor, prepárate para comenzar"
+	vowelTrianglemain.uiMessage$ ["ES", "Record3"]		= "Seleccione el discurso que quiere analizar"
+	vowelTrianglemain.uiMessage$ ["ES", "Open1"]			= "Abre la grabación que contiene el discurso"
+	vowelTrianglemain.uiMessage$ ["ES", "Open2"]			= "Seleccione el discurso que quiere analizar"
+	vowelTrianglemain.uiMessage$ ["ES", "Open3"]          = "Abra el archivo que contiene las etiquetas de las vocales."
+	vowelTrianglemain.uiMessage$ ["ES", "Corneri"]		= "s##i#"
+	vowelTrianglemain.uiMessage$ ["ES", "Corneru"]		= "##u#so"
+	vowelTrianglemain.uiMessage$ ["ES", "Cornera"]		= "h##a#"
+	vowelTrianglemain.uiMessage$ ["ES", "DistanceTitle"]	= "Longitud relativa (N)"
+	vowelTrianglemain.uiMessage$ ["ES", "AreaTitle"]		= "Superficie relativa"
+	vowelTrianglemain.uiMessage$ ["ES", "Area1"]			= "1"
+	vowelTrianglemain.uiMessage$ ["ES", "Area2"]			= "2"
+	vowelTrianglemain.uiMessage$ ["ES", "AreaN"]			= "N"
+	vowelTrianglemain.uiMessage$ ["ES", "VTL"] 			= "Tracto vocal"
+										  
+	vowelTrianglemain.uiMessage$ ["ES", "LogFile"]		= "Escribir un archivo de registro en una tabla (""-"" escribir en la ventana de información)"
+	vowelTrianglemain.uiMessage$ ["ES", "CommentContinue"]= "Haga clic en ""Continúa"" si desea analizar más muestras de voz"
+	vowelTrianglemain.uiMessage$ ["ES", "CommentOpen"]	= "Haga clic en ""Abrir"" y seleccione un registro"
+	vowelTrianglemain.uiMessage$ ["ES", "CommentLabel"]   = "Usar segmentación de fonemas (opcional)"
+	vowelTrianglemain.uiMessage$ ["ES", "CommentRecord"]	= "Haz clic en ""Grabar"" y comienza a hablar"
+	vowelTrianglemain.uiMessage$ ["ES", "CommentList"]	= "Grabar sonido, ""Save to list & Close"", luego haga clic en ""Continúa"""
+	vowelTrianglemain.uiMessage$ ["ES", "SavePicture"]	= "Guardar imagen"
+	vowelTrianglemain.uiMessage$ ["ES", "DoContinue"]		= "¿Quieres continuar?"
+	vowelTrianglemain.uiMessage$ ["ES", "SelectSound1"]	= "Selecciona el sonido y continúa"
+	vowelTrianglemain.uiMessage$ ["ES", "SelectSound2"]	= "Es posible eliminar sonidos no deseados de la selección"
+	vowelTrianglemain.uiMessage$ ["ES", "SelectSound3"]	= "Seleccione la parte no deseada, luego elija ""Cut"" desde el menú ""Edit"""
+	vowelTrianglemain.uiMessage$ ["ES", "Stopped"]		= "VowelTriangle se ha detenido"
+	vowelTrianglemain.uiMessage$ ["ES", "ErrorSound"]		= "Error: no hay sonido"
+	vowelTrianglemain.uiMessage$ ["ES", "Nothing to do"] 	= "Nada que hacer"
+	vowelTrianglemain.uiMessage$ ["ES", "No readable recording selected "] = "No se ha seleccionado ningún registro utilizable "
+
+	vowelTrianglemain.uiMessage$ ["ES", "Interface Language"] = "Idioma (Language)"
+	vowelTrianglemain.uiMessage$ ["ES", "Speaker is a"]	= "El hablante es un(a)"
+	vowelTrianglemain.uiMessage$ ["ES", "Male"] 			= "Hombre ♂"
+	vowelTrianglemain.uiMessage$ ["ES", "Female"] 		= "Mujer ♀"
+	vowelTrianglemain.uiMessage$ ["ES", "Automatic"] 		= "Autoselección"
+	vowelTrianglemain.uiMessage$ ["ES", "Experimental"] 	= "Seleccione el método de seguimiento de formantes"
+	vowelTrianglemain.uiMessage$ ["ES", "Continue"]		= "Continúa"
+	vowelTrianglemain.uiMessage$ ["ES", "Done"]			= "Terminado"
+	vowelTrianglemain.uiMessage$ ["ES", "Stop"]			= "Detener"
+	vowelTrianglemain.uiMessage$ ["ES", "Open"]			= "Abrir"
+	vowelTrianglemain.uiMessage$ ["ES", "Record"]			= "Grabar"
+	vowelTrianglemain.uiMessage$ ["ES", "Help"]           = "Help"
+	vowelTrianglemain.uiMessage$ ["ES", "untitled"] 		= "no tiene título"
+	vowelTrianglemain.uiMessage$ ["ES", "Title"] 			= "Título"
+	vowelTrianglemain.uiMessage$ ["ES", "Vowels"]         = "Vocales"
+	vowelTrianglemain.uiMessage$ ["ES", "Vowel Tier"]     = "Tier vocal"
+
+	# SAMPA vowels
+	vowels$ ["ES"] = " i I e E { y Y 2 9 1 @ 6 3 a } 8 & M 7 V A u U o O Q "
+
+	#######################################################################
+	#
+	# Portugese
+	vowelTrianglemain.uiMessage$ ["PT", "PauseRecord"]	= "Gravar um discurso contínuo"
+	vowelTrianglemain.uiMessage$ ["PT", "Record1"]		= "Salvar ##discurso contínua#"
+	vowelTrianglemain.uiMessage$ ["PT", "Record2"]		= "Por favor, prepare-se para começar"
+	vowelTrianglemain.uiMessage$ ["PT", "Record3"]		= "Selecione o discurso que deseja analisar"
+	vowelTrianglemain.uiMessage$ ["PT", "Open1"]			= "Abra a gravação que contém o discurso"
+	vowelTrianglemain.uiMessage$ ["PT", "Open2"]			= "Selecione o discurso que deseja analisar"
+	vowelTrianglemain.uiMessage$ ["PT", "Open3"]          = "Abra o arquivo que contém os rótulos das vogais"
+	vowelTrianglemain.uiMessage$ ["PT", "Corneri"]		= "s##i#"
+	vowelTrianglemain.uiMessage$ ["PT", "Corneru"]		= "r##u#a"
+	vowelTrianglemain.uiMessage$ ["PT", "Cornera"]		= "d##á#"
+	vowelTrianglemain.uiMessage$ ["PT", "DistanceTitle"]	= "Comprimento relativo (N)"
+	vowelTrianglemain.uiMessage$ ["PT", "AreaTitle"]		= "Superfície relativa"
+	vowelTrianglemain.uiMessage$ ["PT", "Area1"]			= "1"
+	vowelTrianglemain.uiMessage$ ["PT", "Area2"]			= "2"
+	vowelTrianglemain.uiMessage$ ["PT", "AreaN"]			= "N"
+	vowelTrianglemain.uiMessage$ ["PT", "VTL"] 			= "Trato vocal"
+										                                        
+	vowelTrianglemain.uiMessage$ ["PT", "LogFile"]		= "Escreva um arquivo de registro em uma tabela (""-"" escreva na janela de informações)"
+	vowelTrianglemain.uiMessage$ ["PT", "CommentContinue"]= "Clique em ""Continuar"" se quiser analisar mais amostras de voz"
+	vowelTrianglemain.uiMessage$ ["PT", "CommentOpen"]	= "Clique em ""Abrir"" e selecione um registro"
+	vowelTrianglemain.uiMessage$ ["PT", "CommentLabel"]   = "Usar segmentação por fonema (opcional)"
+	vowelTrianglemain.uiMessage$ ["PT", "CommentRecord"]	= "Clique ""Gravar"" e comece a falar "
+	vowelTrianglemain.uiMessage$ ["PT", "CommentList"]	= "Gravar som, ""Save to list & Close"", depois clique em ""Continuar"""
+	vowelTrianglemain.uiMessage$ ["PT", "SavePicture"]	= "Salvar imagem"
+	vowelTrianglemain.uiMessage$ ["PT", "DoContinue"]		= "Você quer continuar?"
+	vowelTrianglemain.uiMessage$ ["PT", "SelectSound1"]	= "Selecione o som e continue"
+	vowelTrianglemain.uiMessage$ ["PT", "SelectSound2"]	= "É possível remover sons indesejados da seleção"
+	vowelTrianglemain.uiMessage$ ["PT", "SelectSound3"]	= "Selecione a parte indesejada, então escolha ""Cut"" no menu ""Edit"""
+	vowelTrianglemain.uiMessage$ ["PT", "Stopped"]		= "VowelTriangle parou"
+	vowelTrianglemain.uiMessage$ ["PT", "ErrorSound"]		= "Erro: não há som"
+	vowelTrianglemain.uiMessage$ ["PT", "Nothing to do"] 	= "Nada para fazer"
+	vowelTrianglemain.uiMessage$ ["PT", "No readable recording selected "] = "Nenhum registro utilizável foi selecionado"
+
+	vowelTrianglemain.uiMessage$ ["PT", "Interface Language"] = "Idioma (Language)"
+	vowelTrianglemain.uiMessage$ ["PT", "Speaker is a"]	= "O falante é um(a)"
+	vowelTrianglemain.uiMessage$ ["PT", "Male"] 			= "Homem ♂"
+	vowelTrianglemain.uiMessage$ ["PT", "Female"] 		= "Mulher ♀"
+	vowelTrianglemain.uiMessage$ ["PT", "Automatic"] 		= "Auto-seleção"
+	vowelTrianglemain.uiMessage$ ["PT", "Experimental"] 	= "Selecione o método de rastreamento formant"
+	vowelTrianglemain.uiMessage$ ["PT", "Continue"]		= "Continuar"
+	vowelTrianglemain.uiMessage$ ["PT", "Done"]			= "Terminado"
+	vowelTrianglemain.uiMessage$ ["PT", "Stop"]			= "Pare"
+	vowelTrianglemain.uiMessage$ ["PT", "Open"]			= "Abrir"
+	vowelTrianglemain.uiMessage$ ["PT", "Record"]			= "Gravar"
+	vowelTrianglemain.uiMessage$ ["PT", "Help"]           = "Help"
+	vowelTrianglemain.uiMessage$ ["PT", "untitled"] 		= "sem título"
+	vowelTrianglemain.uiMessage$ ["PT", "Title"] 			= "Título"
+	vowelTrianglemain.uiMessage$ ["PT", "Vowels"]         = "Vogais"
+	vowelTrianglemain.uiMessage$ ["PT", "Vowel Tier"]     = "Tier de vogal"
+
+	# SAMPA vowels
+	vowels$ ["PT"] = " i e E a 6 O o u @ i~ e~ 6~ o~ u~ aw iw ew Ew ow aj ej Ej Oj oj 6~j~ e~j~ o~j~ u~j~ "
+
+	#######################################################################
+	#
+	# Italian
+	vowelTrianglemain.uiMessage$ ["IT", "PauseRecord"]	= "Registra un discorso continuo"
+	vowelTrianglemain.uiMessage$ ["IT", "Record1"]		= "Salva ##discorso continuo#"
+	vowelTrianglemain.uiMessage$ ["IT", "Record2"]		= "Per favore, preparati a iniziare"
+	vowelTrianglemain.uiMessage$ ["IT", "Record3"]		= "Seleziona il discorso che vuoi analizzare"
+	vowelTrianglemain.uiMessage$ ["IT", "Open1"]			= "Apri la registrazione che contiene il discorso"
+	vowelTrianglemain.uiMessage$ ["IT", "Open2"]			= "Seleziona il discorso che vuoi analizzare"
+	vowelTrianglemain.uiMessage$ ["IT", "Open3"]          = "Apri il file contenente le etichette vocaliche"
+	vowelTrianglemain.uiMessage$ ["IT", "Corneri"]		= "s##ì#"
+	vowelTrianglemain.uiMessage$ ["IT", "Corneru"]		= "##u#si"
+	vowelTrianglemain.uiMessage$ ["IT", "Cornera"]		= "sar##à#"
+	vowelTrianglemain.uiMessage$ ["IT", "DistanceTitle"]	= "Lunghezza relativa (N)"
+	vowelTrianglemain.uiMessage$ ["IT", "AreaTitle"]		= "Superficie relativa"
+	vowelTrianglemain.uiMessage$ ["IT", "Area1"]			= "1"
+	vowelTrianglemain.uiMessage$ ["IT", "Area2"]			= "2"
+	vowelTrianglemain.uiMessage$ ["IT", "AreaN"]			= "N"
+	vowelTrianglemain.uiMessage$ ["IT", "VTL"] 			= "Tratto vocale"
+										                                        
+	vowelTrianglemain.uiMessage$ ["IT", "LogFile"]		= "Scrivi un file di registrazione in una tabella (""-"" scrivi nella finestra delle informazioni)"
+	vowelTrianglemain.uiMessage$ ["IT", "CommentContinue"]= "Clicca su ""Continua"" se vuoi analizzare più campioni vocali"
+	vowelTrianglemain.uiMessage$ ["IT", "CommentOpen"]	= "Fare clic su ""Apri"" e selezionare un record"
+	vowelTrianglemain.uiMessage$ ["IT", "CommentLabel"]   = "Usa segmentazione fonemi (opzionale)"
+	vowelTrianglemain.uiMessage$ ["IT", "CommentRecord"]	= "Fai clic su ""Registra"" e inizia a parlare"
+	vowelTrianglemain.uiMessage$ ["IT", "CommentList"]	= "Registra suono, ""Save to list & Close"", quindi fai clic su ""Continua"""
+	vowelTrianglemain.uiMessage$ ["IT", "SavePicture"]	= "Salva immagine"
+	vowelTrianglemain.uiMessage$ ["IT", "DoContinue"]		= "Vuoi continuare?"
+	vowelTrianglemain.uiMessage$ ["IT", "SelectSound1"]	= "Seleziona il suono e continua"
+	vowelTrianglemain.uiMessage$ ["IT", "SelectSound2"]	= "È possibile rimuovere i suoni indesiderati dalla selezione"
+	vowelTrianglemain.uiMessage$ ["IT", "SelectSound3"]	= "Seleziona la parte indesiderata, quindi scegli ""Cut"" dal menu ""Edit"""
+	vowelTrianglemain.uiMessage$ ["IT", "Stopped"]		= "VowelTriangle si è fermato"
+	vowelTrianglemain.uiMessage$ ["IT", "ErrorSound"]		= "Errore: non c'è suono"
+	vowelTrianglemain.uiMessage$ ["IT", "Nothing to do"] 	= "Niente da fare"
+	vowelTrianglemain.uiMessage$ ["IT", "No readable recording selected "] = "Nessun record utilizzabile è stato selezionato "
+
+	vowelTrianglemain.uiMessage$ ["IT", "Interface Language"] = "Lingua (Language)"
+	vowelTrianglemain.uiMessage$ ["IT", "Speaker is a"]	= "L oratore è un(a)"
+	vowelTrianglemain.uiMessage$ ["IT", "Male"] 			= "Uomo ♂"
+	vowelTrianglemain.uiMessage$ ["IT", "Female"] 		= "Donna ♀"
+	vowelTrianglemain.uiMessage$ ["IT", "Automatic"] 		= "Auto-selezione"
+	vowelTrianglemain.uiMessage$ ["IT", "Experimental"] 	= "Seleziona il metodo di tracciamento dei formanti"
+	vowelTrianglemain.uiMessage$ ["IT", "Continue"]		= "Continua"
+	vowelTrianglemain.uiMessage$ ["IT", "Done"]			= "Finito"
+	vowelTrianglemain.uiMessage$ ["IT", "Stop"]			= "Fermare"
+	vowelTrianglemain.uiMessage$ ["IT", "Open"]			= "Apri"
+	vowelTrianglemain.uiMessage$ ["IT", "Record"]			= "Registra"
+	vowelTrianglemain.uiMessage$ ["IT", "Help"]           = "Help"
+	vowelTrianglemain.uiMessage$ ["IT", "untitled"] 		= "senza titolo"
+	vowelTrianglemain.uiMessage$ ["IT", "Title"] 			= "Titolo"
+	vowelTrianglemain.uiMessage$ ["IT", "Vowels"]         = "Vocali"
+	vowelTrianglemain.uiMessage$ ["IT", "Vowel Tier"]     = "Tier Vocale"
+
+	# SAMPA vowels
+	vowels$ ["IT"] = " i e E a O o u: "
+
+	#############################################################
+	#
+	# To add a new interface language, translate the text below
+	# and substitute in the correct places. Keep the double quotes "" intact
+	# Replace the "EN" in the ''vowelTrianglemain.uiMessage$ ["EN",'' to the code you
+	# need, should be the ISO country code. Then add the new language 
+	# in the options (following "English" etc.)
+	# and the code following the endPause below.
+	#
+	# "Record continuous speech"
+	# "Record the ##continuous speech#"
+	# "Please be ready to start"
+	# "Select the speech you want to analyse"
+	# "Open the recording containing the speech"
+	# "Select the speech you want to analyse"
+	# "Open the file containing the vowel labels"
+	# "h##ea#t"
+	# "h##oo#t"
+	# "h##a#t"
+	# "Rel. Distance (N)"
+	# "Rel. Area"
+	# "1"
+	# "2"
+	# "N"
+	# "Vocal tract"
+
+	# "Write log to table (""-"" write to the info window)"
+	# "Click on ""Continue"" if you want to analyze more speech samples"
+	# "Click on ""Open"" and select a recording"
+	# "Use phoneme segmentation (optional)"
+	# "Click on ""Record"" and start speaking"
+	# "Record sound, ""Save to list & Close"", then click ""Continue"""
+	# "Save picture"
+	# "Do you want to continue?"
+	# "Select the sound and continue"
+	# "It is possible to remove unwanted sounds from the selection"
+	# "Select the unwanted part and then choose ""Cut"" from the ""Edit"" menu"
+	# "Vowel Triangle stopped"
+	# "Error: Not a sound "
+	# "Nothing to do"
+	# "No readable recording selected "
+
+	# "Language"
+	# "Speaker is a"
+	# "Male ♂"
+	# "Female ♀"
+	# "Automatic"
+	# "Select formant tracking method"
+	# "Continue"
+	# "Done"
+	# "Stop"
+	# "Open"
+	# "Record"
+	# "untitled"
+	# "Title"
+	# "Vowels"
+	# "Vowel tier"
+
+	# Also, find out what the relevant (SAMPA) vowel symbols for this new language are
+	# vowels$ ["EN"] = " @ { } A E Q O O: o i I u U 6 V i: O: u: aU OI oU eI aI "
+	#
+	##############################################################
+
+
+	#######################################################################
+	#
+	# Formant values according to 
+	# IFA corpus averages from FPA isolated vowels
+
+	###############################################
+	#
+	# Split-Levinson (SL)
+	#
+	###############################################
+
+	# Male 
+	phonemes ["SL", "M", "A", "F1"] = 696
+	phonemes ["SL", "M", "A", "F2"] = 1066
+	phonemes ["SL", "M", "E", "F1"] = 552
+	phonemes ["SL", "M", "E", "F2"] = 1659
+	phonemes ["SL", "M", "I", "F1"] = 378
+	phonemes ["SL", "M", "I", "F2"] = 1869
+	phonemes ["SL", "M", "O", "F1"] = 483
+	phonemes ["SL", "M", "O", "F2"] = 726
+	phonemes ["SL", "M", "Y", "F1"] = 418
+	phonemes ["SL", "M", "Y", "F2"] = 1455
+	phonemes ["SL", "M", "Y:", "F1"] = 386
+	phonemes ["SL", "M", "Y:", "F2"] = 1492
+	phonemes ["SL", "M", "a", "F1"] = 789
+	phonemes ["SL", "M", "a", "F2"] = 1291
+	phonemes ["SL", "M", "au", "F1"] = 584
+	phonemes ["SL", "M", "au", "F2"] = 959
+	phonemes ["SL", "M", "e", "F1"] = 372
+	phonemes ["SL", "M", "e", "F2"] = 1960
+	phonemes ["SL", "M", "ei", "F1"] = 500
+	phonemes ["SL", "M", "ei", "F2"] = 1733
+	phonemes ["SL", "M", "i", "F1"] = 260
+	phonemes ["SL", "M", "i", "F2"] = 1972
+	phonemes ["SL", "M", "o", "F1"] = 427
+	phonemes ["SL", "M", "o", "F2"] = 744
+	phonemes ["SL", "M", "u", "F1"] = 288
+	phonemes ["SL", "M", "u", "F2"] = 666
+	phonemes ["SL", "M", "ui", "F1"] = 495
+	phonemes ["SL", "M", "ui", "F2"] = 1469
+	phonemes ["SL", "M", "y", "F1"] = 268
+	phonemes ["SL", "M", "y", "F2"] = 1581
+	# Guessed
+	phonemes ["SL", "M", "@", "F1"] = 417.7000
+	phonemes ["SL", "M", "@", "F2"] = 1455.100
+
+	# Female 
+	phonemes ["SL", "F", "A", "F1"] = 818
+	phonemes ["SL", "F", "A", "F2"] = 1197
+	phonemes ["SL", "F", "E", "F1"] = 668
+	phonemes ["SL", "F", "E", "F2"] = 1748
+	phonemes ["SL", "F", "I", "F1"] = 429
+	phonemes ["SL", "F", "I", "F2"] = 1937
+	phonemes ["SL", "F", "O", "F1"] = 571
+	phonemes ["SL", "F", "O", "F2"] = 882
+	phonemes ["SL", "F", "Y", "F1"] = 496
+	phonemes ["SL", "F", "Y", "F2"] = 1636
+	phonemes ["SL", "F", "Y:", "F1"] = 431
+	phonemes ["SL", "F", "Y:", "F2"] = 1695
+	phonemes ["SL", "F", "a", "F1"] = 854
+	phonemes ["SL", "F", "a", "F2"] = 1436
+	phonemes ["SL", "F", "au", "F1"] = 648
+	phonemes ["SL", "F", "au", "F2"] = 1057
+	phonemes ["SL", "F", "e", "F1"] = 430
+	phonemes ["SL", "F", "e", "F2"] = 1862
+	phonemes ["SL", "F", "ei", "F1"] = 620
+	phonemes ["SL", "F", "ei", "F2"] = 1718
+	phonemes ["SL", "F", "i", "F1"] = 294
+	phonemes ["SL", "F", "i", "F2"] = 1855
+	phonemes ["SL", "F", "o", "F1"] = 528
+	phonemes ["SL", "F", "o", "F2"] = 894
+	phonemes ["SL", "F", "u", "F1"] = 376
+	phonemes ["SL", "F", "u", "F2"] = 735
+	phonemes ["SL", "F", "ui", "F1"] = 613
+	phonemes ["SL", "F", "ui", "F2"] = 1559
+	phonemes ["SL", "F", "y", "F1"] = 321
+	phonemes ["SL", "F", "y", "F2"] = 1742
+	# Guessed
+	phonemes ["SL", "F", "@", "F1"] = 500.5
+	phonemes ["SL", "F", "@", "F2"] = 1706.6
+
+	# Triangle
+	# Male 
+	phonemes ["SL", "M", "i_corner", "F1"] = phonemes ["SL", "M", "i", "F1"]/(2^(1/12))
+	phonemes ["SL", "M", "i_corner", "F2"] = phonemes ["SL", "M", "i", "F2"]*(2^(1/12))
+	phonemes ["SL", "M", "a_corner", "F1"] = phonemes ["SL", "M", "a", "F1"]*(2^(1/12))
+	phonemes ["SL", "M", "a_corner", "F2"] = phonemes ["SL", "M", "a", "F2"]
+	phonemes ["SL", "M", "u_corner", "F1"] = phonemes ["SL", "M", "u", "F1"]/(2^(1/12))
+	phonemes ["SL", "M", "u_corner", "F2"] = phonemes ["SL", "M", "u", "F2"]/(2^(1/12))
+	# @_center is not fixed but derived from current corners
+	phonemes ["SL", "M", "@_center", "F1"] =(phonemes ["SL", "M", "i_corner", "F1"]*phonemes ["SL", "M", "u_corner", "F1"]*phonemes ["SL", "M", "a_corner", "F1"])^(1/3)
+	phonemes ["SL", "M", "@_center", "F2"] = (phonemes ["SL", "M", "i_corner", "F2"]*phonemes ["SL", "M", "u_corner", "F2"]*phonemes ["SL", "M", "a_corner", "F2"])^(1/3)
+
+	# Female 
+	phonemes ["SL", "F", "i_corner", "F1"] = phonemes ["SL", "F", "i", "F1"]/(2^(1/12))
+	phonemes ["SL", "F", "i_corner", "F2"] = phonemes ["SL", "F", "i", "F2"]*(2^(1/12))
+	phonemes ["SL", "F", "a_corner", "F1"] = phonemes ["SL", "F", "a", "F1"]*(2^(1/12))
+	phonemes ["SL", "F", "a_corner", "F2"] = phonemes ["SL", "F", "a", "F2"]
+	phonemes ["SL", "F", "u_corner", "F1"] = phonemes ["SL", "F", "u", "F1"]/(2^(1/12))
+	phonemes ["SL", "F", "u_corner", "F2"] = phonemes ["SL", "F", "u", "F2"]/(2^(1/12))
+	# @_center is not fixed but derived from current corners
+	phonemes ["SL", "F", "@_center", "F1"] =(phonemes ["SL", "F", "i_corner", "F1"]*phonemes ["SL", "F", "u_corner", "F1"]*phonemes ["SL", "F", "a_corner", "F1"])^(1/3)
+	phonemes ["SL", "F", "@_center", "F2"] = (phonemes ["SL", "F", "i_corner", "F2"]*phonemes ["SL", "F", "u_corner", "F2"]*phonemes ["SL", "F", "a_corner", "F2"])^(1/3)
+
+	# Vocal Tract Length
+	# Sex  VTL		Phi
+	# F    15.94	553.52
+	# M    17.11	516.05
+	averagePhi_VTL ["SL", "F"] = 553.52
+	averagePhi_VTL ["SL", "M"] = 516.05
+	# Classification boundary
+	averagePhi_VTL ["SL", "A"] = 529.80
+
+
+	###############################################
+	#
+	# Burg's method formant algorithm (Burg)
+	#
+	###############################################
+
+	# Male 
+	phonemes ["Burg", "M", "A", "F1"] = 743
+	phonemes ["Burg", "M", "A", "F2"] = 1075
+	phonemes ["Burg", "M", "E", "F1"] = 572
+	phonemes ["Burg", "M", "E", "F2"] = 1802
+	phonemes ["Burg", "M", "I", "F1"] = 383
+	phonemes ["Burg", "M", "I", "F2"] = 2037
+	phonemes ["Burg", "M", "O", "F1"] = 499
+	phonemes ["Burg", "M", "O", "F2"] = 712
+	phonemes ["Burg", "M", "Y", "F1"] = 425
+	phonemes ["Burg", "M", "Y", "F2"] = 1482
+	phonemes ["Burg", "M", "Y:", "F1"] = 388
+	phonemes ["Burg", "M", "Y:", "F2"] = 1514
+	phonemes ["Burg", "M", "a", "F1"] = 837
+	phonemes ["Burg", "M", "a", "F2"] = 1299
+	phonemes ["Burg", "M", "au", "F1"] = 606
+	phonemes ["Burg", "M", "au", "F2"] = 962
+	phonemes ["Burg", "M", "e", "F1"] = 376
+	phonemes ["Burg", "M", "e", "F2"] = 2117
+	phonemes ["Burg", "M", "ei", "F1"] = 513
+	phonemes ["Burg", "M", "ei", "F2"] = 1855
+	phonemes ["Burg", "M", "i", "F1"] = 261
+	phonemes ["Burg", "M", "i", "F2"] = 2183
+	phonemes ["Burg", "M", "o", "F1"] = 446
+	phonemes ["Burg", "M", "o", "F2"] = 721
+	phonemes ["Burg", "M", "u", "F1"] = 293
+	phonemes ["Burg", "M", "u", "F2"] = 654
+	phonemes ["Burg", "M", "ui", "F1"] = 501
+	phonemes ["Burg", "M", "ui", "F2"] = 1506
+	phonemes ["Burg", "M", "y", "F1"] = 268
+	phonemes ["Burg", "M", "y", "F2"] = 1608
+
+	# Guessed
+	phonemes ["Burg", "M", "@", "F1"] = 373
+	phonemes ["Burg", "M", "@", "F2"] = 1247
+
+	# Female
+	phonemes ["Burg", "F", "A", "F1"] = 878
+	phonemes ["Burg", "F", "A", "F2"] = 1236
+	phonemes ["Burg", "F", "E", "F1"] = 685
+	phonemes ["Burg", "F", "E", "F2"] = 1956
+	phonemes ["Burg", "F", "I", "F1"] = 435
+	phonemes ["Burg", "F", "I", "F2"] = 2260
+	phonemes ["Burg", "F", "O", "F1"] = 584
+	phonemes ["Burg", "F", "O", "F2"] = 885
+	phonemes ["Burg", "F", "Y", "F1"] = 504
+	phonemes ["Burg", "F", "Y", "F2"] = 1674
+	phonemes ["Burg", "F", "Y:", "F1"] = 437
+	phonemes ["Burg", "F", "Y:", "F2"] = 1745
+	phonemes ["Burg", "F", "a", "F1"] = 938
+	phonemes ["Burg", "F", "a", "F2"] = 1530
+	phonemes ["Burg", "F", "au", "F1"] = 677
+	phonemes ["Burg", "F", "au", "F2"] = 1074
+	phonemes ["Burg", "F", "e", "F1"] = 440
+	phonemes ["Burg", "F", "e", "F2"] = 2184
+	phonemes ["Burg", "F", "ei", "F1"] = 633
+	phonemes ["Burg", "F", "ei", "F2"] = 1951
+	phonemes ["Burg", "F", "i", "F1"] = 309
+	phonemes ["Burg", "F", "i", "F2"] = 2341
+	phonemes ["Burg", "F", "o", "F1"] = 540
+	phonemes ["Burg", "F", "o", "F2"] = 900
+	phonemes ["Burg", "F", "u", "F1"] = 391
+	phonemes ["Burg", "F", "u", "F2"] = 729
+	phonemes ["Burg", "F", "ui", "F1"] = 632
+	phonemes ["Burg", "F", "ui", "F2"] = 1655
+	phonemes ["Burg", "F", "y", "F1"] = 323
+	phonemes ["Burg", "F", "y", "F2"] = 1803
+
+	# Guessed
+	phonemes ["Burg", "F", "@", "F1"] = 440
+	phonemes ["Burg", "F", "@", "F2"] = 1415
+
+	# Triangle
+	# Male 
+	phonemes ["Burg", "M", "i_corner", "F1"] = phonemes ["Burg", "M", "i", "F1"]/(2^(1/12))
+	phonemes ["Burg", "M", "i_corner", "F2"] = phonemes ["Burg", "M", "i", "F2"]*(2^(1/12))
+	phonemes ["Burg", "M", "a_corner", "F1"] = phonemes ["Burg", "M", "a", "F1"]*(2^(1/12))
+	phonemes ["Burg", "M", "a_corner", "F2"] = phonemes ["Burg", "M", "a", "F2"]
+	phonemes ["Burg", "M", "u_corner", "F1"] = phonemes ["Burg", "M", "u", "F1"]/(2^(1/12))
+	phonemes ["Burg", "M", "u_corner", "F2"] = phonemes ["Burg", "M", "u", "F2"]/(2^(1/12))
+	# @_center is not fixed but derived from current corners
+	phonemes ["Burg", "M", "@_center", "F1"] =(phonemes ["Burg", "M", "i_corner", "F1"]*phonemes ["Burg", "M", "u_corner", "F1"]*phonemes ["Burg", "M", "a_corner", "F1"])^(1/3)
+	phonemes ["Burg", "M", "@_center", "F2"] = (phonemes ["Burg", "M", "i_corner", "F2"]*phonemes ["Burg", "M", "u_corner", "F2"]*phonemes ["Burg", "M", "a_corner", "F2"])^(1/3)
+
+	# Female
+	phonemes ["Burg", "F", "i_corner", "F1"] = phonemes ["Burg", "F", "i", "F1"]/(2^(1/12))
+	phonemes ["Burg", "F", "i_corner", "F2"] = phonemes ["Burg", "F", "i", "F2"]*(2^(1/12))
+	phonemes ["Burg", "F", "a_corner", "F1"] = phonemes ["Burg", "F", "a", "F1"]*(2^(1/12))
+	phonemes ["Burg", "F", "a_corner", "F2"] = phonemes ["Burg", "F", "a", "F2"]
+	phonemes ["Burg", "F", "u_corner", "F1"] = phonemes ["Burg", "F", "u", "F1"]/(2^(1/12))
+	phonemes ["Burg", "F", "u_corner", "F2"] = phonemes ["Burg", "F", "u", "F2"]/(2^(1/12))
+	# @_center is not fixed but derived from current corners
+	phonemes ["Burg", "F", "@_center", "F1"] =(phonemes ["Burg", "F", "i_corner", "F1"]*phonemes ["Burg", "F", "u_corner", "F1"]*phonemes ["Burg", "F", "a_corner", "F1"])^(1/3)
+	phonemes ["Burg", "F", "@_center", "F2"] = (phonemes ["Burg", "F", "i_corner", "F2"]*phonemes ["Burg", "F", "u_corner", "F2"]*phonemes ["Burg", "F", "a_corner", "F2"])^(1/3)
+
+	# Vocal Tract Length
+	# Sex  VTL   Phi
+	# F    15.39	573.59
+	# M    16.62	531.65
+	averagePhi_VTL ["Burg", "F"] = 573.59
+	averagePhi_VTL ["Burg", "M"] = 531.65
+	# Classification boundary
+	averagePhi_VTL ["Burg", "A"] = 529.48
+
+
+	###############################################
+	#
+	# Robust formant algorithm (Robust)
+	#
+	###############################################
+
+	# Male
+	phonemes ["Robust", "M", "A", "F1"] = 680
+	phonemes ["Robust", "M", "A", "F2"] = 1038
+	phonemes ["Robust", "M", "E", "F1"] = 510
+	phonemes ["Robust", "M", "E", "F2"] = 1900
+	phonemes ["Robust", "M", "I", "F1"] = 354
+	phonemes ["Robust", "M", "I", "F2"] = 2167
+	phonemes ["Robust", "M", "O", "F1"] = 446
+	phonemes ["Robust", "M", "O", "F2"] = 680
+	phonemes ["Robust", "M", "Y", "F1"] = 389
+	phonemes ["Robust", "M", "Y", "F2"] = 1483
+	phonemes ["Robust", "M", "Y:", "F1"] = 370
+	phonemes ["Robust", "M", "Y:", "F2"] = 1508
+	phonemes ["Robust", "M", "a", "F1"] = 797
+	phonemes ["Robust", "M", "a", "F2"] = 1328
+	phonemes ["Robust", "M", "au", "F1"] = 542
+	phonemes ["Robust", "M", "au", "F2"] = 945
+	phonemes ["Robust", "M", "e", "F1"] = 351
+	phonemes ["Robust", "M", "e", "F2"] = 2180
+	phonemes ["Robust", "M", "ei", "F1"] = 471
+	phonemes ["Robust", "M", "ei", "F2"] = 1994
+	phonemes ["Robust", "M", "i", "F1"] = 242
+	phonemes ["Robust", "M", "i", "F2"] = 2330
+	phonemes ["Robust", "M", "o", "F1"] = 393
+	phonemes ["Robust", "M", "o", "F2"] = 692
+	phonemes ["Robust", "M", "u", "F1"] = 269
+	phonemes ["Robust", "M", "u", "F2"] = 626
+	phonemes ["Robust", "M", "ui", "F1"] = 475
+	phonemes ["Robust", "M", "ui", "F2"] = 1523
+	phonemes ["Robust", "M", "y", "F1"] = 254
+	phonemes ["Robust", "M", "y", "F2"] = 1609
+
+	# Guessed
+	phonemes ["Robust", "M", "@", "F1"] = 373
+	phonemes ["Robust", "M", "@", "F2"] = 1247
+
+	# Female
+	phonemes ["Robust", "F", "A", "F1"] = 826
+	phonemes ["Robust", "F", "A", "F2"] = 1208
+	phonemes ["Robust", "F", "E", "F1"] = 648
+	phonemes ["Robust", "F", "E", "F2"] = 2136
+	phonemes ["Robust", "F", "I", "F1"] = 411
+	phonemes ["Robust", "F", "I", "F2"] = 2432
+	phonemes ["Robust", "F", "O", "F1"] = 527
+	phonemes ["Robust", "F", "O", "F2"] = 836
+	phonemes ["Robust", "F", "Y", "F1"] = 447
+	phonemes ["Robust", "F", "Y", "F2"] = 1698
+	phonemes ["Robust", "F", "Y:", "F1"] = 404
+	phonemes ["Robust", "F", "Y:", "F2"] = 1750
+	phonemes ["Robust", "F", "a", "F1"] = 942
+	phonemes ["Robust", "F", "a", "F2"] = 1550
+	phonemes ["Robust", "F", "au", "F1"] = 600
+	phonemes ["Robust", "F", "au", "F2"] = 1048
+	phonemes ["Robust", "F", "e", "F1"] = 409
+	phonemes ["Robust", "F", "e", "F2"] = 2444
+	phonemes ["Robust", "F", "ei", "F1"] = 618
+	phonemes ["Robust", "F", "ei", "F2"] = 2196
+	phonemes ["Robust", "F", "i", "F1"] = 271
+	phonemes ["Robust", "F", "i", "F2"] = 2667
+	phonemes ["Robust", "F", "o", "F1"] = 470
+	phonemes ["Robust", "F", "o", "F2"] = 879
+	phonemes ["Robust", "F", "u", "F1"] = 334
+	phonemes ["Robust", "F", "u", "F2"] = 686
+	phonemes ["Robust", "F", "ui", "F1"] = 594
+	phonemes ["Robust", "F", "ui", "F2"] = 1669
+	phonemes ["Robust", "F", "y", "F1"] = 285
+	phonemes ["Robust", "F", "y", "F2"] = 1765
+
+	# Guessed
+	phonemes ["Robust", "F", "@", "F1"] = 440
+	phonemes ["Robust", "F", "@", "F2"] = 1415
+
+	# Triangle
+	# Male
+	phonemes ["Robust", "M", "i_corner", "F1"] = phonemes ["Robust", "M", "i", "F1"]/(2^(1/12))
+	phonemes ["Robust", "M", "i_corner", "F2"] = phonemes ["Robust", "M", "i", "F2"]*(2^(1/12))
+	phonemes ["Robust", "M", "a_corner", "F1"] = phonemes ["Robust", "M", "a", "F1"]*(2^(1/12))
+	phonemes ["Robust", "M", "a_corner", "F2"] = phonemes ["Robust", "M", "a", "F2"]
+	phonemes ["Robust", "M", "u_corner", "F1"] = phonemes ["Robust", "M", "u", "F1"]/(2^(1/12))
+	phonemes ["Robust", "M", "u_corner", "F2"] = phonemes ["Robust", "M", "u", "F2"]/(2^(1/12))
+	# @_center is not fixed but derived from current corners
+	phonemes ["Robust", "M", "@_center", "F1"] =(phonemes ["Robust", "M", "i_corner", "F1"]*phonemes ["Robust", "M", "u_corner", "F1"]*phonemes ["Robust", "M", "a_corner", "F1"])^(1/3)
+	phonemes ["Robust", "M", "@_center", "F2"] = (phonemes ["Robust", "M", "i_corner", "F2"]*phonemes ["Robust", "M", "u_corner", "F2"]*phonemes ["Robust", "M", "a_corner", "F2"])^(1/3)
+												  
+	# Female
+	phonemes ["Robust", "F", "i_corner", "F1"] = phonemes ["Robust", "F", "i", "F1"]/(2^(1/12))
+	phonemes ["Robust", "F", "i_corner", "F2"] = phonemes ["Robust", "F", "i", "F2"]*(2^(1/12))
+	phonemes ["Robust", "F", "a_corner", "F1"] = phonemes ["Robust", "F", "a", "F1"]*(2^(1/12))
+	phonemes ["Robust", "F", "a_corner", "F2"] = phonemes ["Robust", "F", "a", "F2"]
+	phonemes ["Robust", "F", "u_corner", "F1"] = phonemes ["Robust", "F", "u", "F1"]/(2^(1/12))
+	phonemes ["Robust", "F", "u_corner", "F2"] = phonemes ["Robust", "F", "u", "F2"]/(2^(1/12))
+	# @_center is not fixed but derived from current corners
+	phonemes ["Robust", "F", "@_center", "F1"] =(phonemes ["Robust", "F", "i_corner", "F1"]*phonemes ["Robust", "F", "u_corner", "F1"]*phonemes ["Robust", "F", "a_corner", "F1"])^(1/3)
+	phonemes ["Robust", "F", "@_center", "F2"] = (phonemes ["Robust", "F", "i_corner", "F2"]*phonemes ["Robust", "F", "u_corner", "F2"]*phonemes ["Robust", "F", "a_corner", "F2"])^(1/3)
+
+	# Vocal Tract Length
+	# Sex  VTL   Phi
+	# F    15.24	579.27
+	# M    16.29	542.28
+	averagePhi_VTL ["Robust", "F"] = 579.27
+	averagePhi_VTL ["Robust", "M"] = 542.28
+	# Classification boundary
+	averagePhi_VTL ["Robust", "A"] = 546.36
+
+	###############################################
+	#
+	# KeepAll formant algorithm (KeepAll)
+	#
+	###############################################
+
+	# Male
+	phonemes ["KeepAll", "M", "A", "F1"] = 680
+	phonemes ["KeepAll", "M", "A", "F2"] = 1038
+	phonemes ["KeepAll", "M", "E", "F1"] = 510
+	phonemes ["KeepAll", "M", "E", "F2"] = 1900
+	phonemes ["KeepAll", "M", "I", "F1"] = 354
+	phonemes ["KeepAll", "M", "I", "F2"] = 2167
+	phonemes ["KeepAll", "M", "O", "F1"] = 446
+	phonemes ["KeepAll", "M", "O", "F2"] = 680
+	phonemes ["KeepAll", "M", "Y", "F1"] = 389
+	phonemes ["KeepAll", "M", "Y", "F2"] = 1483
+	phonemes ["KeepAll", "M", "Y:", "F1"] = 370
+	phonemes ["KeepAll", "M", "Y:", "F2"] = 1508
+	phonemes ["KeepAll", "M", "a", "F1"] = 797
+	phonemes ["KeepAll", "M", "a", "F2"] = 1328
+	phonemes ["KeepAll", "M", "au", "F1"] = 542
+	phonemes ["KeepAll", "M", "au", "F2"] = 945
+	phonemes ["KeepAll", "M", "e", "F1"] = 351
+	phonemes ["KeepAll", "M", "e", "F2"] = 2180
+	phonemes ["KeepAll", "M", "ei", "F1"] = 471
+	phonemes ["KeepAll", "M", "ei", "F2"] = 1994
+	phonemes ["KeepAll", "M", "i", "F1"] = 242
+	phonemes ["KeepAll", "M", "i", "F2"] = 2330
+	phonemes ["KeepAll", "M", "o", "F1"] = 393
+	phonemes ["KeepAll", "M", "o", "F2"] = 692
+	phonemes ["KeepAll", "M", "u", "F1"] = 269
+	phonemes ["KeepAll", "M", "u", "F2"] = 626
+	phonemes ["KeepAll", "M", "ui", "F1"] = 475
+	phonemes ["KeepAll", "M", "ui", "F2"] = 1523
+	phonemes ["KeepAll", "M", "y", "F1"] = 254
+	phonemes ["KeepAll", "M", "y", "F2"] = 1609
+
+	# Guessed
+	phonemes ["KeepAll", "M", "@", "F1"] = 373
+	phonemes ["KeepAll", "M", "@", "F2"] = 1247
+
+	# Female
+	phonemes ["KeepAll", "F", "A", "F1"] = 826
+	phonemes ["KeepAll", "F", "A", "F2"] = 1208
+	phonemes ["KeepAll", "F", "E", "F1"] = 648
+	phonemes ["KeepAll", "F", "E", "F2"] = 2136
+	phonemes ["KeepAll", "F", "I", "F1"] = 411
+	phonemes ["KeepAll", "F", "I", "F2"] = 2432
+	phonemes ["KeepAll", "F", "O", "F1"] = 527
+	phonemes ["KeepAll", "F", "O", "F2"] = 836
+	phonemes ["KeepAll", "F", "Y", "F1"] = 447
+	phonemes ["KeepAll", "F", "Y", "F2"] = 1698
+	phonemes ["KeepAll", "F", "Y:", "F1"] = 404
+	phonemes ["KeepAll", "F", "Y:", "F2"] = 1750
+	phonemes ["KeepAll", "F", "a", "F1"] = 942
+	phonemes ["KeepAll", "F", "a", "F2"] = 1550
+	phonemes ["KeepAll", "F", "au", "F1"] = 600
+	phonemes ["KeepAll", "F", "au", "F2"] = 1048
+	phonemes ["KeepAll", "F", "e", "F1"] = 409
+	phonemes ["KeepAll", "F", "e", "F2"] = 2444
+	phonemes ["KeepAll", "F", "ei", "F1"] = 618
+	phonemes ["KeepAll", "F", "ei", "F2"] = 2196
+	phonemes ["KeepAll", "F", "i", "F1"] = 271
+	phonemes ["KeepAll", "F", "i", "F2"] = 2667
+	phonemes ["KeepAll", "F", "o", "F1"] = 470
+	phonemes ["KeepAll", "F", "o", "F2"] = 879
+	phonemes ["KeepAll", "F", "u", "F1"] = 334
+	phonemes ["KeepAll", "F", "u", "F2"] = 686
+	phonemes ["KeepAll", "F", "ui", "F1"] = 594
+	phonemes ["KeepAll", "F", "ui", "F2"] = 1669
+	phonemes ["KeepAll", "F", "y", "F1"] = 285
+	phonemes ["KeepAll", "F", "y", "F2"] = 1765
+
+	# Guessed
+	phonemes ["KeepAll", "F", "@", "F1"] = 440
+	phonemes ["KeepAll", "F", "@", "F2"] = 1415
+
+	# Triangle
+	# Male
+	phonemes ["KeepAll", "M", "i_corner", "F1"] = phonemes ["KeepAll", "M", "i", "F1"]/(2^(1/12))
+	phonemes ["KeepAll", "M", "i_corner", "F2"] = phonemes ["KeepAll", "M", "i", "F2"]*(2^(1/12))
+	phonemes ["KeepAll", "M", "a_corner", "F1"] = phonemes ["KeepAll", "M", "a", "F1"]*(2^(1/12))
+	phonemes ["KeepAll", "M", "a_corner", "F2"] = phonemes ["KeepAll", "M", "a", "F2"]
+	phonemes ["KeepAll", "M", "u_corner", "F1"] = phonemes ["KeepAll", "M", "u", "F1"]/(2^(1/12))
+	phonemes ["KeepAll", "M", "u_corner", "F2"] = phonemes ["KeepAll", "M", "u", "F2"]/(2^(1/12))
+	# @_center is not fixed but derived from current corners
+	phonemes ["KeepAll", "M", "@_center", "F1"] =(phonemes ["KeepAll", "M", "i_corner", "F1"]*phonemes ["KeepAll", "M", "u_corner", "F1"]*phonemes ["KeepAll", "M", "a_corner", "F1"])^(1/3)
+	phonemes ["KeepAll", "M", "@_center", "F2"] = (phonemes ["KeepAll", "M", "i_corner", "F2"]*phonemes ["KeepAll", "M", "u_corner", "F2"]*phonemes ["KeepAll", "M", "a_corner", "F2"])^(1/3)
+												  
+	# Female
+	phonemes ["KeepAll", "F", "i_corner", "F1"] = phonemes ["KeepAll", "F", "i", "F1"]/(2^(1/12))
+	phonemes ["KeepAll", "F", "i_corner", "F2"] = phonemes ["KeepAll", "F", "i", "F2"]*(2^(1/12))
+	phonemes ["KeepAll", "F", "a_corner", "F1"] = phonemes ["KeepAll", "F", "a", "F1"]*(2^(1/12))
+	phonemes ["KeepAll", "F", "a_corner", "F2"] = phonemes ["KeepAll", "F", "a", "F2"]
+	phonemes ["KeepAll", "F", "u_corner", "F1"] = phonemes ["KeepAll", "F", "u", "F1"]/(2^(1/12))
+	phonemes ["KeepAll", "F", "u_corner", "F2"] = phonemes ["KeepAll", "F", "u", "F2"]/(2^(1/12))
+	# @_center is not fixed but derived from current corners
+	phonemes ["KeepAll", "F", "@_center", "F1"] =(phonemes ["KeepAll", "F", "i_corner", "F1"]*phonemes ["KeepAll", "F", "u_corner", "F1"]*phonemes ["KeepAll", "F", "a_corner", "F1"])^(1/3)
+	phonemes ["KeepAll", "F", "@_center", "F2"] = (phonemes ["KeepAll", "F", "i_corner", "F2"]*phonemes ["KeepAll", "F", "u_corner", "F2"]*phonemes ["KeepAll", "F", "a_corner", "F2"])^(1/3)
+
+	# Vocal Tract Length
+	# Sex  VTL   Phi
+	# F    15.39	573.59
+	# M    16.62	531.65
+	averagePhi_VTL ["KeepAll", "F"] = 573.59
+	averagePhi_VTL ["KeepAll", "M"] = 531.65
+	# Classification boundary
+	averagePhi_VTL ["KeepAll", "A"] = 529.48
+
+
+	###############################################
+	#
+	# Start program: Non-Interactive
+	#
+	###############################################
+
+	# Run as a non interactive program
+	if input_table > 0
+		segmentTier = 0
+		labelFile$ = ""
+
 		selectObject: input_table
-		title$ = Get value: .r, "Title"
-		# Skip rows that are commented out
-		if startsWith(title$, "#")
-			goto NEXTROW
-		endif
-		.sp$ = Get value: .r, "Speaker"
-		if .sp$ = "A"
-			.sp$ = "F"
-			vtl_normalization = 1
-		else
-			vtl_normalization = 0
-		endif
-		file$ = Get value: .r, "File"
-		if index_regex(file$, "^([/\\~]|[A-Z]:)") <= 0
-			file$ = input_prefix$ + file$
-		endif
-		tmp$ = Get value: .r, "Language"
-		if index_regex(tmp$, "[A-Z]{2}")
-			uiLanguage$ = tmp$
-			vowelString$ = vowels$ [uiLanguage$]
-		endif
-		.log$ = Get value: .r, "Log"
-		if index_regex(.log$, "\w")
-			log = 1
-			if index_regex(.log$, "^([/\\~]|[A-Z]:)") <= 0
-				.log$ = input_prefix$ + .log$
+		.numInputRows = Get number of rows
+		for .r to .numInputRows
+			selectObject: input_table
+			title$ = Get value: .r, "Title"
+			# Skip rows that are commented out
+			if startsWith(title$, "#")
+				goto NEXTROW
 			endif
-			output_table$ = .log$
-			if not fileReadable(output_table$)
-				writeFileLine: output_table$, "Name", tab$, "Speaker", tab$, "N", tab$, "Area2", tab$, "Area1", tab$, "i.dist", tab$, "u.dist", tab$, "a.dist", tab$, "VTL", tab$, "Duration", tab$, "Intensity", tab$, "Slope", tab$, "Formant"
+			.sp$ = Get value: .r, "Speaker"
+			if .sp$ = "A"
+				.sp$ = "F"
+				vtl_normalization = 1
+			else
+				vtl_normalization = 0
 			endif
-		else
-			log = 0
-			output_table$ = "-"
-		endif
-		
-		.plotFile$ = Get value: .r, "Plotfile"
-		.plotVowels = 0
-		if index_regex(.plotFile$, "\w") <= 0
-			.plotFile$ = ""
-		else
-			.plotVowels = 1
-			if index_regex(.plotFile$, "^([/\\~]|[A-Z]:)") <= 0
-				.plotFile$ = input_prefix$ + .plotFile$
+			file$ = Get value: .r, "File"
+			if index_regex(file$, "^([/\\~]|[A-Z]:)") <= 0
+				file$ = input_prefix$ + file$
 			endif
-		endif
-		
-		# Get the formant algorithm, if given
-		.idx = Get column index: "Formant"
-		if .idx > 0
-			.formantAlgorithm$ = Get value: .r, "Formant"
-			if index_regex(.formantAlgorithm$, "\w") > 0 and index(" SL Burg Robust KeepAll ", .formantAlgorithm$)
-				targetFormantAlgorithm$ = .formantAlgorithm$
-				plotFormantAlgorithm$ = targetFormantAlgorithm$
+			tmp$ = Get value: .r, "Language"
+			if index_regex(tmp$, "[A-Z]{2}")
+				uiLanguage$ = tmp$
+				vowelString$ = vowels$ [uiLanguage$]
 			endif
-		endif
-		
-		# Get the segment tier, vowel list, and label file
-		.idx = Get column index: "VowelTier"
-		if .idx > 0
-			segmentTier = Get value: .r, "VowelTier"
-		endif
-		.idx = Get column index: "Vowels"
-		if .idx > 0
-			.tmp$ = Get value: .r, "Vowels"
-			if tmp$ <> "" and index_regex(.tmp$, "[^-.?]")
-				vowelString$ = .tmp$
+			.log$ = Get value: .r, "Log"
+			if index_regex(.log$, "\w")
+				log = 1
+				if index_regex(.log$, "^([/\\~]|[A-Z]:)") <= 0
+					.log$ = input_prefix$ + .log$
+				endif
+				output_table$ = .log$
+				if not fileReadable(output_table$)
+					writeFileLine: output_table$, "Name", tab$, "Speaker", tab$, "N", tab$, "Area2", tab$, "Area1", tab$, "i.dist", tab$, "u.dist", tab$, "a.dist", tab$, "VTL", tab$, "Duration", tab$, "Intensity", tab$, "Slope", tab$, "Formant"
+				endif
+			else
+				log = 0
+				output_table$ = "-"
 			endif
-		endif
-		.idx = Get column index: "LabelFile"
-		if .idx > 0
-			.tmp$ = Get value: .r, "LabelFile"
-			if tmp$ <> "" and index_regex(.tmp$, "[^-.?]")
-				labelFile$ = .tmp$
-				if index_regex(labelFile$, "^([/\\~]|[A-Z]:)") <= 0
-					labelFile$ = input_prefix$ + labelFile$
+			
+			.plotFile$ = Get value: .r, "Plotfile"
+			.plotVowels = 0
+			if index_regex(.plotFile$, "\w") <= 0
+				.plotFile$ = ""
+			else
+				.plotVowels = 1
+				if index_regex(.plotFile$, "^([/\\~]|[A-Z]:)") <= 0
+					.plotFile$ = input_prefix$ + .plotFile$
 				endif
 			endif
-		endif
-
-		# Handle cases where there is a wildcard
-		.textGrid = -1
-		if file$ <> "" and index_regex(file$, "[*]{1}") and index_regex(file$, "(?i\.(wav|mp3|aif[fc]|flac|nist|au|ogg))")
-			.preFix$ = ""
-			if index(file$, "/") > 0
-				.preFix$ = replace_regex$(file$, "/[^/]+$", "/", 0)
+			
+			# Get the formant algorithm, if given
+			.idx = Get column index: "Formant"
+			if .idx > 0
+				.formantAlgorithm$ = Get value: .r, "Formant"
+				if index_regex(.formantAlgorithm$, "\w") > 0 and index(" SL Burg Robust KeepAll ", .formantAlgorithm$)
+					targetFormantAlgorithm$ = .formantAlgorithm$
+					plotFormantAlgorithm$ = targetFormantAlgorithm$
+				endif
 			endif
-			.fileList = Create Strings as file list: "FileList", file$
-			.numFiles = Get number of strings
-			.sound = -1
-			for .f to .numFiles
-				selectObject: .fileList
-				.fileName$ = Get string: .f
+			
+			# Get the segment tier, vowel list, and label file
+			.idx = Get column index: "VowelTier"
+			if .idx > 0
+				segmentTier = Get value: .r, "VowelTier"
+			endif
+			.idx = Get column index: "Vowels"
+			if .idx > 0
+				.tmp$ = Get value: .r, "Vowels"
+				if tmp$ <> "" and index_regex(.tmp$, "[^-.?]")
+					vowelString$ = .tmp$
+				endif
+			endif
+			.idx = Get column index: "LabelFile"
+			if .idx > 0
+				.tmp$ = Get value: .r, "LabelFile"
+				if tmp$ <> "" and index_regex(.tmp$, "[^-.?]")
+					labelFile$ = .tmp$
+					if index_regex(labelFile$, "^([/\\~]|[A-Z]:)") <= 0
+						labelFile$ = input_prefix$ + labelFile$
+					endif
+				endif
+			endif
 
-				.tmp = Read from file: .preFix$ + .fileName$
-				if .tmp <= 0 or numberOfSelected("Sound") <= 0
-					exitScript: uiMessage$ [uiLanguage$, "ErrorSound"]
+			# Handle cases where there is a wildcard
+			.textGrid = -1
+			if file$ <> "" and index_regex(file$, "[*]{1}") and index_regex(file$, "(?i\.(wav|mp3|aif[fc]|flac|nist|au|ogg))")
+				.preFix$ = ""
+				if index(file$, "/") > 0
+					.preFix$ = replace_regex$(file$, "/[^/]+$", "/", 0)
+				endif
+				.fileList = Create Strings as file list: "FileList", file$
+				.numFiles = Get number of strings
+				.sound = -1
+				for .f to .numFiles
+					selectObject: .fileList
+					.fileName$ = Get string: .f
+
+					.tmp = Read from file: .preFix$ + .fileName$
+					if .tmp <= 0 or numberOfSelected("Sound") <= 0
+						goto LASTROUNDVT
+						exitScript: vowelTrianglemain.uiMessage$ [uiLanguage$, "ErrorSound"]
+					endif
+					name$ = selected$("Sound")
+					.numChannels = Get number of channels
+					if .numChannels > 1
+						.maxInt = -10000
+						.bestChannel = 1
+						for .c to .numChannels
+							selectObject: .tmp
+							.tmpChannel = Extract one channel: .c
+							.currentInt = Get intensity (dB)
+							if .currentInt > .maxInt
+								.maxInt = .currentInt
+								.bestChannel = .c
+							endif
+							selectObject: .tmpChannel
+							Remove
+						endfor
+						selectObject: .tmp
+						.soundPart = Extract one channel: .bestChannel
+					else
+						selectObject: .tmp
+						.soundPart = Copy: name$
+					endif
+					selectObject: .tmp
+					Remove
+					
+					if .sound > 0
+						selectObject: .sound, .soundPart
+						.tmp = Concatenate
+						.duration = Get total duration
+						.intensity = Get intensity (dB)
+						selectObject: .sound, .soundPart
+						Remove
+						.sound = .tmp
+						.tmp = -1
+					else
+						.sound = .soundPart
+					endif
+				endfor
+				selectObject: .fileList
+				Remove
+				
+				# Get TextGrids if needed
+				if segmentTier > 0
+					if labelFile$ <> ""
+						.textGridname$ = labelFile$
+					else
+						.textGridname$ = replace_regex$(file$, "(?i\.(wav|mp3|aif[fc]|flac|nist|au|ogg))$", ".TextGrid", 0)
+					endif
+					if .textGridname$ <> "" and index_regex(.textGridname$, "[*]{1}")
+						.preFix$ = ""
+						if index(.textGridname$, "/") > 0
+							.preFix$ = replace_regex$(.textGridname$, "/[^/]+$", "/", 0)
+						endif
+						.fileList = Create Strings as file list: "FileList", .textGridname$
+						.numFiles = Get number of strings
+						.textGrid = -1
+						for .f to .numFiles
+							selectObject: .fileList
+							.fileName$ = Get string: .f
+			
+							@read_and_process_TextGrid: .preFix$ + .fileName$, segmentTier, vowelString$
+							.tmp = read_and_process_TextGrid.textGrid
+							if .tmp <= 0
+								goto LASTROUNDVT
+								exitScript: vowelTrianglemain.uiMessage$ [uiLanguage$, "ErrorSound"]
+							endif
+							# Force last boundary == duration
+							selectObject: .tmp
+							.numInt = Get number of intervals: segmentTier
+							.duration = Get end time of interval: segmentTier, .numInt
+							.textGridPart = Extract part: 0, .duration, "no"
+							selectObject: .tmp
+							Remove
+							
+							if .textGrid > 0
+								selectObject: .textGrid, .textGridPart
+								.tmp = Concatenate
+								.duration = Get total duration
+								selectObject: .textGrid, .textGridPart
+								Remove
+								.textGrid = .tmp
+								.tmp = -1
+							else
+								.textGrid = .textGridPart
+							endif
+						endfor
+						selectObject: .fileList
+						Remove
+						
+					elsif fileReadable(.textGridname$)
+						@read_and_process_TextGrid: .textGridname$, segmentTier, vowelString$
+						.textGrid = read_and_process_TextGrid.textGrid
+						if index_regex(vowelString$, "\w") <= 0
+							vowelString$ = read_and_process_TextGrid.vowelString$
+						endif
+						
+						selectObject: .textGrid
+						Rename: name$
+					endif
+				endif
+			elsif file$ <> "" and fileReadable(file$) and index_regex(file$, "(?i\.(wav|mp3|aif[fc]|flac|nist|au|ogg))")
+				tmp = Read from file: file$
+				if tmp <= 0 or numberOfSelected("Sound") <= 0
+					goto LASTROUNDVT
+					exitScript: vowelTrianglemain.uiMessage$ [uiLanguage$, "ErrorSound"]
 				endif
 				name$ = selected$("Sound")
 				.numChannels = Get number of channels
@@ -1369,7 +1488,7 @@ if input_table > 0
 					.maxInt = -10000
 					.bestChannel = 1
 					for .c to .numChannels
-						selectObject: .tmp
+						selectObject: tmp
 						.tmpChannel = Extract one channel: .c
 						.currentInt = Get intensity (dB)
 						if .currentInt > .maxInt
@@ -1379,438 +1498,342 @@ if input_table > 0
 						selectObject: .tmpChannel
 						Remove
 					endfor
-					selectObject: .tmp
-					.soundPart = Extract one channel: .bestChannel
+					selectObject: tmp
+					.sound = Extract one channel: .bestChannel
 				else
-					selectObject: .tmp
-					.soundPart = Copy: name$
+					selectObject: tmp
+					.sound = Copy: name$
 				endif
-				selectObject: .tmp
+				selectObject: .sound
+				.duration = Get total duration
+				.intensity = Get intensity (dB)
+				Rename: name$
+				selectObject(tmp)
 				Remove
 				
-				if .sound > 0
-					selectObject: .sound, .soundPart
-					.tmp = Concatenate
-					.duration = Get total duration
-					.intensity = Get intensity (dB)
-					selectObject: .sound, .soundPart
-					Remove
-					.sound = .tmp
-					.tmp = -1
-				else
-					.sound = .soundPart
-				endif
-			endfor
-			selectObject: .fileList
-			Remove
-			
-			# Get TextGrids if needed
-			if segmentTier > 0
-				if labelFile$ <> ""
-					.textGridname$ = labelFile$
-				else
-					.textGridname$ = replace_regex$(file$, "(?i\.(wav|mp3|aif[fc]|flac|nist|au|ogg))$", ".TextGrid", 0)
-				endif
-				if .textGridname$ <> "" and index_regex(.textGridname$, "[*]{1}")
-					.preFix$ = ""
-					if index(.textGridname$, "/") > 0
-						.preFix$ = replace_regex$(.textGridname$, "/[^/]+$", "/", 0)
-					endif
-					.fileList = Create Strings as file list: "FileList", .textGridname$
-					.numFiles = Get number of strings
-					.textGrid = -1
-					for .f to .numFiles
-						selectObject: .fileList
-						.fileName$ = Get string: .f
-		
-						@read_and_process_TextGrid: .preFix$ + .fileName$, segmentTier, vowelString$
-						.tmp = read_and_process_TextGrid.textGrid
-						if .tmp <= 0
-							exitScript: uiMessage$ [uiLanguage$, "ErrorSound"]
+				# Get TextGrid if needed
+				if segmentTier > 0
+					.textGridname$ = replace_regex$(file$, "(?i\.wav)$", ".TextGrid", 0)
+					if fileReadable(.textGridname$)
+						@read_and_process_TextGrid: .textGridname$, segmentTier, vowelString$
+						.textGrid = read_and_process_TextGrid.textGrid
+						if index_regex(vowelString$, "\w") <= 0
+							vowelString$ = read_and_process_TextGrid.vowelString$
 						endif
-						# Force last boundary == duration
-						selectObject: .tmp
-						.numInt = Get number of intervals: segmentTier
-						.duration = Get end time of interval: segmentTier, .numInt
-						.textGridPart = Extract part: 0, .duration, "no"
-						selectObject: .tmp
-						Remove
 						
-						if .textGrid > 0
-							selectObject: .textGrid, .textGridPart
-							.tmp = Concatenate
-							.duration = Get total duration
-							selectObject: .textGrid, .textGridPart
-							Remove
-							.textGrid = .tmp
-							.tmp = -1
-						else
-							.textGrid = .textGridPart
-						endif
-					endfor
-					selectObject: .fileList
-					Remove
-					
-				elsif fileReadable(.textGridname$)
-					@read_and_process_TextGrid: .textGridname$, segmentTier, vowelString$
-					.textGrid = read_and_process_TextGrid.textGrid
-					if index_regex(vowelString$, "\w") <= 0
-						vowelString$ = read_and_process_TextGrid.vowelString$
+						selectObject: .textGrid
+						Rename: name$
 					endif
-					
-					selectObject: .textGrid
-					Rename: name$
 				endif
-			endif
-		elsif file$ <> "" and fileReadable(file$) and index_regex(file$, "(?i\.(wav|mp3|aif[fc]|flac|nist|au|ogg))")
-			tmp = Read from file: file$
-			if tmp <= 0 or numberOfSelected("Sound") <= 0
-				exitScript: uiMessage$ [uiLanguage$, "ErrorSound"]
-			endif
-			name$ = selected$("Sound")
-			.numChannels = Get number of channels
-			if .numChannels > 1
-				.maxInt = -10000
-				.bestChannel = 1
-				for .c to .numChannels
-					selectObject: tmp
-					.tmpChannel = Extract one channel: .c
-					.currentInt = Get intensity (dB)
-					if .currentInt > .maxInt
-						.maxInt = .currentInt
-						.bestChannel = .c
-					endif
-					selectObject: .tmpChannel
-					Remove
-				endfor
-				selectObject: tmp
-				.sound = Extract one channel: .bestChannel
+				
 			else
-				selectObject: tmp
-				.sound = Copy: name$
+				goto LASTROUNDVT
+				exitScript: vowelTrianglemain.uiMessage$ [uiLanguage$, "ErrorSound"]
 			endif
+
+			if .plotVowels
+				Erase all
+				call set_up_Canvas_VT
+				#@plot_vowel_triangle: .sp$
+				Text special... 0.5 Centre 1.05 bottom Helvetica 18 0 ##'title$'#
+			endif
+			@plot_vowels: .plotVowels, .sp$, .sound, .textGrid
+			@print_output_line: title$, plot_vowels.sp$, plot_vowels.numVowelIntervals, plot_vowels.area2perc, plot_vowels.area1perc, plot_vowels.relDist_i, plot_vowels.relDist_u, plot_vowels.relDist_a, plot_vowels.vocalTractLength, .duration, .intensity, plot_vowels.slope
+
+			if index_regex(.plotFile$, "\w")
+				Select outer viewport: 0, 8, 0, 8
+				Save as 300-dpi PNG file: .plotFile$
+			endif
+
 			selectObject: .sound
-			.duration = Get total duration
-			.intensity = Get intensity (dB)
-			Rename: name$
-			selectObject(tmp)
+			if .textGrid > 0
+				plusObject: .textGrid
+			endif
 			Remove
 			
-			# Get TextGrid if needed
-			if segmentTier > 0
-				.textGridname$ = replace_regex$(file$, "(?i\.wav)$", ".TextGrid", 0)
-				if fileReadable(.textGridname$)
-					@read_and_process_TextGrid: .textGridname$, segmentTier, vowelString$
-					.textGrid = read_and_process_TextGrid.textGrid
-					if index_regex(vowelString$, "\w") <= 0
-						vowelString$ = read_and_process_TextGrid.vowelString$
-					endif
-					
-					selectObject: .textGrid
-					Rename: name$
-				endif
+			label NEXTROW
+		endfor
+		selectObject: input_table
+		Remove
+		
+		goto LASTROUNDVT
+		exitScript: vowelTrianglemain.uiMessage$ [uiLanguage$, "Done"]
+	endif
+
+	###############################################
+	#
+	# Start program: Interactive
+	#
+	###############################################
+	.continue = 1
+
+	# Run master loop
+	while .continue
+		
+		.titleVar$ = vowelTrianglemain.uiMessage$ [uiLanguage$, "Title"]
+		.titleVar$ = replace_regex$(.titleVar$, "^([A-Z])", "\l\1", 0)
+		.speakerIsA$ = vowelTrianglemain.uiMessage$ [uiLanguage$, "Speaker is a"]
+		.speakerIsAVar$ = replace_regex$(.speakerIsA$, "^([A-Z])", "\l\1", 0)
+		.speakerIsAVar$ = replace_regex$(.speakerIsAVar$, "\s*\(.*$", "", 0)
+		.speakerIsAVar$ = replace_regex$(.speakerIsAVar$, "(\s|[.?!()/\\\\])", "_", 0)
+		.languageInput$ = vowelTrianglemain.uiMessage$ [uiLanguage$, "Interface Language"]
+		.languageInputVar$ = replace_regex$(.languageInput$, "^([A-Z])", "\l\1", 0)
+		.languageInputVar$ = replace_regex$(.languageInputVar$, "\s*\(.*$", "", 0)
+		.languageInputVar$ = replace_regex$(.languageInputVar$, "(\s|[.?!()/\\\\])", "_", 0)
+		.segmentTierVar$ =  vowelTrianglemain.uiMessage$ [uiLanguage$, "Vowel Tier"]
+		.segmentTierVar$ =  replace_regex$(.segmentTierVar$, "^([A-Z])", "\l\1", 0)
+		.segmentTierVar$ =  replace_regex$(.segmentTierVar$, "(\s|[.?!()/\\\\])", "_", 0)
+		.vowelsVar$ = vowelTrianglemain.uiMessage$ [uiLanguage$, "Vowels"]
+		.vowelsVar$ = replace_regex$(.vowelsVar$, "^([A-Z])", "\l\1", 0)
+		
+		segmentValue$ = ""
+		vowelsValue$ = ""
+		if segmentTier > 0
+			segmentValue$ = "'segmentTier'"
+			if index_regex(vowelString$, "\w") <= 0
+				vowelString$ = vowels$ [uiLanguage$]
 			endif
-			
+			vowelsValue$ = vowelString$
+		endif
+
+		.recording = 0
+		label START
+		beginPause: "Select a recording"
+			sentence: vowelTrianglemain.uiMessage$ [uiLanguage$, "Title"], vowelTrianglemain.uiMessage$ [uiLanguage$, "untitled"]
+			comment: vowelTrianglemain.uiMessage$ [uiLanguage$, "CommentOpen"]
+			comment: vowelTrianglemain.uiMessage$ [uiLanguage$, "CommentRecord"]
+			choice: .speakerIsA$, .sp_default
+				option: vowelTrianglemain.uiMessage$ [uiLanguage$, "Female"]
+				option: vowelTrianglemain.uiMessage$ [uiLanguage$, "Male"]
+				option: vowelTrianglemain.uiMessage$ [uiLanguage$, "Automatic"]
+			optionMenu: .languageInput$, .defaultLanguage
+				option: "English"
+				option: "Nederlands"
+				option: "Deutsch"
+				option: "Français"
+				option: "汉语"
+				option: "Español"
+				option: "Português"
+				option: "Italiano"
+			#   option: "MyLanguage"
+			boolean: "Log", (output_table$ <> "")
+			comment: vowelTrianglemain.uiMessage$ [uiLanguage$, "Experimental"]
+			optionMenu: "Formant", .formant_default
+				option: "SL"
+				option: "Burg"
+				option: "Robust"
+				option: "Keep All"
+			comment: vowelTrianglemain.uiMessage$ [uiLanguage$, "CommentLabel"]
+			sentence: vowelTrianglemain.uiMessage$ [uiLanguage$, "Vowel Tier"], segmentValue$
+			sentence: vowelTrianglemain.uiMessage$ [uiLanguage$, "Vowels"], vowelsValue$
+		.clicked = endPause: (vowelTrianglemain.uiMessage$ [uiLanguage$, "Stop"]), (vowelTrianglemain.uiMessage$ [uiLanguage$, "Help"]), (vowelTrianglemain.uiMessage$ [uiLanguage$, "Record"]), (vowelTrianglemain.uiMessage$ [uiLanguage$, "Open"]), 4, 1	
+
+		if .clicked = 1
+			.continue = 0
+			.message$ = vowelTrianglemain.uiMessage$ [uiLanguage$, "Nothing to do"]
+			@exitVowelTriangle: .message$
+			goto LASTROUNDVT
+		elsif .clicked = 3
+			.recording = 1
+		endif
+		
+		if .clicked = 2
+			if fileReadable("VowelTriangle.man") 
+				Read from file: "VowelTriangle.man"
+			elsif fileReadable("ManPages/VowelTriangle.man")
+				Read from file: "ManPages/VowelTriangle.man"
+			else
+				beginPause: "See manual"
+				comment: "https://robvanson.github.io/VowelTriangle"
+				helpClicked = endPause: (vowelTrianglemain.uiMessage$ [uiLanguage$, "Continue"]), 1,1
+			endif
+			goto START
+		endif
+		
+		title$ = '.titleVar$'$
+		if title$ = vowelTrianglemain.uiMessage$ [uiLanguage$, "untitled"]
+			title$ = "untitled"
+		elsif index_regex(title$, "(?ifile://)")
+			# Run non-interactive
+			input_file$ = replace_regex$(title$, "^(?ifile://)", "", 0)
+			if input_file$ = ""
+				input_file$ = chooseReadFile$: "Select the control file"
+			endif
+			goto REENTERINPUTFILEVT
+		endif
+		
+		# Magic incantations to extract the values
+		segmentTier = 0
+		segmentTierValue$ = '.segmentTierVar$'$
+		if index_regex(segmentTierValue$, "\d") > 0
+			segmentTier = extractNumber('.segmentTierVar$'$, "")
+		endif
+		if segmentTier > 0
+			vowelString$ = '.vowelsVar$'$
 		else
-			exitScript: uiMessage$ [uiLanguage$, "ErrorSound"]
+			vowelString$ = ""
 		endif
 
-		if .plotVowels
+		.sp$ = "M"
+		vtl_normalization = 0
+		.sp_default = 2
+		.speakerIsAVar$ = replace_regex$(.speakerIsAVar$, " ", "_", 0)
+		.speakerIsAVar$ = replace_regex$(.speakerIsAVar$, "^([A-Z])", "\l\1", 0)
+		if vowelTrianglemain.uiMessage$ [uiLanguage$, "Female"] = '.speakerIsAVar$'$
+			.sp$ = "F"
+			.sp_default = 1
+		elsif vowelTrianglemain.uiMessage$ [uiLanguage$, "Automatic"] = '.speakerIsAVar$'$
+			.sp$ = "F"
+			.sp_default = 3
+			vtl_normalization = 1
+		endif
+		
+		uiLanguage$ = "EN"
+		.defaultLanguage = 1
+		.display_language$ = '.languageInputVar$'$
+		if .display_language$ = "Nederlands"
+			uiLanguage$ = "NL"
+			.defaultLanguage = 2
+		elsif .display_language$ = "Deutsch"
+			uiLanguage$ = "DE"
+			.defaultLanguage = 3
+		elsif .display_language$ = "Français"
+			uiLanguage$ = "FR"
+			.defaultLanguage = 4
+		elsif .display_language$ = "汉语"
+			uiLanguage$ = "ZH"
+			.defaultLanguage = 5
+		elsif .display_language$ = "Español"
+			uiLanguage$ = "ES"
+			.defaultLanguage = 6
+		elsif .display_language$ = "Português"
+			uiLanguage$ = "PT"
+			.defaultLanguage = 7
+		elsif .display_language$ = "Italiano"
+			uiLanguage$ = "IT"
+			.defaultLanguage = 8
+		#
+		# Add a new language
+		# elsif .display_language$ = "MyLanguage"
+		#	uiLanguage$ = "MyCode"
+		#	.defaultLanguage = 9
+		endif
+		if formant$ = "Burg"
+			plotFormantAlgorithm$ = "Burg"
+			targetFormantAlgorithm$ = "Burg"
+			.formant_default = 2
+		elsif formant$ = "Robust"
+			plotFormantAlgorithm$ = "Robust"
+			targetFormantAlgorithm$ = "Robust"
+			.formant_default = 3
+		elsif formant$ = "Keep All"
+			plotFormantAlgorithm$ = "KeepAll"
+			targetFormantAlgorithm$ = "KeepAll"
+			.formant_default = 4
+		else
+			plotFormantAlgorithm$ = "SL"
+			targetFormantAlgorithm$ = "SL"
+			.formant_default = 1
+		endif
+		
+		# Store preferences
+		writeFileLine: .preferencesLanguageFile$, "Language=",uiLanguage$
+		appendFileLine: .preferencesLanguageFile$, "Formant=",targetFormantAlgorithm$
+		appendFileLine: .preferencesLanguageFile$, "VowelTier=",segmentTier
+		appendFileLine: .preferencesLanguageFile$, "Vowels=",vowelString$
+		
+		# Start
+		if log and output_table$ = ""
 			Erase all
-			call set_up_Canvas
-			#@plot_vowel_triangle: .sp$
-			Text special... 0.5 Centre 1.05 bottom Helvetica 18 0 ##'title$'#
-		endif
-		@plot_vowels: .plotVowels, .sp$, .sound, .textGrid
-		@print_output_line: title$, plot_vowels.sp$, plot_vowels.numVowelIntervals, plot_vowels.area2perc, plot_vowels.area1perc, plot_vowels.relDist_i, plot_vowels.relDist_u, plot_vowels.relDist_a, plot_vowels.vocalTractLength, .duration, .intensity, plot_vowels.slope
-
-		if index_regex(.plotFile$, "\w")
 			Select outer viewport: 0, 8, 0, 8
-			Save as 300-dpi PNG file: .plotFile$
+			Select inner viewport: 0.5, 7.5, 0.5, 4.5
+			Axes: 0, 1, 0, 1
+			Blue
+			Text special: 0, "left", 0.65, "half", "Helvetica", 16, "0", vowelTrianglemain.uiMessage$ [uiLanguage$, "LogFile"]
+			
+			output_table$ = chooseWriteFile$: vowelTrianglemain.uiMessage$ [uiLanguage$, "LogFile"], replace_regex$(vowelTrianglemain.uiMessage$ [uiLanguage$, "LogFile"], "^[^\(]+", "", 0) + " -"
+			if endsWith(output_table$, "-")
+				output_table$ = "-"
+			endif
+			# Print output
+			if output_table$ = "-"
+				clearinfo
+				appendInfoLine: "Name", tab$, "Speaker", tab$, "N", tab$, "Area2", tab$, "Area1", tab$, "i.dist", tab$, "u.dist", tab$, "a.dist", tab$, "VTL", tab$,"Duration", tab$, "Intensity", tab$, "Slope", tab$, "Formant"
+			elsif index_regex(output_table$, "\w") and not fileReadable(output_table$)
+				writeFileLine: output_table$, "Name", tab$, "Speaker", tab$, "N", tab$, "Area2", tab$, "Area1", tab$, "i.dist", tab$, "u.dist", tab$, "a.dist", tab$, "VTL", tab$, "Duration", tab$, "Intensity", tab$, "Slope", tab$, "Formant"
+			endif
 		endif
-
+		
+		# Write instruction
+		Erase all
+		Select outer viewport: 0, 8, 0, 8
+		Select inner viewport: 0.5, 7.5, 0.5, 4.5
+		Axes: 0, 1, 0, 1
+		Blue
+		if .recording
+			Text special: 0, "left", 0.65, "half", "Helvetica", 16, "0", vowelTrianglemain.uiMessage$ [uiLanguage$, "Record1"]
+			Text special: 0, "left", 0.45, "half", "Helvetica", 16, "0", vowelTrianglemain.uiMessage$ [uiLanguage$, "Record2"]	
+		else
+			Text special: 0, "left", 0.65, "half", "Helvetica", 16, "0", vowelTrianglemain.uiMessage$ [uiLanguage$, "Record3"]
+		endif
+		Black
+		
+		# Open sound and select
+		.open1$ = vowelTrianglemain.uiMessage$ [uiLanguage$, "Open1"]
+		.open2$ = vowelTrianglemain.uiMessage$ [uiLanguage$, "Open2"]
+		@read_and_select_audioVT: .recording, .open1$ , .open2$
+		if read_and_select_audioVT.sound < 1
+			
+			goto LASTROUNDVT
+		endif
+		.sound = read_and_select_audioVT.sound
+		.textGrid = read_and_select_audioVT.textGrid
+		if title$ = "untitled"
+			title$ = replace_regex$(read_and_select_audioVT.filename$, "\.[^\.]+$", "", 0)
+			title$ = replace_regex$(title$, "^.*/([^/]+)$", "\1", 0)
+			title$ = replace_regex$(title$, "_", " ", 0)
+		endif
+			
+		# Draw vowel triangle
+		Erase all
+		call set_up_Canvas_VT
+		#@plot_vowel_triangle: .sp$
+		Text special... 0.5 Centre 1.05 bottom Helvetica 18 0 ##'title$'#
+		
+		selectObject: .sound
+		.duration = Get total duration
+		.intensity = Get intensity (dB)
+		if .intensity > 50
+			@plot_vowels: 1, .sp$, .sound, .textGrid
+			@print_output_line: title$, plot_vowels.sp$, plot_vowels.numVowelIntervals, plot_vowels.area2perc, plot_vowels.area1perc, plot_vowels.relDist_i, plot_vowels.relDist_u, plot_vowels.relDist_a, plot_vowels.vocalTractLength, .duration, .intensity, plot_vowels.slope
+		endif
+		
 		selectObject: .sound
 		if .textGrid > 0
 			plusObject: .textGrid
 		endif
 		Remove
 		
-		label NEXTROW
-	endfor
-	selectObject: input_table
-	Remove
-	
-	exitScript: uiMessage$ [uiLanguage$, "Done"]
-endif
-
-###############################################
-#
-# Start program: Interactive
-#
-###############################################
-
-# Run master loop
-while .continue
-	
-	.titleVar$ = uiMessage$ [uiLanguage$, "Title"]
-	.titleVar$ = replace_regex$(.titleVar$, "^([A-Z])", "\l\1", 0)
-	.speakerIsA$ = uiMessage$ [uiLanguage$, "Speaker is a"]
-	.speakerIsAVar$ = replace_regex$(.speakerIsA$, "^([A-Z])", "\l\1", 0)
-	.speakerIsAVar$ = replace_regex$(.speakerIsAVar$, "\s*\(.*$", "", 0)
-	.speakerIsAVar$ = replace_regex$(.speakerIsAVar$, "(\s|[.?!()/\\\\])", "_", 0)
-	.languageInput$ = uiMessage$ [uiLanguage$, "Interface Language"]
-	.languageInputVar$ = replace_regex$(.languageInput$, "^([A-Z])", "\l\1", 0)
-	.languageInputVar$ = replace_regex$(.languageInputVar$, "\s*\(.*$", "", 0)
-	.languageInputVar$ = replace_regex$(.languageInputVar$, "(\s|[.?!()/\\\\])", "_", 0)
-	.segmentTierVar$ =  uiMessage$ [uiLanguage$, "Vowel Tier"]
-	.segmentTierVar$ =  replace_regex$(.segmentTierVar$, "^([A-Z])", "\l\1", 0)
-	.segmentTierVar$ =  replace_regex$(.segmentTierVar$, "(\s|[.?!()/\\\\])", "_", 0)
-	.vowelsVar$ = uiMessage$ [uiLanguage$, "Vowels"]
-	.vowelsVar$ = replace_regex$(.vowelsVar$, "^([A-Z])", "\l\1", 0)
-	
-	segmentValue$ = ""
-	vowelsValue$ = ""
-	if segmentTier > 0
-		segmentValue$ = "'segmentTier'"
-		if index_regex(vowelString$, "\w") <= 0
-			vowelString$ = vowels$ [uiLanguage$]
-		endif
-		vowelsValue$ = vowelString$
-	endif
-
-	.recording = 0
-	label START
-	beginPause: "Select a recording"
-		sentence: uiMessage$ [uiLanguage$, "Title"], uiMessage$ [uiLanguage$, "untitled"]
-		comment: uiMessage$ [uiLanguage$, "CommentOpen"]
-		comment: uiMessage$ [uiLanguage$, "CommentRecord"]
-		choice: .speakerIsA$, .sp_default
-			option: uiMessage$ [uiLanguage$, "Female"]
-			option: uiMessage$ [uiLanguage$, "Male"]
-			option: uiMessage$ [uiLanguage$, "Automatic"]
-		optionMenu: .languageInput$, .defaultLanguage
-			option: "English"
-			option: "Nederlands"
-			option: "Deutsch"
-			option: "Français"
-			option: "汉语"
-			option: "Español"
-			option: "Português"
-			option: "Italiano"
-		#   option: "MyLanguage"
-		boolean: "Log", (output_table$ <> "")
-		comment: uiMessage$ [uiLanguage$, "Experimental"]
-		optionMenu: "Formant", .formant_default
-			option: "SL"
-			option: "Burg"
-			option: "Robust"
-			option: "Keep All"
-		comment: uiMessage$ [uiLanguage$, "CommentLabel"]
-		sentence: uiMessage$ [uiLanguage$, "Vowel Tier"], segmentValue$
-		sentence: uiMessage$ [uiLanguage$, "Vowels"], vowelsValue$
-	.clicked = endPause: (uiMessage$ [uiLanguage$, "Stop"]), (uiMessage$ [uiLanguage$, "Help"]), (uiMessage$ [uiLanguage$, "Record"]), (uiMessage$ [uiLanguage$, "Open"]), 4, 1	
-
-	if .clicked = 1
-		.continue = 0
-		.message$ = uiMessage$ [uiLanguage$, "Nothing to do"]
-		@exitVowelTriangle: .message$
-	elsif .clicked = 3
-		.recording = 1
-	endif
-	
-	if .clicked = 2
-		if fileReadable("VowelTriangle.man") 
-			Read from file: "VowelTriangle.man"
-		elsif fileReadable("ManPages/VowelTriangle.man")
-			Read from file: "ManPages/VowelTriangle.man"
-		else
-			beginPause: "See manual"
-			comment: "https://robvanson.github.io/VowelTriangle"
-			helpClicked = endPause: "Continue", 1
-		endif
-		goto START
-	endif
-	
-	title$ = '.titleVar$'$
-	if title$ = uiMessage$ [uiLanguage$, "untitled"]
-		title$ = "untitled"
-	elsif index_regex(title$, "(?ifile://)")
-		# Run non-interactive
-		input_file$ = replace_regex$(title$, "^(?ifile://)", "", 0)
-		if input_file$ = ""
-			input_file$ = chooseReadFile$: "Select the control file"
-		endif
-		goto REENTERINPUTFILE
-	endif
-	
-	# Magic incantations to extract the values
-	segmentTier = 0
-	segmentTierValue$ = '.segmentTierVar$'$
-	if index_regex(segmentTierValue$, "\d") > 0
-		segmentTier = extractNumber('.segmentTierVar$'$, "")
-	endif
-	if segmentTier > 0
-		vowelString$ = '.vowelsVar$'$
-	else
-		vowelString$ = ""
-	endif
-
-	.sp$ = "M"
-	vtl_normalization = 0
-	.sp_default = 2
-	.speakerIsAVar$ = replace_regex$(.speakerIsAVar$, " ", "_", 0)
-	.speakerIsAVar$ = replace_regex$(.speakerIsAVar$, "^([A-Z])", "\l\1", 0)
-	if uiMessage$ [uiLanguage$, "Female"] = '.speakerIsAVar$'$
-		.sp$ = "F"
-		.sp_default = 1
-	elsif uiMessage$ [uiLanguage$, "Automatic"] = '.speakerIsAVar$'$
-		.sp$ = "F"
-		.sp_default = 3
-		vtl_normalization = 1
-	endif
-	
-	uiLanguage$ = "EN"
-	.defaultLanguage = 1
-	.display_language$ = '.languageInputVar$'$
-	if .display_language$ = "Nederlands"
-		uiLanguage$ = "NL"
-		.defaultLanguage = 2
-	elsif .display_language$ = "Deutsch"
-		uiLanguage$ = "DE"
-		.defaultLanguage = 3
-	elsif .display_language$ = "Français"
-		uiLanguage$ = "FR"
-		.defaultLanguage = 4
-	elsif .display_language$ = "汉语"
-		uiLanguage$ = "ZH"
-		.defaultLanguage = 5
-	elsif .display_language$ = "Español"
-		uiLanguage$ = "ES"
-		.defaultLanguage = 6
-	elsif .display_language$ = "Português"
-		uiLanguage$ = "PT"
-		.defaultLanguage = 7
-	elsif .display_language$ = "Italiano"
-		uiLanguage$ = "IT"
-		.defaultLanguage = 8
-	#
-	# Add a new language
-	# elsif .display_language$ = "MyLanguage"
-	#	uiLanguage$ = "MyCode"
-	#	.defaultLanguage = 9
-	endif
-	if formant$ = "Burg"
-		plotFormantAlgorithm$ = "Burg"
-		targetFormantAlgorithm$ = "Burg"
-		.formant_default = 2
-	elsif formant$ = "Robust"
-		plotFormantAlgorithm$ = "Robust"
-		targetFormantAlgorithm$ = "Robust"
-		.formant_default = 3
-	elsif formant$ = "Keep All"
-		plotFormantAlgorithm$ = "KeepAll"
-		targetFormantAlgorithm$ = "KeepAll"
-		.formant_default = 4
-	else
-		plotFormantAlgorithm$ = "SL"
-		targetFormantAlgorithm$ = "SL"
-		.formant_default = 1
-	endif
-	
-	# Store preferences
-	writeFileLine: .preferencesLanguageFile$, "Language=",uiLanguage$
-	appendFileLine: .preferencesLanguageFile$, "Formant=",targetFormantAlgorithm$
-	appendFileLine: .preferencesLanguageFile$, "VowelTier=",segmentTier
-	appendFileLine: .preferencesLanguageFile$, "Vowels=",vowelString$
-	
-	# Start
-	if log and output_table$ = ""
-		Erase all
-		Select outer viewport: 0, 8, 0, 8
-		Select inner viewport: 0.5, 7.5, 0.5, 4.5
-		Axes: 0, 1, 0, 1
-		Blue
-		Text special: 0, "left", 0.65, "half", "Helvetica", 16, "0", uiMessage$ [uiLanguage$, "LogFile"]
 		
-		output_table$ = chooseWriteFile$: uiMessage$ [uiLanguage$, "LogFile"], replace_regex$(uiMessage$ [uiLanguage$, "LogFile"], "^[^\(]+", "", 0) + " -"
-		if endsWith(output_table$, "-")
-			output_table$ = "-"
+		# Save graphics
+		.file$ = chooseWriteFile$: vowelTrianglemain.uiMessage$ [uiLanguage$, "SavePicture"], title$+"_VowelTriangle.png"
+		if .file$ <> ""
+			Select outer viewport: 0, 8, 0, 8
+			Save as 300-dpi PNG file: .file$
 		endif
-		# Print output
-		if output_table$ = "-"
-			clearinfo
-			appendInfoLine: "Name", tab$, "Speaker", tab$, "N", tab$, "Area2", tab$, "Area1", tab$, "i.dist", tab$, "u.dist", tab$, "a.dist", tab$, "VTL", tab$,"Duration", tab$, "Intensity", tab$, "Slope", tab$, "Formant"
-		elsif index_regex(output_table$, "\w") and not fileReadable(output_table$)
-			writeFileLine: output_table$, "Name", tab$, "Speaker", tab$, "N", tab$, "Area2", tab$, "Area1", tab$, "i.dist", tab$, "u.dist", tab$, "a.dist", tab$, "VTL", tab$, "Duration", tab$, "Intensity", tab$, "Slope", tab$, "Formant"
-		endif
-	endif
-	
-	# Write instruction
-	Erase all
-	Select outer viewport: 0, 8, 0, 8
-	Select inner viewport: 0.5, 7.5, 0.5, 4.5
-	Axes: 0, 1, 0, 1
-	Blue
-	if .recording
-		Text special: 0, "left", 0.65, "half", "Helvetica", 16, "0", uiMessage$ [uiLanguage$, "Record1"]
-		Text special: 0, "left", 0.45, "half", "Helvetica", 16, "0", uiMessage$ [uiLanguage$, "Record2"]	
-	else
-		Text special: 0, "left", 0.65, "half", "Helvetica", 16, "0", uiMessage$ [uiLanguage$, "Record3"]
-	endif
-	Black
-	
-	# Open sound and select
-	.open1$ = uiMessage$ [uiLanguage$, "Open1"]
-	.open2$ = uiMessage$ [uiLanguage$, "Open2"]
-	@read_and_select_audio: .recording, .open1$ , .open2$
-	if read_and_select_audio.sound < 1
 		
-		goto NEXTROUND
-	endif
-	.sound = read_and_select_audio.sound
-	.textGrid = read_and_select_audio.textGrid
-	if title$ = "untitled"
-		title$ = replace_regex$(read_and_select_audio.filename$, "\.[^\.]+$", "", 0)
-		title$ = replace_regex$(title$, "^.*/([^/]+)$", "\1", 0)
-		title$ = replace_regex$(title$, "_", " ", 0)
-	endif
+		# Ready or not?
+		beginPause: vowelTrianglemain.uiMessage$ [uiLanguage$, "DoContinue"]
+			comment: vowelTrianglemain.uiMessage$ [uiLanguage$, "CommentContinue"]
+		.clicked = endPause: (vowelTrianglemain.uiMessage$ [uiLanguage$, "Continue"]), (vowelTrianglemain.uiMessage$ [uiLanguage$, "Done"]), 2, 2
+		.continue = (.clicked = 1)
 		
-	# Draw vowel triangle
-	Erase all
-	call set_up_Canvas
-	#@plot_vowel_triangle: .sp$
-	Text special... 0.5 Centre 1.05 bottom Helvetica 18 0 ##'title$'#
-	
-	selectObject: .sound
-	.duration = Get total duration
-	.intensity = Get intensity (dB)
-	if .intensity > 50
-		@plot_vowels: 1, .sp$, .sound, .textGrid
-		@print_output_line: title$, plot_vowels.sp$, plot_vowels.numVowelIntervals, plot_vowels.area2perc, plot_vowels.area1perc, plot_vowels.relDist_i, plot_vowels.relDist_u, plot_vowels.relDist_a, plot_vowels.vocalTractLength, .duration, .intensity, plot_vowels.slope
-	endif
-	
-	selectObject: .sound
-	if .textGrid > 0
-		plusObject: .textGrid
-	endif
-	Remove
-	
-	
-	# Save graphics
-	.file$ = chooseWriteFile$: uiMessage$ [uiLanguage$, "SavePicture"], title$+"_VowelTriangle.png"
-	if .file$ <> ""
-		Select outer viewport: 0, 8, 0, 8
-		Save as 300-dpi PNG file: .file$
-	endif
-	
-	# Ready or not?
-	beginPause: uiMessage$ [uiLanguage$, "DoContinue"]
-		comment: uiMessage$ [uiLanguage$, "CommentContinue"]
-	.clicked = endPause: (uiMessage$ [uiLanguage$, "Continue"]), (uiMessage$ [uiLanguage$, "Done"]), 2, 2
-	.continue = (.clicked = 1)
-	
-	label NEXTROUND
-endwhile
+		label NEXTROUNDVT
+	endwhile
+
+	label LASTROUNDVT
+
+endproc
 
 #######################################################################
 #
@@ -1829,7 +1852,7 @@ procedure read_and_process_TextGrid .textGridname$ .tier .vowelString$
 	.numTiers = Get number of tiers
 	.textGrid = -1
 	if .tier <= 0 or .numTiers < .tier
-		goto ENDOFREADANDPROCESSTEXTGRID
+		goto ENDOFREADANDPROCESSTEXTGRIDVT
 	endif
 	
 	if index_regex(.vowelString$, "\w") <= 0
@@ -1868,27 +1891,29 @@ procedure read_and_process_TextGrid .textGridname$ .tier .vowelString$
 		endif
 	endfor
 	
-	label ENDOFREADANDPROCESSTEXTGRID
+	label ENDOFREADANDPROCESSTEXTGRIDVT
 	
 	selectObject: .tmpTextGrid
 	Remove
 endproc
 
-procedure read_and_select_audio .type .message1$ .message2$
+procedure read_and_select_audioVT .type .message1$ .message2$
 	.sound = -1
 	.textGrid = -1
 	if .type
 		Record mono Sound...
-		beginPause: (uiMessage$ [uiLanguage$, "PauseRecord"])
-			comment: uiMessage$ [uiLanguage$, "CommentList"]
-		.clicked = endPause: (uiMessage$ [uiLanguage$, "Stop"]), (uiMessage$ [uiLanguage$, "Continue"]), 2, 1
+		beginPause: (vowelTrianglemain.uiMessage$ [uiLanguage$, "PauseRecord"])
+			comment: vowelTrianglemain.uiMessage$ [uiLanguage$, "CommentList"]
+		.clicked = endPause: (vowelTrianglemain.uiMessage$ [uiLanguage$, "Stop"]), (vowelTrianglemain.uiMessage$ [uiLanguage$, "Continue"]), 2, 1
 		if .clicked = 1
-			pauseScript: (uiMessage$ [uiLanguage$, "Stopped"])
-			goto RETURN
+			beginPause: vowelTrianglemain.uiMessage$ [uiLanguage$, "Stopped"]
+			.clicked = endPause: vowelTrianglemain.uiMessage$ [uiLanguage$, "Stop"], 1, 1
+			goto LASTROUNDVT
 		endif
 		if numberOfSelected("Sound") <= 0
-			pauseScript: (uiMessage$ [uiLanguage$, "ErrorSound"])
-			goto RETURN
+			beginPause: vowelTrianglemain.uiMessage$ [uiLanguage$, "ErrorSound"])
+			.clicked = endPause: vowelTrianglemain.uiMessage$ [uiLanguage$, "Stop"], 1, 1
+			goto LASTROUNDVT
 		endif
 		.source = selected ("Sound")
 		.filename$ = "Recorded speech"
@@ -1896,10 +1921,11 @@ procedure read_and_select_audio .type .message1$ .message2$
 		.fullFilename$ = chooseReadFile$: .message1$
 		if index_regex(.fullFilename$, "(?i\.(csv|Table|tsv))") and fileReadable(.fullFilename$)
 			input_file$ = .fullFilename$
-			goto NONINTERACTIVEINPUT
+			goto NONINTERACTIVEINPUTVT
 		elsif .fullFilename$ = "" or not fileReadable(.fullFilename$) or not index_regex(.fullFilename$, "(?i\.(wav|mp3|aif[fc]|flac|nist|au|ogg))")
-			pauseScript: (uiMessage$ [uiLanguage$, "No readable recording selected "])+.fullFilename$
-			goto RETURN
+			beginPause: vowelTrianglemain.uiMessage$ [uiLanguage$, "No readable recording selected "]+.fullFilename$
+			clicked = endPause: vowelTrianglemain.uiMessage$ [uiLanguage$, "Stop"], 1, 1
+			goto LASTROUNDVT
 		endif
 		
 		if index_regex (.fullFilename$, "(?i\.ogg)")
@@ -1912,23 +1938,23 @@ procedure read_and_select_audio .type .message1$ .message2$
 		.fullName$ = selected$()
 		.fileType$ = extractWord$ (.fullName$, "")
 		if .fileType$ <> "Sound" and .fileType$ <> "LongSound"
-			pauseScript:  (uiMessage$ [uiLanguage$, "ErrorSound"])+.filename$
-			goto RETURN
+			pauseScript:  (vowelTrianglemain.uiMessage$ [uiLanguage$, "ErrorSound"])+.filename$
+			goto LASTROUNDVT
 		endif
 		
 		if segmentTier > 0
 			.textGridname$ = replace_regex$(.fullFilename$, "(?i\.(wav|mp3|aif[fc]|flac|nist|au|ogg))$", ".TextGrid", 0)
 			# Ask for a TextGrid file if a tier number has been given
 			if ! fileReadable(.textGridname$)
-				writeInfoLine: uiMessage$ [uiLanguage$, "Open3"]
+				writeInfoLine: vowelTrianglemain.uiMessage$ [uiLanguage$, "Open3"]
 				Erase all
 				Select outer viewport: 0, 8, 0, 8
 				Select inner viewport: 0.5, 7.5, 0.5, 4.5
 				Axes: 0, 1, 0, 1
 				Blue
-				Text special: 0, "left", 0.65, "half", "Helvetica", 16, "0", "##"+uiMessage$ [uiLanguage$, "Open3"]+"#"
+				Text special: 0, "left", 0.65, "half", "Helvetica", 16, "0", "##"+vowelTrianglemain.uiMessage$ [uiLanguage$, "Open3"]+"#"
 				Black
-				.tmp$ = chooseReadFile$: uiMessage$ [uiLanguage$, "Open3"]
+				.tmp$ = chooseReadFile$: vowelTrianglemain.uiMessage$ [uiLanguage$, "Open3"]
 				if .tmp$ <> ""
 					.textGridname$ = .tmp$
 				endif
@@ -1954,15 +1980,16 @@ procedure read_and_select_audio .type .message1$ .message2$
 	editor: .source
 	endeditor
 	beginPause: .message2$
-		comment: (uiMessage$ [uiLanguage$, "SelectSound1"])
-		comment: (uiMessage$ [uiLanguage$, "SelectSound2"])
-		comment: (uiMessage$ [uiLanguage$, "SelectSound3"])
-	.clicked = endPause: (uiMessage$ [uiLanguage$, "Stop"]), (uiMessage$ [uiLanguage$, "Continue"]), 2, 1
+		comment: (vowelTrianglemain.uiMessage$ [uiLanguage$, "SelectSound1"])
+		comment: (vowelTrianglemain.uiMessage$ [uiLanguage$, "SelectSound2"])
+		comment: (vowelTrianglemain.uiMessage$ [uiLanguage$, "SelectSound3"])
+	.clicked = endPause: (vowelTrianglemain.uiMessage$ [uiLanguage$, "Stop"]), (vowelTrianglemain.uiMessage$ [uiLanguage$, "Continue"]), 2, 1
 	if .clicked = 1
 		selectObject: .source
 		Remove
-		pauseScript: (uiMessage$ [uiLanguage$, "Stopped"])
-		goto RETURN
+		beginPause: vowelTrianglemain.uiMessage$ [uiLanguage$, "Stopped"]
+		endPause: vowelTrianglemain.uiMessage$ [uiLanguage$, "Stop"], 1, 1
+		goto LASTROUNDVT
 	endif
 	
 	.start = -1
@@ -2026,12 +2053,12 @@ procedure read_and_select_audio .type .message1$ .message2$
 	selectObject: .sound
 	Rename: .filename$
 	
-	label RETURN
+	label RETURNVT
 
 endproc
 
 # Set up Canvas
-procedure set_up_Canvas
+procedure set_up_Canvas_VT
 	Select outer viewport: 0, 8, 0, 8
 	Select inner viewport: 0.75, 7.25, 0.75, 7.25
 	Axes: 0, 1, 0, 1
@@ -2383,20 +2410,20 @@ procedure plot_vowels .plot .sp$ .sound .vowelTextGrid
 			.dY = 0.05
 		endif
 		.shift = Text width (world coordinates): " ('plotFormantAlgorithm$')"
-		Text special: 0.95+.shift, "right", 0.07 + .dY, "bottom", "Helvetica", 16, "0", uiMessage$ [uiLanguage$, "AreaTitle"]+" ('plotFormantAlgorithm$')"
-		Text special: 0.8, "right", 0.02 + .dY, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "Area1"]
+		Text special: 0.95+.shift, "right", 0.07 + .dY, "bottom", "Helvetica", 16, "0", vowelTrianglemain.uiMessage$ [uiLanguage$, "AreaTitle"]+" ('plotFormantAlgorithm$')"
+		Text special: 0.8, "right", 0.02 + .dY, "bottom", "Helvetica", 14, "0", vowelTrianglemain.uiMessage$ [uiLanguage$, "Area1"]
 		Text special: 0.8, "left", 0.02 + .dY, "bottom", "Helvetica", 14, "0", ": '.area1perc:0'\% "
-		Text special: 0.8, "right", -0.03 + .dY, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "Area2"]
+		Text special: 0.8, "right", -0.03 + .dY, "bottom", "Helvetica", 14, "0", vowelTrianglemain.uiMessage$ [uiLanguage$, "Area2"]
 		Text special: 0.8, "left", -0.03 + .dY, "bottom", "Helvetica", 14, "0", ": '.area2perc:0'\% "
-		Text special: 0.8, "right", -0.08 + .dY, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "AreaN"]
+		Text special: 0.8, "right", -0.08 + .dY, "bottom", "Helvetica", 14, "0", vowelTrianglemain.uiMessage$ [uiLanguage$, "AreaN"]
 		Text special: 0.8, "left", -0.08 + .dY, "bottom", "Helvetica", 14, "0", ": '.numVowelIntervals' ('.duration:0' s, '.slope:1' dB)"
 		if vtl_normalization
-			Text special: 0.8, "right", -0.08, "bottom", "Helvetica", 14, "0", uiMessage$ [uiLanguage$, "VTL"]
+			Text special: 0.8, "right", -0.08, "bottom", "Helvetica", 14, "0", vowelTrianglemain.uiMessage$ [uiLanguage$, "VTL"]
 			Text special: 0.8, "left", -0.08, "bottom", "Helvetica", 14, "0", ": '.vocalTractLength:1' cm"
 		endif
 
 		# Relative distance to corners
-		Text special: -0.1, "left", 0.07 + .dY, "bottom", "Helvetica", 16, "0", uiMessage$ [uiLanguage$, "DistanceTitle"]
+		Text special: -0.1, "left", 0.07 + .dY, "bottom", "Helvetica", 16, "0", vowelTrianglemain.uiMessage$ [uiLanguage$, "DistanceTitle"]
 		Text special: 0.0, "right", 0.02 + .dY, "bottom", "Helvetica", 14, "0", "/i/:"
 		Text special: 0.16, "right", 0.02 + .dY, "bottom", "Helvetica", 14, "0", " '.relDist_i:0'\%  ('.num_i_Intervals')"
 		Text special: 0.0, "right", -0.03 + .dY, "bottom", "Helvetica", 14, "0", "/u/:"
@@ -2467,14 +2494,14 @@ procedure plot_vowel_triangle .sp$
 	.x1 = vowel2point.x
 	.y1 = vowel2point.y
 	Colour: color$ ["u"]
-	Text special: .x1, "Centre", .y1, "Bottom", "Helvetica", 20, "0", "/u/ "+uiMessage$ [uiLanguage$, "Corneru"]
+	Text special: .x1, "Centre", .y1, "Bottom", "Helvetica", 20, "0", "/u/ "+vowelTrianglemain.uiMessage$ [uiLanguage$, "Corneru"]
 	Black
 	
 	@vowel2point: 1, plotFormantAlgorithm$, .sp$, .i_F1, .i_F2
 	.x2 = vowel2point.x
 	.y2 = vowel2point.y
 	Colour: color$ ["i"]
-	Text special: .x2, "Centre", .y2, "Bottom", "Helvetica", 20, "0", uiMessage$ [uiLanguage$, "Corneri"]+" /i/"
+	Text special: .x2, "Centre", .y2, "Bottom", "Helvetica", 20, "0", vowelTrianglemain.uiMessage$ [uiLanguage$, "Corneri"]+" /i/"
 	Black
 	Draw line: .x1, .y1, .x2, .y2
 	
@@ -2486,7 +2513,7 @@ procedure plot_vowel_triangle .sp$
 	.x2 = vowel2point.x
 	.y2 = vowel2point.y
 	Colour: color$ ["a"]
-	Text special: .x2, "Centre", .y2, "Top", "Helvetica", 20, "0", "/a/ "+uiMessage$ [uiLanguage$, "Cornera"]
+	Text special: .x2, "Centre", .y2, "Top", "Helvetica", 20, "0", "/a/ "+vowelTrianglemain.uiMessage$ [uiLanguage$, "Cornera"]
 	Black
 	Draw line: .x1, .y1, .x2, .y2
 	
@@ -2508,7 +2535,7 @@ procedure vowel2point .scaling .targetFormantAlgorithm$ .sp$ .f1 .f2
 		.x = -1
 		.y = -1
 		
-		goto ENDOFVowel2point
+		goto ENDOFVowel2pointVT
 	endif
 
 	.spt1 = 12*log2(.f1)
@@ -2542,7 +2569,7 @@ procedure vowel2point .scaling .targetFormantAlgorithm$ .sp$ .f1 .f2
 	.y = 1 - .y
 	.yp = 1 - .yp
 	
-	label ENDOFVowel2point
+	label ENDOFVowel2pointVT
 endproc
 
 # Stop the progam
@@ -2551,7 +2578,6 @@ procedure exitVowelTriangle .message$
 	if numberOfSelected() > 0
 		Remove
 	endif
-	exitScript: .message$
 endproc
 
 # Get a list of best targets with distances, one for each vowel segment found
@@ -2739,7 +2765,7 @@ procedure select_vowel_target .sp$ .sound .formants .formantsBandwidth .textgrid
 	else
 	 	.numTiers = Get number of tiers
 		if .numTiers <= 2
-			goto TEXTGRIDREADY
+			goto TEXTGRIDREADYVT
 		endif
 	endif
 	
@@ -3055,7 +3081,7 @@ procedure select_vowel_target .sp$ .sound .formants .formantsBandwidth .textgrid
 	selectObject: .voicePP
 	Remove
 	
-	label TEXTGRIDREADY
+	label TEXTGRIDREADYVT
 endproc
 
 
@@ -3147,7 +3173,7 @@ procedure segment_syllables .silence_threshold .minimum_dip_between_peaks .minim
 	.numPeaks = Get number of points: 1
 	# No peaks, nothing to do
 	if .numPeaks <= 0
-		goto VALLEYREADY
+		goto VALLEYREADYVT
 	endif
 	
 	for .i from 2 to .numValleys
@@ -3247,11 +3273,11 @@ procedure segment_syllables .silence_threshold .minimum_dip_between_peaks .minim
 			endif
 			.numPeaks = Get number of points: 1
 			if .numPeaks <= 0
-				goto VALLEYREADY
+				goto VALLEYREADYVT
 			endif
 		endif
 	endfor
-	label VALLEYREADY
+	label VALLEYREADYVT
 	
 	selectObject: .intensity
 	Remove
